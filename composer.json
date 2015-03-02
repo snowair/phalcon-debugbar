@@ -1,0 +1,16 @@
+{
+    "name": "snowair/easy_phalcon",
+    "description": "A beginning of a phalcon project.",
+    "require-dev": {
+        "filp/whoops": "1.*",
+        "maximebf/debugbar": "1.*",
+        "vlucas/phpdotenv": "1.*"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "snowair",
+            "email": "xcoolcc@gmail.com"
+        }
+    ]
+}
