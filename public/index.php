@@ -28,5 +28,6 @@ try {
     echo $application->handle()->getContent();
 
 } catch (Exception $e) {
-    echo $e->getMessage();
+	$whoops = new \Whoops\Run;
+	$whoops->handleError( E_USER_NOTICE, $e->getMessage(),$e->getFile(),$e->getLine());
 }
