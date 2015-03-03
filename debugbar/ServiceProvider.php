@@ -5,7 +5,7 @@
  * Time: 16:09
  */
 
-namespace Snowair;
+namespace Snowair\Debugbar;
 
 use Phalcon\Mvc\Router\Group;
 use Snowair\Debugbar\PhalconDebugbar;
@@ -15,10 +15,17 @@ use Phalcon\DI\Injectable;
 
 class ServiceProvider extends Injectable {
 
-	public function register( $configPath = null ){
+	protected $configPath;
+
+	public function __construct( $configPath=null ){
+		$this->configPath = $configPath;
+	}
+
+	public function register( ){
+		$configPath = $this->configPath;
 		$this->di->set('config.debugbar', function() use($configPath){
 			if ( $configPath===null ) {
-				$configPath = __DIR__ . '/../config/debugbar.php';
+				$configPath = __DIR__ . '/config/debugbar.php';
 			}
 			return new Php($configPath);
 		});
@@ -33,20 +40,19 @@ class ServiceProvider extends Injectable {
 
 	public function boot() {
 		$group = new Group( array('namespace'=>'Snowair\Debugbar\Controllers') );
-		$group->setPrefix('_debugbar');
-
+		$group->setPrefix('/_debugbar/');
 		$group->addGet('open',array(
-			'controller'=>'OpenHandlerController',
+			'controller'=>'OpenHandler',
 			'action'=>'handle',
 		))->setName('debugbar.openhandler');
 
 		$group->addGet('assets/stylesheets',array(
-			'controller'=>'AssetController',
+			'controller'=>'Asset',
 			'action'=>'css',
 		))->setName('debugbar.assets.css');
 
 		$group->addGet('assets/javascript',array(
-			'controller'=>'AssetController',
+			'controller'=>'Asset',
 			'action'=>'js',
 		))->setName('debugbar.assets.js');
 
@@ -60,8 +66,9 @@ class ServiceProvider extends Injectable {
 		$debugbar->boot();
 
 		$eventsManager = $this->eventsManager;
-		$eventsManager->attach('application:beforeSendResponse',function($app,$response) use($debugbar){
+		$eventsManager->attach('application:beforeSendResponse',function($event,$app,$response) use($debugbar){
 			$debugbar->modifyResponse($response);
 		});
+		$this->di['app']->setEventsManager($eventsManager);
 	}
 }
