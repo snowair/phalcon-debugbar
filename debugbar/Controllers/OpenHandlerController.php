@@ -13,7 +13,7 @@ use Phalcon\Http\Request\Exception;
 
 class OpenHandlerController extends BaseController {
 
-	public function handle()
+	public function handleAction()
 	{
 		$debugbar = $this->debugbar;
 

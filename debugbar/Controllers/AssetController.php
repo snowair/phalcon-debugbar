@@ -11,7 +11,7 @@ use Phalcon\Http\Response;
 
 class AssetController extends BaseController {
 
-	public function js()
+	public function jsAction()
 	{
 		$renderer = $this->debugbar->getJavascriptRenderer();
 
@@ -23,7 +23,7 @@ class AssetController extends BaseController {
 		return $this->cacheResponse($response);
 	}
 
-	public function css()
+	public function cssAction()
 	{
 		$renderer = $this->debugbar->getJavascriptRenderer();
 
