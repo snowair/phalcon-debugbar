@@ -5,7 +5,7 @@
  * Time: 11:55
  */
 
-namespace Snowair;
+namespace Snowair\Debugbar;
 
 use Phalcon\DI\Injectable;
 use DebugBar\HttpDriverInterface;

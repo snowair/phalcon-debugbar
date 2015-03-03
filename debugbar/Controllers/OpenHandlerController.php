@@ -4,6 +4,9 @@
  * Date: 15/3/3
  * Time: 17:24
  */
+
+namespace Snowair\Debugbar\Controllers;
+
 use DebugBar\OpenHandler;
 use Phalcon\Http\Response;
 use Phalcon\Http\Request\Exception;
