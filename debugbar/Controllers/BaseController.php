@@ -5,8 +5,10 @@
  * Time: 17:19
  */
 
+namespace Snowair\Debugbar\Controllers;
+
 use Phalcon\Mvc\Controller;
-use Snowair\PhalconDebugbar;
+use Snowair\Debugbar\PhalconDebugbar;
 
 class BaseController extends Controller{
 
@@ -15,7 +17,7 @@ class BaseController extends Controller{
 	 */
 	protected $debugbar;
 
-	public function initilazie( PhalconDebugbar $debugbar ){
+	public function initialize( PhalconDebugbar $debugbar ){
 		$this->debugbar = $debugbar;
 	}
 
