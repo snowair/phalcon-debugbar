@@ -213,12 +213,12 @@ class PhalconDebugbar extends DebugBar {
     }
 
 	/**
-	 * @param Request $request
-	 * @param Response $response
+	 * @param  Response $response
 	 *
 	 * @return mixed
 	 */
-	public function modifyResponse($request, $response){
+	public function modifyResponse($response){
+		$request = $this->di['request'];
 		if (!$this->isEnabled() || $this->isDebugbarRequest()) {
 			return $response;
 		}
