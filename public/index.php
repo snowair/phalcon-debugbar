@@ -2,6 +2,7 @@
 
 use Phalcon\Mvc\Application;
 
+define('PHALCON_START', microtime(true));
 error_reporting(E_ALL);
 
 try {
