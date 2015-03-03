@@ -5,7 +5,7 @@
  * Time: 11:25
  */
 
-namespace Snowair;
+namespace Snowair\Debugbar;
 
 use DebugBar\Bridge\MonologCollector;
 use DebugBar\Bridge\SwiftMailer\SwiftLogCollector;
@@ -18,11 +18,10 @@ use DebugBar\DataCollector\PhpInfoCollector;
 use DebugBar\DataCollector\RequestDataCollector;
 use DebugBar\DataCollector\TimeDataCollector;
 use DebugBar\DebugBar;
-use DebugBar\Storage\PdoStorage;
-use DebugBar\Storage\RedisStorage;
 use Exception;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
+use Snowair\Debugbar\DataCollector\SessionCollector;
 
 /**
  * Debug bar subclass which adds all without Request and with Collector.
@@ -119,6 +118,10 @@ class PhalconDebugbar extends DebugBar {
 			} catch (\Exception $e) {
 			}
 		}
+		if ($this->shouldCollect('time', true)) {
+			$startTime = defined('LARAVEL_START') ? LARAVEL_START : null;
+			$this->addCollector(new TimeDataCollector($startTime));
+		}
 
 		$renderer = $this->getJavascriptRenderer();
 		$renderer->setIncludeVendors($this->config->get('include_vendors', true));
@@ -199,7 +202,6 @@ class PhalconDebugbar extends DebugBar {
 	 * @param null   $basePath
 	 *
 	 * @return JsRender
-	 * @internal param string $basePathng
 	 */
     public function getJavascriptRenderer($baseUrl = null, $basePath = null)
     {
@@ -210,11 +212,109 @@ class PhalconDebugbar extends DebugBar {
         return $this->jsRenderer;
     }
 
+	/**
+	 * @param Request $request
+	 * @param Response $response
+	 *
+	 * @return mixed
+	 */
 	public function modifyResponse($request, $response){
 		if (!$this->isEnabled() || $this->isDebugbarRequest()) {
 			return $response;
 		}
 
+		if ($this->shouldCollect('config', false)) {
+			try {
+				$configCollector = new ConfigCollector();
+				$configCollector->setData($this->di['config']->toArray());
+				$this->addCollector($configCollector);
+			} catch (\Exception $e) {
+				$this->addException(
+					new Exception(
+						'Cannot add ConfigCollector to Laravel Debugbar: ' . $e->getMessage(),
+						$e->getCode(),
+						$e
+					)
+				);
+			}
+		}
+
+		if ($this->shouldCollect('session')) {
+			try {
+				$this->addCollector(new SessionCollector($this->di['session']));
+			} catch (\Exception $e) {
+				$this->addException(
+					new Exception(
+						'Cannot add SessionCollector to Laravel Debugbar: ' . $e->getMessage(),
+						$e->getCode(),
+						$e
+					)
+				);
+			}
+		}
+
+		if ($this->hasCollector('request')) {
+			try {
+				$this->addCollector(new RequestDataCollector());
+			} catch (\Exception $e) {
+				$this->addException(
+					new Exception(
+						'Cannot add SymfonyRequestCollector to Laravel Debugbar: ' . $e->getMessage(),
+						$e->getCode(),
+						$e
+					)
+				);
+			}
+		}
+
+
+		if ($this->isRedirection($response)) {
+			try {
+				$this->stackData();
+			} catch (\Exception $e) {
+				$this->di['log']->error('Debugbar exception: ' . $e->getMessage());
+			}
+		}
+		elseif ( $this->isJsonRequest($request) && $this->config->get('capture_ajax', true) )
+		{
+			try {
+				$this->sendDataInHeaders(true);
+			} catch (\Exception $e) {
+				$this->di['log']->error('Debugbar exception: ' . $e->getMessage());
+			}
+		} elseif (
+			( ($content_type = $response->getHeaders()->get('Content-Type')) and
+				strpos($response->getHeaders()->get('Content-Type'), 'html') === false)
+		) {
+			try {
+				// Just collect + store data, don't inject it.
+				$this->collect();
+			} catch (\Exception $e) {
+				$this->di['log']->error('Debugbar exception: ' . $e->getMessage());
+			}
+		} elseif ($this->config->get('inject', true)) {
+			try {
+				$this->injectDebugbar($response);
+			} catch (\Exception $e) {
+				$this->di['log']->error('Debugbar exception: ' . $e->getMessage());
+			}
+		}
+
+		// Stop further rendering (on subrequests etc)
+		$this->disable();
+
+		return $response;
+	}
+
+	/**
+	 * @param Response $response
+	 *
+	 * @return bool
+	 */
+	public function isRedirection($response) {
+		$status = $response->getHeaders()->get('Status');
+		$code   = (int)strstr($status,' ',true);
+		return $code >= 300 && $code < 400;
 	}
 
 	/**
