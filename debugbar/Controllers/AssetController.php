@@ -4,6 +4,9 @@
  * Date: 15/3/3
  * Time: 17:23
  */
+
+namespace Snowair\Debugbar\Controllers;
+
 use Phalcon\Http\Response;
 
 class AssetController extends BaseController {

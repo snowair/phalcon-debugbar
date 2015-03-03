@@ -5,7 +5,7 @@
  * Time: 14:51
  */
 
-namespace Snowair;
+namespace Snowair\Debugbar;
 
 use DebugBar\Storage\StorageInterface;
 

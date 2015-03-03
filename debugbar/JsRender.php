@@ -5,7 +5,7 @@
  * Time: 13:29
  */
 
-namespace Snowair;
+namespace Snowair\Debugbar;
 
 use DebugBar\JavascriptRenderer;
 
