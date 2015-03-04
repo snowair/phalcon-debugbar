@@ -1,6 +1,7 @@
 <?php
 
 use Phalcon\Mvc\Application;
+use Phalcon\DI\FactoryDefault;
 
 define('PHALCON_START', microtime(true));
 error_reporting(E_ALL);
@@ -9,6 +10,10 @@ try {
 	/**
 	 * Include composer autoload
 	 */
+	$di = new FactoryDefault();
+	$application = new Application($di);
+	$di['app']=$application;
+
 	require_once __DIR__ . '/../vendor/autoload.php';
 
     /**
@@ -19,7 +24,6 @@ try {
     /**
      * Handle the request
      */
-    $application = new Application($di);
 
     /**
      * Include modules
