@@ -40,17 +40,12 @@ class FilesystemStorage implements  StorageInterface
 			}
 		}
 
-		try {
-			file_put_contents($this->makeFilename($id), json_encode($data));
-		} catch (\Exception $e) {
-			//TODO; error handling
-		}
+		file_put_contents($this->makeFilename($id), json_encode($data));
 
 		// Randomly check if we should collect old files
 		if (rand(1, 100) <= $this->gc_probability) {
 			$this->garbageCollect();
 		}
-		// TODO: Implement save() method.
 	}
 
 	/**

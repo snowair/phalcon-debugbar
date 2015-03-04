@@ -18,6 +18,7 @@ use DebugBar\DataCollector\PhpInfoCollector;
 use DebugBar\DataCollector\RequestDataCollector;
 use DebugBar\DataCollector\TimeDataCollector;
 use DebugBar\DebugBar;
+use DebugBar\DebugBarException;
 use Exception;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
@@ -78,7 +79,8 @@ class PhalconDebugbar extends DebugBar {
 	 */
 	protected function isDebugbarRequest()
 	{
-		return $this->di['request']->segment(1) == '_debugbar';
+		$segment =explode('/', trim($this->di['request']->getUri(),'/'));
+		return $segment[0] == '_debugbar';
 	}
 
 	public function shouldCollect($name, $default = false)
@@ -105,9 +107,9 @@ class PhalconDebugbar extends DebugBar {
 		if ($this->shouldCollect('memory', true)) {
 			$this->addCollector(new MemoryCollector());
 		}
-		if ($this->shouldCollect('request', false)) {
-			$this->addCollector(new RequestDataCollector());
-		}
+//		if ($this->shouldCollect('request', false)) {
+//			$this->addCollector(new RequestDataCollector());
+//		}
 		if ($this->shouldCollect('exceptions', true)) {
 			try {
 				$exceptionCollector = new ExceptionsCollector();
@@ -141,7 +143,7 @@ class PhalconDebugbar extends DebugBar {
 				//TODO:: other driver
 				default:
 					$path = $config->storage->path;
-					$storage = new FilesystemStorage($this->app['files'], $path);
+					$storage = new FilesystemStorage($path);
 					break;
 			}
 
@@ -216,6 +218,7 @@ class PhalconDebugbar extends DebugBar {
 	 * @param  Response $response
 	 *
 	 * @return mixed
+	 * @throws Exception
 	 */
 	public function modifyResponse($response){
 		$request = $this->di['request'];
@@ -268,36 +271,23 @@ class PhalconDebugbar extends DebugBar {
 		}
 
 
-		if ($this->isRedirection($response)) {
-			try {
-				$this->stackData();
-			} catch (\Exception $e) {
-				$this->di['log']->error('Debugbar exception: ' . $e->getMessage());
+		try {
+			if ($this->isRedirection($response)) {
+					$this->stackData();
 			}
-		}
-		elseif ( $this->isJsonRequest($request) && $this->config->get('capture_ajax', true) )
-		{
-			try {
-				$this->sendDataInHeaders(true);
-			} catch (\Exception $e) {
-				$this->di['log']->error('Debugbar exception: ' . $e->getMessage());
+			elseif ( $this->isJsonRequest($request) && $this->config->get('capture_ajax', true) )
+			{
+					$this->sendDataInHeaders(true);
+			} elseif (
+				( ($content_type = $response->getHeaders()->get('Content-Type')) and
+					strpos($response->getHeaders()->get('Content-Type'), 'html') === false)
+			) {
+					$this->collect();
+			} elseif ($this->config->get('inject', true)) {
+					$this->injectDebugbar($response);
 			}
-		} elseif (
-			( ($content_type = $response->getHeaders()->get('Content-Type')) and
-				strpos($response->getHeaders()->get('Content-Type'), 'html') === false)
-		) {
-			try {
-				// Just collect + store data, don't inject it.
-				$this->collect();
-			} catch (\Exception $e) {
-				$this->di['log']->error('Debugbar exception: ' . $e->getMessage());
-			}
-		} elseif ($this->config->get('inject', true)) {
-			try {
-				$this->injectDebugbar($response);
-			} catch (\Exception $e) {
-				$this->di['log']->error('Debugbar exception: ' . $e->getMessage());
-			}
+		} catch (\Exception $e) {
+			throw $e;
 		}
 
 		// Stop further rendering (on subrequests etc)
@@ -333,8 +323,8 @@ class PhalconDebugbar extends DebugBar {
 				'datetime' => date('Y-m-d H:i:s'),
 				'utime' => microtime(true),
 				'method' => $request->getMethod(),
-				'uri' => $request->getRequestUri(),
-				'ip' => $request->getClientIp()
+				'uri' => $request->getURI(),
+				'ip' => $request->getClientAddress()
 			)
 		);
 
