@@ -22,6 +22,7 @@ use DebugBar\DebugBarException;
 use Exception;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
+use Snowair\Debugbar\DataCollector\PhalconRequestCollector;
 use Snowair\Debugbar\DataCollector\SessionCollector;
 
 /**
@@ -107,9 +108,9 @@ class PhalconDebugbar extends DebugBar {
 		if ($this->shouldCollect('memory', true)) {
 			$this->addCollector(new MemoryCollector());
 		}
-//		if ($this->shouldCollect('request', false)) {
-//			$this->addCollector(new RequestDataCollector());
-//		}
+		if ($this->shouldCollect('default_request', false)) {
+			$this->addCollector(new RequestDataCollector());
+		}
 		if ($this->shouldCollect('exceptions', true)) {
 			try {
 				$exceptionCollector = new ExceptionsCollector();
@@ -122,7 +123,7 @@ class PhalconDebugbar extends DebugBar {
 			}
 		}
 		if ($this->shouldCollect('time', true)) {
-			$startTime = defined('LARAVEL_START') ? LARAVEL_START : null;
+			$startTime = defined('PHALCON_START') ? PHALCON_START : null;
 			$this->addCollector(new TimeDataCollector($startTime));
 		}
 
@@ -235,7 +236,7 @@ class PhalconDebugbar extends DebugBar {
 			} catch (\Exception $e) {
 				$this->addException(
 					new Exception(
-						'Cannot add ConfigCollector to Laravel Debugbar: ' . $e->getMessage(),
+						'Cannot add ConfigCollector to Phalcon Debugbar: ' . $e->getMessage(),
 						$e->getCode(),
 						$e
 					)
@@ -249,7 +250,7 @@ class PhalconDebugbar extends DebugBar {
 			} catch (\Exception $e) {
 				$this->addException(
 					new Exception(
-						'Cannot add SessionCollector to Laravel Debugbar: ' . $e->getMessage(),
+						'Cannot add SessionCollector to Phalcon Debugbar: ' . $e->getMessage(),
 						$e->getCode(),
 						$e
 					)
@@ -257,13 +258,13 @@ class PhalconDebugbar extends DebugBar {
 			}
 		}
 
-		if ($this->hasCollector('request')) {
+		if ($this->shouldCollect('phalcon_request', true) and !$this->hasCollector('request')) {
 			try {
-				$this->addCollector(new RequestDataCollector());
+				$this->addCollector(new PhalconRequestCollector($this->di['request'],$response,$this->di));
 			} catch (\Exception $e) {
 				$this->addException(
 					new Exception(
-						'Cannot add SymfonyRequestCollector to Laravel Debugbar: ' . $e->getMessage(),
+						'Cannot add PhalconRequestCollector to Phalcon Debugbar: ' . $e->getMessage(),
 						$e->getCode(),
 						$e
 					)
