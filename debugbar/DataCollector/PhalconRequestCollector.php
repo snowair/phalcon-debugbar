@@ -56,7 +56,7 @@ class PhalconRequestCollector extends DataCollector implements DataCollectorInte
 		$cookies_service = $response->getCookies();
 		if ( $cookies_service ) {
 			$useEncrypt = true;
-			if ( $cookies_service->isUsingEncryption() && !$this->di['crypt']->getKey()) {
+			if ( $cookies_service->isUsingEncryption() && $this->di->has('crypt') && !$this->di['crypt']->getKey()) {
 				$useEncrypt = false;
 			}
 			foreach ( $cookies as $key=>$vlaue ) {

@@ -20,6 +20,7 @@ use DebugBar\DataCollector\TimeDataCollector;
 use DebugBar\DebugBar;
 use DebugBar\DebugBarException;
 use Exception;
+use Phalcon\DI;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
 use Snowair\Debugbar\DataCollector\PhalconRequestCollector;
@@ -41,6 +42,9 @@ use Snowair\Debugbar\DataCollector\SessionCollector;
  */
 class PhalconDebugbar extends DebugBar {
 
+	/**
+	 * @var  DI $di
+	 */
 	protected $di;
 	protected $config;
 	protected $booted = false;
@@ -232,7 +236,7 @@ class PhalconDebugbar extends DebugBar {
 			return $response;
 		}
 
-		if ($this->shouldCollect('config', false)) {
+		if ($this->shouldCollect('config', false) && $this->di->has('config')) {
 			try {
 				$configCollector = new ConfigCollector();
 				$configCollector->setData($this->di['config']->toArray());
@@ -248,7 +252,7 @@ class PhalconDebugbar extends DebugBar {
 			}
 		}
 
-		if ($this->shouldCollect('session')) {
+		if ($this->shouldCollect('session')   && $this->di->has('session') ) {
 			try {
 				$this->addCollector(new SessionCollector($this->di['session']));
 			} catch (\Exception $e) {
