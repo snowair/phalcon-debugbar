@@ -123,7 +123,11 @@ class PhalconDebugbar extends DebugBar {
 			}
 		}
 		if ($this->shouldCollect('time', true)) {
-			$startTime = defined('PHALCON_START') ? PHALCON_START : null;
+			if (defined('PHALCON_START')){
+				$startTime = PHALCON_START;
+			}else{
+				$startTime = isset($_SERVER["REQUEST_TIME_FLOAT"])?$_SERVER["REQUEST_TIME_FLOAT"]:$_SERVER["REQUEST_TIME"];
+			}
 			$this->addCollector(new TimeDataCollector($startTime));
 		}
 
@@ -410,6 +414,22 @@ class PhalconDebugbar extends DebugBar {
 			/** @var \DebugBar\DataCollector\TimeDataCollector $collector */
 			$collector = $this->getCollector('time');
 			$collector->addMeasure($label, $start, $end);
+		}
+	}
+
+	public function addMeasurePoint( $label , $start =null ) {
+		if ($this->hasCollector('time')) {
+			/** @var \DebugBar\DataCollector\TimeDataCollector $collector */
+			$collector = $this->getCollector('time');
+			if ( !$start && $measures = $collector->getMeasures() ) {
+				$latest = end($measures);
+				$start = $latest['end'];
+			}elseif (defined('PHALCON_START')){
+				$start = PHALCON_START;
+			}else{
+				$start = isset($_SERVER["REQUEST_TIME_FLOAT"])?$_SERVER["REQUEST_TIME_FLOAT"]:$_SERVER["REQUEST_TIME"];
+			}
+			$collector->addMeasure($label, $start, microtime(true));
 		}
 	}
 
