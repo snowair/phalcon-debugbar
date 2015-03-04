@@ -6,13 +6,11 @@
 
 use Phalcon\Mvc\Router;
 use Phalcon\Mvc\Url as UrlResolver;
-use Phalcon\DI\FactoryDefault;
 use Phalcon\Session\Adapter\Files as SessionAdapter;
 
 /**
  * The FactoryDefault Dependency Injector automatically register the right services providing a full stack framework
  */
-$di = new FactoryDefault();
 
 /**
  * Registering a router
@@ -23,6 +21,10 @@ $di['router'] = function () {
 
     $router->setDefaultModule("frontend");
     $router->setDefaultNamespace("Myphalcon\\Frontend\\Controllers");
+	$router->addGet('/test',array(
+		'controller'=>'Index',
+		'action'=>'test',
+	));
 
     return $router;
 };
@@ -52,3 +54,12 @@ $di['session'] = function () {
  */
 new Whoops\Provider\Phalcon\WhoopsServiceProvider($di);
 
+$loader = new \Phalcon\Loader();
+$loader->registerNamespaces(array(
+	'Snowair\Debugbar' => __DIR__ . '/../debugbar/',
+));
+$loader->register();
+$provider = new Snowair\Debugbar\ServiceProvider();
+$provider->register();
+$di['debugbar']->enable();
+$provider->boot();
