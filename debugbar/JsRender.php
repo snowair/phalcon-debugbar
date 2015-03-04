@@ -7,12 +7,23 @@
 
 namespace Snowair\Debugbar;
 
+use DebugBar\DebugBar;
 use DebugBar\JavascriptRenderer;
 
 class JsRender extends JavascriptRenderer{
 
+	protected $ajaxHandlerBindToJquery = false;
+	protected $ajaxHandlerBindToXHR = true;
 	protected $url;
 
+
+	public function __construct(DebugBar $debugBar, $baseUrl = null, $basePath = null)
+	{
+		parent::__construct($debugBar, $baseUrl, $basePath);
+
+		$this->cssFiles['laravel'] = __DIR__ . '/Resources/laravel-debugbar.css';
+		$this->cssVendors['fontawesome'] = __DIR__ . '/Resources/font-awesome/style.css';
+	}
 	/**
 	 * Set the URL Generator
 	 */
