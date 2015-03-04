@@ -14,12 +14,15 @@ use DebugBar\DataCollector\ConfigCollector;
 use DebugBar\DataCollector\ExceptionsCollector;
 use DebugBar\DataCollector\MemoryCollector;
 use DebugBar\DataCollector\MessagesCollector;
+use DebugBar\DataCollector\PDO\PDOCollector;
+use DebugBar\DataCollector\PDO\TraceablePDO;
 use DebugBar\DataCollector\PhpInfoCollector;
 use DebugBar\DataCollector\RequestDataCollector;
 use DebugBar\DataCollector\TimeDataCollector;
 use DebugBar\DebugBar;
 use DebugBar\DebugBarException;
 use Exception;
+use Phalcon\Db\Adapter\Pdo;
 use Phalcon\DI;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
@@ -142,12 +145,15 @@ class PhalconDebugbar extends DebugBar {
 			} catch (\Exception $e) {
 				$this->addException(
 					new Exception(
-						'Cannot add RouteCollector to Laravel Debugbar: ' . $e->getMessage(),
+						'Cannot add RouteCollector to Phalcon Debugbar: ' . $e->getMessage(),
 						$e->getCode(),
 						$e
 					)
 				);
 			}
+		}
+		if ( $this->di->has( 'db' ) ) {
+			$this->addPdoCollector( $this->di['db'] );
 		}
 
 		$renderer = $this->getJavascriptRenderer();
@@ -247,6 +253,7 @@ class PhalconDebugbar extends DebugBar {
 	 */
 	public function modifyResponse($response){
 		$request = $this->di['request'];
+
 		if (!$this->isEnabled() || $this->isDebugbarRequest()) {
 			return $response;
 		}
@@ -319,6 +326,26 @@ class PhalconDebugbar extends DebugBar {
 		$this->disable();
 
 		return $response;
+	}
+
+	/**
+	 * @param Pdo $db
+	 */
+	public function addPdoCollector( $db ) {
+		if ($this->shouldCollect('pdo', true)  ) {
+			try {
+				$pdo = new TraceablePDO($db->getInternalHandler());
+				$this->addCollector(new PDOCollector($pdo));
+			} catch (\Exception $e) {
+				$this->addException(
+					new Exception(
+						'Cannot add PdoCollector to Phalcon Debugbar: ' . $e->getMessage(),
+						$e->getCode(),
+						$e
+					)
+				);
+			}
+		}
 	}
 
 	/**

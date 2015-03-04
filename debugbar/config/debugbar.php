@@ -28,7 +28,7 @@ return array(
 	'storage' => array(
 		'enabled' => true,
 		'driver' => 'file',
-		'path' => './Runtime/debugbar', // For file driver
+		'path' => '../Runtime/debugbar', // For file driver
 	),
 
 	/*
@@ -74,7 +74,12 @@ return array(
 		'time'            => true,  // Time Datalogger
 		'memory'          => true,  // Memory usage
 		'exceptions'      => true,  // Exception displayer
-		'request'         => true, // Regular or special Symfony request logger
+		'default_request' => false, // Regular or special Symfony request logger
+		'phalcon_request' => true,  // Only one can be enabled..
+		'session'         => true, // Display session data in a separate tab
+		'config'          => true,
+		'route'           => true,
+		'pdo'             => true,
 	),
 
 	/*
@@ -87,6 +92,9 @@ return array(
 	 */
 
 	'options' => array(
+		'exceptions'=>array(
+			'chain'=>true,
+		),
 	),
 
 	/*
