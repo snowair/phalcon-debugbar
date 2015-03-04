@@ -24,6 +24,7 @@ use Phalcon\DI;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
 use Snowair\Debugbar\DataCollector\PhalconRequestCollector;
+use Snowair\Debugbar\DataCollector\RouteCollector;
 use Snowair\Debugbar\DataCollector\SessionCollector;
 
 /**
@@ -133,6 +134,20 @@ class PhalconDebugbar extends DebugBar {
 				$startTime = isset($_SERVER["REQUEST_TIME_FLOAT"])?$_SERVER["REQUEST_TIME_FLOAT"]:$_SERVER["REQUEST_TIME"];
 			}
 			$this->addCollector(new TimeDataCollector($startTime));
+		}
+
+		if ($this->shouldCollect('route') && $this->di->has('router') && $this->di->has('dispatcher')) {
+			try {
+				$this->addCollector(new RouteCollector($this->di['router'],$this->di['dispatcher']));
+			} catch (\Exception $e) {
+				$this->addException(
+					new Exception(
+						'Cannot add RouteCollector to Laravel Debugbar: ' . $e->getMessage(),
+						$e->getCode(),
+						$e
+					)
+				);
+			}
 		}
 
 		$renderer = $this->getJavascriptRenderer();
