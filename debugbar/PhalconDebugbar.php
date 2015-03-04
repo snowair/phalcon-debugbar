@@ -118,6 +118,7 @@ class PhalconDebugbar extends DebugBar {
 				);
 				$this->addCollector($exceptionCollector);
 			} catch (\Exception $e) {
+				$this->addException($e);
 			}
 		}
 		if ($this->shouldCollect('time', true)) {
@@ -179,7 +180,7 @@ class PhalconDebugbar extends DebugBar {
 			try {
 				$collector->stopMeasure($name);
 			} catch (\Exception $e) {
-				//  $this->addException($e);
+				  $this->addException($e);
 			}
 		}
 	}
@@ -287,7 +288,7 @@ class PhalconDebugbar extends DebugBar {
 					$this->injectDebugbar($response);
 			}
 		} catch (\Exception $e) {
-			throw $e;
+			$this->addException($e);
 		}
 
 		// Stop further rendering (on subrequests etc)
