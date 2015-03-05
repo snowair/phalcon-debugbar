@@ -152,7 +152,7 @@ class PhalconDebugbar extends DebugBar {
 			}
 		}
 		if ( $this->di->has( 'db' ) ) {
-			$this->addPdoCollector( $this->di['db'] );
+			$this->attachDb( $this->di['db'] );
 		}
 
 		$renderer = $this->getJavascriptRenderer();
@@ -330,20 +330,24 @@ class PhalconDebugbar extends DebugBar {
 	/**
 	 * @param Adapter $db
 	 */
-	public function addPdoCollector( $db ) {
+	public function attachDb( $db ) {
 		if ($this->shouldCollect('db', true)  ) {
-			static $profiler;
+			static $profiler,$faild_sql,$succeed_sql,$eventsManager,$queryCollector;
 			if ( !$profiler ) {
 				$profiler = new Profiler();
 			}
+			if ( !$faild_sql ) {
+				$faild_sql  = new \ArrayObject();
+			}
+			if ( !$succeed_sql ) {
+				$succeed_sql = new \ArrayObject();
+			}
 			$pdo = $db->getInternalHandler();
 			$pdo->setAttribute(\PDO::ATTR_ERRMODE, $this->config->options->db->error_mode);
-			try {
+			if ( !$eventsManager ) {
 				$eventsManager = new Manager();
 				$latest_sql = '';
 				$latest_params = null;
-				$faild_sql  = new \ArrayObject();
-				$succeed_sql = new \ArrayObject();
 				$eventsManager->attach('db', function(Event $event, Adapter $db, $params)  use (
 					$profiler,&$latest_sql,&$latest_params,$faild_sql,$succeed_sql
 				) {
@@ -378,10 +382,13 @@ class PhalconDebugbar extends DebugBar {
 						$latest_sql ='';
 					}
 				});
-				$db->setEventsManager($eventsManager);
-
-				$queryCollector = new QueryCollector($succeed_sql, $faild_sql, $profiler);
-				$this->addCollector($queryCollector);
+			}
+			$db->setEventsManager($eventsManager);
+			try {
+				if ( !$queryCollector ) {
+					$queryCollector = new QueryCollector($succeed_sql, $faild_sql, $profiler);
+					$this->addCollector($queryCollector);
+				}
 			} catch (\Exception $e) {
 				$this->addException(
 					new Exception(
