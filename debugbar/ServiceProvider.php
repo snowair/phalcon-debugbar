@@ -7,6 +7,7 @@
 
 namespace Snowair\Debugbar;
 
+use Phalcon\Events\Manager;
 use Phalcon\Mvc\Router\Group;
 use Snowair\Debugbar\PhalconDebugbar;
 use Snowair\Debugbar\PhalconHttpDriver;
@@ -65,7 +66,7 @@ class ServiceProvider extends Injectable {
 		$debugbar = $this->di['debugbar'];
 		$debugbar->boot();
 
-		$eventsManager = $this->eventsManager;
+		$eventsManager = new Manager();
 		$eventsManager->attach('application:beforeSendResponse',function($event,$app,$response) use($debugbar){
 			$debugbar->modifyResponse($response);
 		});

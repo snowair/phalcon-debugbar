@@ -79,7 +79,7 @@ return array(
 		'session'         => true, // Display session data in a separate tab
 		'config'          => true,
 		'route'           => true,
-		'pdo'             => true,
+		'db'              => true,
 	),
 
 	/*
@@ -94,6 +94,13 @@ return array(
 	'options' => array(
 		'exceptions'=>array(
 			'chain'=>true,
+		),
+		'db' => array(
+			'backtrace' => true,  // EXPERIMENTAL: Use a backtrace to find the origin of the query in your files.
+			'explain'   => array(            // EXPERIMENTAL: Show EXPLAIN output on queries
+				'enabled' => true,
+				'types' => array('SELECT'), // array('SELECT', 'INSERT', 'UPDATE', 'DELETE'); for MySQL 5.6.3+
+			),
 		),
 	),
 

@@ -22,10 +22,15 @@ use DebugBar\DataCollector\TimeDataCollector;
 use DebugBar\DebugBar;
 use DebugBar\DebugBarException;
 use Exception;
+use Phalcon\Db\Adapter;
 use Phalcon\Db\Adapter\Pdo;
+use Phalcon\Db\Profiler;
 use Phalcon\DI;
+use Phalcon\Events\Event;
+use Phalcon\Events\Manager;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
+use Snowair\Debugbar\Controllers\QueryCollector;
 use Snowair\Debugbar\DataCollector\PhalconRequestCollector;
 use Snowair\Debugbar\DataCollector\RouteCollector;
 use Snowair\Debugbar\DataCollector\SessionCollector;
@@ -329,17 +334,45 @@ class PhalconDebugbar extends DebugBar {
 	}
 
 	/**
-	 * @param Pdo $db
+	 * @param Adapter $db
 	 */
 	public function addPdoCollector( $db ) {
-		if ($this->shouldCollect('pdo', true)  ) {
+		if ($this->shouldCollect('db', true)  ) {
+			static $profiler;
+			if ( !$profiler ) {
+				$profiler = new Profiler();
+			}
+
 			try {
-				$pdo = new TraceablePDO($db->getInternalHandler());
-				$this->addCollector(new PDOCollector($pdo));
+				$eventsManager = new Manager();
+				$latest_sql = '';
+				$faild_sql = new \ArrayObject();
+				$eventsManager->attach('db', function(Event $event, Adapter $db) use ($profiler,&$latest_sql,$faild_sql) {
+					if ($event->getType() == 'beforeQuery') {
+						$sql = $db->getRealSQLStatement();
+						if ( $latest_sql=='' ) {
+							$latest_sql = $sql;
+						}
+						$profiler->startProfile($latest_sql);
+					}
+					if ($event->getType() == 'afterQuery') {
+						$sql_stop = $db->getRealSQLStatement();
+						if ( $sql_stop !== $latest_sql  ) {
+							$faild_sql->append($latest_sql);
+						}else{
+							$latest_sql ='';
+						}
+						$profiler->stopProfile();
+					}
+				});
+				$db->setEventsManager($eventsManager);
+
+				$queryCollector = new QueryCollector($profiler,$faild_sql);
+				$this->addCollector($queryCollector);
 			} catch (\Exception $e) {
 				$this->addException(
 					new Exception(
-						'Cannot add PdoCollector to Phalcon Debugbar: ' . $e->getMessage(),
+						'Cannot add listen to Queries for Phalcon Debugbar: ' . $e->getMessage(),
 						$e->getCode(),
 						$e
 					)
