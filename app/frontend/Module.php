@@ -59,15 +59,26 @@ class Module implements ModuleDefinitionInterface
                 "host" => $config->database->host,
                 "username" => $config->database->username,
                 "password" => $config->database->password,
-                "dbname" => $config->database->name
+                "dbname" => $config->database->dbname
             ));
 
 			return $db;
         };
+		$di['db2'] = function () use ($config) {
+			$db = new DbAdapter(array(
+				"host" => $config->database->host,
+				"username" => $config->database->username,
+				"password" => '',
+				"dbname" => $config->database->dbname
+			));
+
+			return $db;
+		};
 		if ( $di->has('debugbar') ) {
 			/** @var PhalconDebugbar $debugbar */
 			$debugbar = $di['debugbar'];
-			$debugbar->addPdoCollector($di['db']);
+			$debugbar->attachDb($di['db']);
+			$debugbar->attachDb($di['db2']);
 		}
 
     }
