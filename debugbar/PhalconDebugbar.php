@@ -356,12 +356,13 @@ class PhalconDebugbar extends DebugBar {
 						if ( $latest_sql=='' ) {
 							$latest_sql = $sql;
 						}
+						$latest_params = $params;
 						$profiler->startProfile($sql,$params);
 					}
 					if ($event->getType() == 'afterQuery') {
 						$sql_stop = $db->getRealSQLStatement();
 						$pdo = $db->getInternalHandler();
-						if ( $sql_stop !== $latest_sql && $params!=$latest_params ) {
+						if ( $sql_stop !== $latest_sql || ( $sql_stop==$latest_sql && $params!=$latest_params) ) {
 							$err_code = $pdo->errorCode();
 							$err_msg  = $pdo->errorInfo();
 							$faild_sql->append(array('sql'=>$latest_sql,'err_code'=>$err_code,'err_msg'=>$err_msg,'params'=>$latest_params));
