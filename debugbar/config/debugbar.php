@@ -101,6 +101,7 @@ return array(
 				'enabled' => true,
 				'types' => array('SELECT'), // array('SELECT', 'INSERT', 'UPDATE', 'DELETE'); for MySQL 5.6.3+
 			),
+			'error_mode'=> \PDO::ERRMODE_SILENT, // \PDO::ERRMODE_SILENT , \PDO::ERRMODE_WARNING, \PDO::ERRMODE_EXCEPTION
 		),
 	),
 

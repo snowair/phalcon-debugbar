@@ -336,9 +336,8 @@ class PhalconDebugbar extends DebugBar {
 			if ( !$profiler ) {
 				$profiler = new Profiler();
 			}
-
 			$pdo = $db->getInternalHandler();
-			$pdo->setAttribute(\PDO::ATTR_ERRMODE,0);
+			$pdo->setAttribute(\PDO::ATTR_ERRMODE, $this->config->options->db->error_mode);
 			try {
 				$eventsManager = new Manager();
 				$latest_sql = '';
