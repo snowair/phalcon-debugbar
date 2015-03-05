@@ -7,20 +7,14 @@
 
 namespace Snowair\Debugbar;
 
-use DebugBar\Bridge\MonologCollector;
-use DebugBar\Bridge\SwiftMailer\SwiftLogCollector;
-use DebugBar\Bridge\SwiftMailer\SwiftMailCollector;
 use DebugBar\DataCollector\ConfigCollector;
 use DebugBar\DataCollector\ExceptionsCollector;
 use DebugBar\DataCollector\MemoryCollector;
 use DebugBar\DataCollector\MessagesCollector;
-use DebugBar\DataCollector\PDO\PDOCollector;
-use DebugBar\DataCollector\PDO\TraceablePDO;
 use DebugBar\DataCollector\PhpInfoCollector;
 use DebugBar\DataCollector\RequestDataCollector;
 use DebugBar\DataCollector\TimeDataCollector;
 use DebugBar\DebugBar;
-use DebugBar\DebugBarException;
 use Exception;
 use Phalcon\Db\Adapter;
 use Phalcon\Db\Adapter\Pdo;
@@ -30,8 +24,8 @@ use Phalcon\Events\Event;
 use Phalcon\Events\Manager;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
-use Snowair\Debugbar\Controllers\QueryCollector;
 use Snowair\Debugbar\DataCollector\PhalconRequestCollector;
+use Snowair\Debugbar\DataCollector\QueryCollector;
 use Snowair\Debugbar\DataCollector\RouteCollector;
 use Snowair\Debugbar\DataCollector\SessionCollector;
 
@@ -343,31 +337,51 @@ class PhalconDebugbar extends DebugBar {
 				$profiler = new Profiler();
 			}
 
+			$pdo = $db->getInternalHandler();
+			$pdo->setAttribute(\PDO::ATTR_ERRMODE,0);
 			try {
 				$eventsManager = new Manager();
 				$latest_sql = '';
-				$faild_sql = new \ArrayObject();
-				$eventsManager->attach('db', function(Event $event, Adapter $db) use ($profiler,&$latest_sql,$faild_sql) {
+				$latest_params = null;
+				$faild_sql  = new \ArrayObject();
+				$succeed_sql = new \ArrayObject();
+				$eventsManager->attach('db', function(Event $event, Adapter $db, $params)  use (
+					$profiler,&$latest_sql,&$latest_params,$faild_sql,$succeed_sql
+				) {
 					if ($event->getType() == 'beforeQuery') {
 						$sql = $db->getRealSQLStatement();
 						if ( $latest_sql=='' ) {
 							$latest_sql = $sql;
 						}
-						$profiler->startProfile($latest_sql);
+						$profiler->startProfile($sql,$params);
 					}
 					if ($event->getType() == 'afterQuery') {
 						$sql_stop = $db->getRealSQLStatement();
-						if ( $sql_stop !== $latest_sql  ) {
-							$faild_sql->append($latest_sql);
-						}else{
-							$latest_sql ='';
+						$pdo = $db->getInternalHandler();
+						if ( $sql_stop !== $latest_sql && $params!=$latest_params ) {
+							$err_code = $pdo->errorCode();
+							$err_msg  = $pdo->errorInfo();
+							$faild_sql->append(array('sql'=>$latest_sql,'err_code'=>$err_code,'err_msg'=>$err_msg,'params'=>$latest_params));
 						}
 						$profiler->stopProfile();
+						$succeed = array(
+							'item'=>$profiler->getLastProfile(),
+							'last_insert_id'=>0,
+							'affect_rows'=>0,
+						);
+						if ( stripos( $sql_stop, 'INSERT' )===0 ) {
+							$succeed['last_insert_id'] =  $pdo->lastInsertId();
+						}
+						if ( stripos( $sql_stop, 'INSERT')===0  || stripos( $sql_stop, 'UPDATE')===0 || stripos( $sql_stop, 'DELETE')===0) {
+							$succeed['affect_rows'] =  $db->affectedRows();
+						}
+						$succeed_sql->append($succeed);
+						$latest_sql ='';
 					}
 				});
 				$db->setEventsManager($eventsManager);
 
-				$queryCollector = new QueryCollector($profiler,$faild_sql);
+				$queryCollector = new QueryCollector($succeed_sql, $faild_sql, $profiler);
 				$this->addCollector($queryCollector);
 			} catch (\Exception $e) {
 				$this->addException(
