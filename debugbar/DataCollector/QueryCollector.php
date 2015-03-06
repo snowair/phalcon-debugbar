@@ -8,30 +8,21 @@
 namespace Snowair\Debugbar\DataCollector;
 
 
-use DebugBar\DataCollector\AssetProvider;
-use DebugBar\DataCollector\DataCollector;
-use DebugBar\DataCollector\Renderable;
+use DebugBar\DataCollector\PDO\PDOCollector;
 use Phalcon\Db\Profiler;
 use Snowair\Debugbar\Phalcon\Db\Profiler\Item;
 
-class QueryCollector extends DataCollector  implements Renderable, AssetProvider
-{
+class QueryCollector extends PDOCollector{
 	/**
 	 * @var \Snowair\Debugbar\Phalcon\Db\Profiler $profiler
 	 */
 	protected $profiler;
 
-	protected $renderSqlWithParams = false;
 	protected $findSource = false;
 
 	public function __construct( Profiler $profiler)
 	{
 		$this->profiler = $profiler;
-	}
-
-	public function setRenderSqlWithParams($enabled = true)
-	{
-		$this->renderSqlWithParams = $enabled;
 	}
 
 	public function collect()
@@ -116,32 +107,4 @@ class QueryCollector extends DataCollector  implements Renderable, AssetProvider
 		return ltrim( $path, realpath(dirname($_SERVER['DOCUMENT_ROOT'])));
 	}
 
-	public function getName()
-	{
-		return 'pdo';
-	}
-
-	public function getWidgets()
-	{
-		return array(
-			"database" => array(
-				"icon" => "inbox",
-				"widget" => "PhpDebugBar.Widgets.SQLQueriesWidget",
-				"map" => "pdo",
-				"default" => "[]"
-			),
-			"database:badge" => array(
-				"map" => "pdo.nb_statements",
-				"default" => 0
-			)
-		);
-	}
-
-	public function getAssets()
-	{
-		return array(
-			'css' => 'widgets/sqlqueries/widget.css',
-			'js' => 'widgets/sqlqueries/widget.js'
-		);
-	}
 }
