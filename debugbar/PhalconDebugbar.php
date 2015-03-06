@@ -306,9 +306,9 @@ class PhalconDebugbar extends DebugBar {
 			}
 		}
 
-		if( $pdoCollector =  $this->getCollector('pdo') ){
+		if( $this->hasCollector('pdo') ){
 			/** @var Profiler $profiler */
-			$profiler = $pdoCollector->getProfiler();
+			$profiler = $this->getCollector('pdo')->getProfiler();
 			$profiler->handleFailed();
 		};
 
@@ -503,7 +503,7 @@ class PhalconDebugbar extends DebugBar {
 
 		// Check if the request wants Json
 		$acceptable = $this->di['request']->getAcceptableContent();
-		return (isset($acceptable[0]) && $acceptable[0] == 'application/json');
+		return (isset($acceptable[0]) && $acceptable[0]['accept'] == 'application/json');
 	}
 
 
