@@ -57,7 +57,7 @@ class Profiler extends  PhalconProfiler {
 		$activeProfile = new Item();
 
 		$activeProfile->setSqlStatement($sqlStatement);
-		$activeProfile->setRealSQL($this->setRealSql($sqlStatement,$sqlVariables));
+		$activeProfile->setRealSQL($this->getRealSql($sqlStatement,$sqlVariables));
 
 		if ( is_array($sqlVariables) ) {
 			$activeProfile->setSqlVariables($sqlVariables);
@@ -79,7 +79,7 @@ class Profiler extends  PhalconProfiler {
 		return $this;
 	}
 
-	public function setRealSql( $sql, $variables ) {
+	public function getRealSql( $sql, $variables ) {
 		if ( !$variables ) {
 			return $sql;
 		}
@@ -138,6 +138,9 @@ class Profiler extends  PhalconProfiler {
 			}
 			if ( stripos( $sql, 'INSERT')===0  || stripos( $sql, 'UPDATE')===0 || stripos( $sql, 'DELETE')===0) {
 				$data['affect_rows'] =  $this->_db->affectedRows();
+			}
+			if ( stripos( $sql, 'SELECT')===0 ) {
+				$stmt = $pdo->query( 'explain '.$activeProfile->getRealSQL());
 			}
 			$activeProfile->setExtra($data);
 		}

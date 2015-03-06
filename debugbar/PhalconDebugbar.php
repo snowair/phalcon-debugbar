@@ -376,17 +376,24 @@ class PhalconDebugbar extends DebugBar {
 					$profiler->setDb($db);
 					if ($event->getType() == 'beforeQuery') {
 						$sql = $db->getRealSQLStatement();
-						$profiler->startProfile($sql,$params);
-						if ($queryCollector->getFindSource()) {
-							try {
-								$source = $queryCollector->findSource();
-								$profiler->setSource($source);
-							} catch (\Exception $e) {
+						if ( stripos( $sql, 'SELECT IF(COUNT(*)>0, 1 , 0) FROM `INFORMATION_SCHEMA`.`TABLES`' )===false
+							&& stripos( $sql, 'DESCRIBE')!==0) {
+							$profiler->startProfile($sql,$params);
+							if ($queryCollector->getFindSource()) {
+								try {
+									$source = $queryCollector->findSource();
+									$profiler->setSource($source);
+								} catch (\Exception $e) {
+								}
 							}
 						}
 					}
 					if ($event->getType() == 'afterQuery') {
-						$profiler->stopProfile();
+						$sql = $db->getRealSQLStatement();
+						if ( stripos( $sql, 'SELECT IF(COUNT(*)>0, 1 , 0) FROM `INFORMATION_SCHEMA`.`TABLES`' )===false
+							&& stripos( $sql, 'DESCRIBE')!==0) {
+							$profiler->stopProfile();
+						}
 					}
 				});
 			}
