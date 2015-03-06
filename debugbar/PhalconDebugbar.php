@@ -346,6 +346,9 @@ class PhalconDebugbar extends DebugBar {
 					if ( $config->options->db->backtrace ) {
 						$queryCollector->setFindSource( true );
 					}
+					if ( $config->options->db->get('show_conn',false) ) {
+						$queryCollector->setShowConnection( true );
+					}
 					$this->addCollector($queryCollector);
 				}
 			} catch (\Exception $e) {
@@ -368,17 +371,16 @@ class PhalconDebugbar extends DebugBar {
 					if ($event->getType() == 'beforeQuery') {
 						$sql = $db->getRealSQLStatement();
 						$profiler->startProfile($sql,$params);
-					}
-					if ($event->getType() == 'afterQuery') {
 						if ($queryCollector->getFindSource()) {
 							try {
 								$source = $queryCollector->findSource();
-								$profiler->stopProfile(array('source'=>$source));
+								$profiler->setSource($source);
 							} catch (\Exception $e) {
 							}
-						}else{
-							$profiler->stopProfile();
 						}
+					}
+					if ($event->getType() == 'afterQuery') {
+						$profiler->stopProfile();
 					}
 				});
 			}

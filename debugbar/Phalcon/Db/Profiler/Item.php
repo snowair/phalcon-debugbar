@@ -11,7 +11,7 @@ use Phalcon\Db\Profiler\Item as ProflierItem;
 
 class Item extends ProflierItem {
 
-	protected $_extra;
+	protected $_extra = array();
 	protected $_realSQL;
 
 	/**
@@ -25,7 +25,7 @@ class Item extends ProflierItem {
 	 * @param mixed $extra
 	 */
 	public function setExtra( $extra ) {
-		$this->_extra = $extra;
+		$this->_extra = array_merge($this->_extra,$extra);
 	}
 
 	public function __get( $var ) {

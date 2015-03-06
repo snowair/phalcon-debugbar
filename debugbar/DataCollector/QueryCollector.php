@@ -17,6 +17,7 @@ class QueryCollector extends PDOCollector{
 	 * @var \Snowair\Debugbar\Phalcon\Db\Profiler $profiler
 	 */
 	protected $profiler;
+	protected $showConnection=false;
 
 	protected $findSource = false;
 
@@ -38,14 +39,16 @@ class QueryCollector extends PDOCollector{
 			'statements' => array()
 		);
 		$renderOrNot = $this->renderSqlWithParams;
+		$show_conn = $this->showConnection;
 		foreach ( $failed as $profile ) {
 			$data['statements'][] = array(
 				'sql'          => $renderOrNot?$profile->getRealSQL():$profile->getSQLStatement(),
 				'params'       => $profile->getSqlVariables(),
 				'is_success'    => false,
-				'stmt_id'      =>  null,
+				'stmt_id'       => $profile->source,
                 'error_code'    => $profile->err_code,
                 'error_message' => $profile->err_msg,
+				'connection'    => $show_conn?$profile->connection:null,
 			);
 		}
 		foreach ( $succeed as $profile ) {
@@ -54,6 +57,7 @@ class QueryCollector extends PDOCollector{
 				'params'       => $profile->getSqlVariables(),
 				'row_count'    => $profile->affect_rows,
 				'stmt_id'      => $profile->source,
+				'connection'    => $show_conn?$profile->connection:null,
 				'is_success'   => true,
 				'duration'     => $profile->getTotalElapsedSeconds(),
 				'duration_str' => $this->getDataFormatter()->formatDuration($profile->getTotalElapsedSeconds()),
@@ -107,4 +111,10 @@ class QueryCollector extends PDOCollector{
 		return ltrim( $path, realpath(dirname($_SERVER['DOCUMENT_ROOT'])));
 	}
 
+	/**
+	 * @param boolean $showConnection
+	 */
+	public function setShowConnection( $showConnection ) {
+		$this->showConnection = (bool)$showConnection;
+	}
 }
