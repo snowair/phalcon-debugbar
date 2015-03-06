@@ -12,47 +12,47 @@ use DebugBar\DataCollector\PDO\PDOCollector;
 use Phalcon\Db\Profiler;
 
 class QueryCollector extends PDOCollector{
+	/**
+	 * @var \Snowair\Debugbar\Phalcon\Db\Profiler $profiler
+	 */
+	protected $profiler;
 
-	protected $succeed;
-	protected $failed;
 	protected $findSource = false;
 
-	public function __construct(\ArrayObject $succeed,\ArrayObject $failed, Profiler $profiler)
+	public function __construct( Profiler $profiler)
 	{
-		$this->succeed = $succeed;
-		$this->failed = $failed;
 		$this->profiler = $profiler;
 	}
 
 	public function collect()
 	{
-		$succeed = $this->succeed;
-		$failed = $this->failed;
+		$succeed = $this->profiler->getProfiles();
+		$failed = $this->profiler->getFailedProfiles();
 		$data = array(
-			'nb_statements'        => $succeed->count() + $failed->count(),
-			'nb_failed_statements' => $failed->count(),
+			'nb_statements'        => count($succeed) +count($failed),
+			'nb_failed_statements' => count($failed),
 			'accumulated_duration' => $this->profiler->getTotalElapsedSeconds(),
 			'statements' => array()
 		);
 		foreach ( $failed as $profile ) {
 			$data['statements'][] = array(
-				'sql'           => $profile['sql'],
-				'params'        => $profile['params'],
+				'sql'          => $profile->getSQLStatement(),
+				'params'       => $profile->getSqlVariables(),
 				'is_success'    => false,
 				'stmt_id'      =>  null,
-                'error_code'    => $profile['err_code'],
-                'error_message' => $profile['err_msg'],
+                'error_code'    => $profile->err_code,
+                'error_message' => $profile->err_msg,
 			);
 		}
 		foreach ( $succeed as $profile ) {
 			$data['statements'][] = array(
-				'sql'          => $profile['item']->getSQLStatement(),
-				'params'       => $profile['item']->getSqlVariables(),
-				'row_count'    => $profile['affect_rows'],
-				'stmt_id'      => $profile['source'],
+				'sql'          => $profile->getSQLStatement(),
+				'params'       => $profile->getSqlVariables(),
+				'row_count'    => $profile->affect_rows,
+				'stmt_id'      => $profile->source,
 				'is_success'   => true,
-				'duration'     => $profile['item']->getTotalElapsedSeconds(),
-				'duration_str' => $this->getDataFormatter()->formatDuration($profile['item']->getTotalElapsedSeconds()),
+				'duration'     => $profile->getTotalElapsedSeconds(),
+				'duration_str' => $this->getDataFormatter()->formatDuration($profile->getTotalElapsedSeconds()),
 			);
 		}
 
@@ -100,7 +100,7 @@ class QueryCollector extends PDOCollector{
 		if (file_exists($path)) {
 			$path = realpath($path);
 		}
-		return str_replace( realpath(dirname($_SERVER['DOCUMENT_ROOT'])), '', $path);
+		return ltrim( $path, realpath(dirname($_SERVER['DOCUMENT_ROOT'])));
 	}
 
 

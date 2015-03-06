@@ -18,7 +18,6 @@ use DebugBar\DebugBar;
 use Exception;
 use Phalcon\Db\Adapter;
 use Phalcon\Db\Adapter\Pdo;
-use Phalcon\Db\Profiler;
 use Phalcon\DI;
 use Phalcon\Events\Event;
 use Phalcon\Events\Manager;
@@ -28,6 +27,7 @@ use Snowair\Debugbar\DataCollector\PhalconRequestCollector;
 use Snowair\Debugbar\DataCollector\QueryCollector;
 use Snowair\Debugbar\DataCollector\RouteCollector;
 use Snowair\Debugbar\DataCollector\SessionCollector;
+use Snowair\Debugbar\Phalcon\Db\Profiler;
 
 /**
  * Debug bar subclass which adds all without Request and with Collector.
@@ -332,20 +332,14 @@ class PhalconDebugbar extends DebugBar {
 	 */
 	public function attachDb( $db ) {
 		if ($this->shouldCollect('db', true)  ) {
-			static $profiler,$faild_sql,$succeed_sql,$eventsManager,$queryCollector;
+			static $profiler,$eventsManager,$queryCollector;
 			$config = $this->config;
 			if ( !$profiler ) {
 				$profiler = new Profiler();
 			}
-			if ( !$faild_sql ) {
-				$faild_sql  = new \ArrayObject();
-			}
-			if ( !$succeed_sql ) {
-				$succeed_sql = new \ArrayObject();
-			}
 			try {
 				if ( !$queryCollector ) {
-					$queryCollector = new QueryCollector($succeed_sql, $faild_sql, $profiler);
+					$queryCollector = new QueryCollector($profiler);
 					if ( $config->options->db->backtrace ) {
 						$queryCollector->setFindSource( true );
 					}
@@ -364,49 +358,24 @@ class PhalconDebugbar extends DebugBar {
 			$pdo->setAttribute(\PDO::ATTR_ERRMODE, $config->options->db->error_mode);
 			if ( !$eventsManager ) {
 				$eventsManager = new Manager();
-				$latest_sql = '';
-				$latest_params = null;
 				$eventsManager->attach('db', function(Event $event, Adapter $db, $params)  use (
-					$profiler,&$latest_sql,&$latest_params,$faild_sql,$succeed_sql,$queryCollector
+					$profiler,$queryCollector
 				) {
+					$profiler->setDb($db);
 					if ($event->getType() == 'beforeQuery') {
 						$sql = $db->getRealSQLStatement();
-						if ( $latest_sql=='' ) {
-							$latest_sql = $sql;
-						}
 						$profiler->startProfile($sql,$params);
-						$latest_params = $params;
 					}
 					if ($event->getType() == 'afterQuery') {
-						$sql_stop = $db->getRealSQLStatement();
-						$pdo = $db->getInternalHandler();
-						if ( $sql_stop !== $latest_sql || ( $sql_stop==$latest_sql && $params!=$latest_params) ) {
-							$err_code = $pdo->errorCode();
-							$err_msg  = $pdo->errorInfo();
-							$faild_sql->append(array('sql'=>$latest_sql,'err_code'=>$err_code,'err_msg'=>$err_msg,'params'=>$latest_params));
-						}
-						$profiler->stopProfile();
-						$succeed = array(
-							'item'=>$profiler->getLastProfile(),
-							'last_insert_id'=>0,
-							'affect_rows'=>0,
-							'source'=>null,
-						);
-						if ( stripos( $sql_stop, 'INSERT' )===0 ) {
-							$succeed['last_insert_id'] =  $pdo->lastInsertId();
-						}
-						if ( stripos( $sql_stop, 'INSERT')===0  || stripos( $sql_stop, 'UPDATE')===0 || stripos( $sql_stop, 'DELETE')===0) {
-							$succeed['affect_rows'] =  $db->affectedRows();
-						}
 						if ($queryCollector->getFindSource()) {
 							try {
 								$source = $queryCollector->findSource();
-								$succeed['source'] = $source;
+								$profiler->stopProfile(array('source'=>$source));
 							} catch (\Exception $e) {
 							}
+						}else{
+							$profiler->stopProfile();
 						}
-						$succeed_sql->append($succeed);
-						$latest_sql ='';
 					}
 				});
 			}
