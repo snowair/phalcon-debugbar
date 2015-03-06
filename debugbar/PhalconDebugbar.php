@@ -333,6 +333,7 @@ class PhalconDebugbar extends DebugBar {
 	public function attachDb( $db ) {
 		if ($this->shouldCollect('db', true)  ) {
 			static $profiler,$faild_sql,$succeed_sql,$eventsManager,$queryCollector;
+			$config = $this->config;
 			if ( !$profiler ) {
 				$profiler = new Profiler();
 			}
@@ -342,22 +343,39 @@ class PhalconDebugbar extends DebugBar {
 			if ( !$succeed_sql ) {
 				$succeed_sql = new \ArrayObject();
 			}
+			try {
+				if ( !$queryCollector ) {
+					$queryCollector = new QueryCollector($succeed_sql, $faild_sql, $profiler);
+					if ( $config->options->db->backtrace ) {
+						$queryCollector->setFindSource( true );
+					}
+					$this->addCollector($queryCollector);
+				}
+			} catch (\Exception $e) {
+				$this->addException(
+					new Exception(
+						'Cannot add listen to Queries for Phalcon Debugbar: ' . $e->getMessage(),
+						$e->getCode(),
+						$e
+					)
+				);
+			}
 			$pdo = $db->getInternalHandler();
-			$pdo->setAttribute(\PDO::ATTR_ERRMODE, $this->config->options->db->error_mode);
+			$pdo->setAttribute(\PDO::ATTR_ERRMODE, $config->options->db->error_mode);
 			if ( !$eventsManager ) {
 				$eventsManager = new Manager();
 				$latest_sql = '';
 				$latest_params = null;
 				$eventsManager->attach('db', function(Event $event, Adapter $db, $params)  use (
-					$profiler,&$latest_sql,&$latest_params,$faild_sql,$succeed_sql
+					$profiler,&$latest_sql,&$latest_params,$faild_sql,$succeed_sql,$queryCollector
 				) {
 					if ($event->getType() == 'beforeQuery') {
 						$sql = $db->getRealSQLStatement();
 						if ( $latest_sql=='' ) {
 							$latest_sql = $sql;
 						}
-						$latest_params = $params;
 						$profiler->startProfile($sql,$params);
+						$latest_params = $params;
 					}
 					if ($event->getType() == 'afterQuery') {
 						$sql_stop = $db->getRealSQLStatement();
@@ -372,6 +390,7 @@ class PhalconDebugbar extends DebugBar {
 							'item'=>$profiler->getLastProfile(),
 							'last_insert_id'=>0,
 							'affect_rows'=>0,
+							'source'=>null,
 						);
 						if ( stripos( $sql_stop, 'INSERT' )===0 ) {
 							$succeed['last_insert_id'] =  $pdo->lastInsertId();
@@ -379,26 +398,19 @@ class PhalconDebugbar extends DebugBar {
 						if ( stripos( $sql_stop, 'INSERT')===0  || stripos( $sql_stop, 'UPDATE')===0 || stripos( $sql_stop, 'DELETE')===0) {
 							$succeed['affect_rows'] =  $db->affectedRows();
 						}
+						if ($queryCollector->getFindSource()) {
+							try {
+								$source = $queryCollector->findSource();
+								$succeed['source'] = $source;
+							} catch (\Exception $e) {
+							}
+						}
 						$succeed_sql->append($succeed);
 						$latest_sql ='';
 					}
 				});
 			}
 			$db->setEventsManager($eventsManager);
-			try {
-				if ( !$queryCollector ) {
-					$queryCollector = new QueryCollector($succeed_sql, $faild_sql, $profiler);
-					$this->addCollector($queryCollector);
-				}
-			} catch (\Exception $e) {
-				$this->addException(
-					new Exception(
-						'Cannot add listen to Queries for Phalcon Debugbar: ' . $e->getMessage(),
-						$e->getCode(),
-						$e
-					)
-				);
-			}
 		}
 	}
 

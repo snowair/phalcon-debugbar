@@ -46,8 +46,6 @@ class PhalconRequestCollector extends DataCollector implements DataCollectorInte
 		$response = $this->response;
 
 		$status = $response->getHeaders()->get('Status')?:'200 ok';
-		$statusCode = substr($status,0,3);
-		$statusText = substr($status,4);
 
 		$responseHeaders = $response->getHeaders()->toArray()?:headers_list();
 
@@ -64,8 +62,7 @@ class PhalconRequestCollector extends DataCollector implements DataCollectorInte
 			}
 		}
 		$data = array(
-			'status_text'      => $statusText,
-			'status_code'      => $statusCode,
+			'status'      => $status,
 			'request_query'    => $request->getQuery(),
 			'request_post'     => $request->getPost(),
 			'request_body'     => $request->getRawBody(),
