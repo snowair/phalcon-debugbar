@@ -43,7 +43,7 @@ class ServiceProvider extends Injectable {
 		$group = new Group( array('namespace'=>'Snowair\Debugbar\Controllers') );
 		$group->setPrefix('/_debugbar/');
 		$group->addGet('open',array(
-			'controller'=>'OpenHandler',
+			'controller'=>'\OpenHandler',
 			'action'=>'handle',
 		))->setName('debugbar.openhandler');
 
