@@ -62,6 +62,16 @@ class QueryCollector extends PDOCollector{
 				'duration'     => $profile->getTotalElapsedSeconds(),
 				'duration_str' => $this->getDataFormatter()->formatDuration($profile->getTotalElapsedSeconds()),
 			);
+			if ( $explains = $profile->explain ) {
+				foreach ( $explains as $explain ) {
+					$data['statements'][] = array(
+						'sql' => ' - EXPLAIN #' . $explain->id . ': `' . $explain->table . '` (' . $explain->select_type . ')',
+						'params' => $explain,
+						'row_count' => $explain->rows,
+						'stmt_id' => $explain->id,
+					);
+				}
+			}
 		}
 
 		$data['accumulated_duration_str'] = $this->getDataFormatter()->formatDuration($data['accumulated_duration']);

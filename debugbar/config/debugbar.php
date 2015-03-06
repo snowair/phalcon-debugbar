@@ -96,12 +96,11 @@ return array(
 			'chain'=>true,
 		),
 		'db' => array(
+			'with_params'       => false,   // Render SQL with the parameters substituted
 			'backtrace' => true,  // EXPERIMENTAL: Use a backtrace to find the origin of the query in your files.
-			'explain'   => array(            // EXPERIMENTAL: Show EXPLAIN output on queries
-				'enabled' => true,
-				'types' => array('SELECT'), // array('SELECT', 'INSERT', 'UPDATE', 'DELETE'); for MySQL 5.6.3+
-			),
+			'explain'   => true,  // EXPLAIN select statement
 			'error_mode'=> \PDO::ERRMODE_SILENT, // \PDO::ERRMODE_SILENT , \PDO::ERRMODE_WARNING, \PDO::ERRMODE_EXCEPTION
+			'show_conn'=>false, // IF show connection info
 		),
 	),
 

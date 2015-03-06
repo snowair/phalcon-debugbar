@@ -16,6 +16,7 @@ class Profiler extends  PhalconProfiler {
 	protected $_failedProfiles=array();
 	protected $_stoped=false;
 	protected $_lastFailed;
+	protected $_explainQuery = false;
 	/**
 	 * @var  Item $activeProfile
 	 */
@@ -139,8 +140,10 @@ class Profiler extends  PhalconProfiler {
 			if ( stripos( $sql, 'INSERT')===0  || stripos( $sql, 'UPDATE')===0 || stripos( $sql, 'DELETE')===0) {
 				$data['affect_rows'] =  $this->_db->affectedRows();
 			}
-			if ( stripos( $sql, 'SELECT')===0 ) {
-				$stmt = $pdo->query( 'explain '.$activeProfile->getRealSQL());
+			if ( stripos( $sql, 'SELECT')===0 && $this->_explainQuery ) {
+				$stmt = $pdo->prepare( 'explain '.$activeProfile->getSQLStatement());
+				$stmt->execute($activeProfile->getSQLVariables());
+				$data['explain'] = $stmt->fetchAll(\PDO::FETCH_CLASS);
 			}
 			$activeProfile->setExtra($data);
 		}
@@ -178,5 +181,12 @@ class Profiler extends  PhalconProfiler {
 
 	public function setSource( $source ) {
 			$this->_activeProfile->setExtra(array('source'=>$source));
+	}
+
+	/**
+	 * @param boolean $explainQuery
+	 */
+	public function setExplainQuery( $explainQuery ) {
+		$this->_explainQuery = (bool)$explainQuery;
 	}
 }

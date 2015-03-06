@@ -358,6 +358,9 @@ class PhalconDebugbar extends DebugBar {
 					if ( $config->options->db->get('show_conn',false) ) {
 						$queryCollector->setShowConnection( true );
 					}
+					if ( $config->options->db->get( 'explain', false ) ) {
+						$profiler->setExplainQuery(true);
+					}
 					$this->addCollector($queryCollector);
 				}
 			} catch (\Exception $e) {
