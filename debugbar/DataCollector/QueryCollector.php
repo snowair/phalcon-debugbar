@@ -66,9 +66,10 @@ class QueryCollector extends PDOCollector{
 				foreach ( $explains as $explain ) {
 					$data['statements'][] = array(
 						'sql' => ' - EXPLAIN #' . $explain->id . ': `' . $explain->table . '` (' . $explain->select_type . ')',
-						'params' => $explain,
+						'params' => (array)$explain,
 						'row_count' => $explain->rows,
 						'stmt_id' => $explain->id,
+						'is_success'   => true,
 					);
 				}
 			}
