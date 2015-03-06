@@ -29,9 +29,9 @@ class QueryCollector extends PDOCollector{
 	public function collect()
 	{
 		/** @var Item[] $succeed */
-		$succeed = $this->profiler->getProfiles();
+		$succeed = (array)$this->profiler->getProfiles();
 		/** @var Item[] $failed */
-		$failed = $this->profiler->getFailedProfiles();
+		$failed = (array)$this->profiler->getFailedProfiles();
 		$data = array(
 			'nb_statements'        => count($succeed) +count($failed),
 			'nb_failed_statements' => count($failed),
@@ -116,5 +116,12 @@ class QueryCollector extends PDOCollector{
 	 */
 	public function setShowConnection( $showConnection ) {
 		$this->showConnection = (bool)$showConnection;
+	}
+
+	/**
+	 * @return \Snowair\Debugbar\Phalcon\Db\Profiler
+	 */
+	public function getProfiler() {
+		return $this->profiler;
 	}
 }

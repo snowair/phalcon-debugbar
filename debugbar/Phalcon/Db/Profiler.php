@@ -25,17 +25,7 @@ class Profiler extends  PhalconProfiler {
 	 */
 	protected $_db;
 
-	/**
-	 * Starts the profile of a SQL sentence
-	 *
-	 * @param string $sqlStatement
-	 * @param null|array   $sqlVariables
-	 * @param null|array   $sqlBindTypes
-	 *
-	 * @return PhalconProfiler
-	 */
-	public function startProfile($sqlStatement, $sqlVariables = null, $sqlBindTypes = null)
-	{
+	public function handleFailed() {
 		$latest = $this->_activeProfile;
 		if ( !$this->_stoped && $latest) {
 			if ( $this->_db ) {
@@ -50,7 +40,20 @@ class Profiler extends  PhalconProfiler {
 			$this->_lastFailed = $latest;
 			$this->_failedProfiles[] = $latest;
 		}
+	}
 
+	/**
+	 * Starts the profile of a SQL sentence
+	 *
+	 * @param string $sqlStatement
+	 * @param null|array   $sqlVariables
+	 * @param null|array   $sqlBindTypes
+	 *
+	 * @return PhalconProfiler
+	 */
+	public function startProfile($sqlStatement, $sqlVariables = null, $sqlBindTypes = null)
+	{
+		$this->handleFailed();
 		$activeProfile = new Item();
 
 		$activeProfile->setSqlStatement($sqlStatement);

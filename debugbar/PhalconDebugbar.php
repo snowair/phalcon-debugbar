@@ -301,6 +301,12 @@ class PhalconDebugbar extends DebugBar {
 			}
 		}
 
+		if( $pdoCollector =  $this->getCollector('pdo') ){
+			/** @var Profiler $profiler */
+			$profiler = $pdoCollector->getProfiler();
+			$profiler->handleFailed();
+		};
+
 
 		try {
 			if ($this->isRedirection($response)) {
