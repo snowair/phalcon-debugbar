@@ -100,6 +100,10 @@ class PhalconDebugbar extends DebugBar {
 	 * 启动debugbar: 设置collector
 	 */
 	public function boot() {
+		$debugbar = $this;
+		if ( !$this->isDataPersisted() ) {
+			$this->selectStorage($debugbar); // for normal request and debugbar request both
+		}
 		if ($this->booted) {
 			return;
 		}
@@ -107,9 +111,7 @@ class PhalconDebugbar extends DebugBar {
 		if (!$this->isEnabled() || $this->isDebugbarRequest()) {
 			return;
 		}
-		$debugbar = $this;
-		$this->selectStorage($debugbar);
-
+		// only for normal request
 		if ($this->shouldCollect('phpinfo', true)) {
 			$this->addCollector(new PhpInfoCollector());
 		}
