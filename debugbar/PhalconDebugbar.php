@@ -103,6 +103,10 @@ class PhalconDebugbar extends DebugBar {
 		if ($this->booted) {
 			return;
 		}
+		$this->booted = true;
+		if (!$this->isEnabled() || $this->isDebugbarRequest()) {
+			return;
+		}
 		$debugbar = $this;
 		$this->selectStorage($debugbar);
 
@@ -158,7 +162,6 @@ class PhalconDebugbar extends DebugBar {
 		$renderer = $this->getJavascriptRenderer();
 		$renderer->setIncludeVendors($this->config->get('include_vendors', true));
 		$renderer->setBindAjaxHandlerToXHR($this->config->get('capture_ajax', true));
-		$this->booted = true;
 	}
 
 	/**
