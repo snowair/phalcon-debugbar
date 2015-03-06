@@ -340,6 +340,9 @@ class PhalconDebugbar extends DebugBar {
 			try {
 				if ( !$queryCollector ) {
 					$queryCollector = new QueryCollector($profiler);
+					if ( $config->options->db->get( 'with_params', false ) ) {
+						$queryCollector->setRenderSqlWithParams();
+					}
 					if ( $config->options->db->backtrace ) {
 						$queryCollector->setFindSource( true );
 					}

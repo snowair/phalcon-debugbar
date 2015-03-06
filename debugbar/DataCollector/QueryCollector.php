@@ -8,15 +8,20 @@
 namespace Snowair\Debugbar\DataCollector;
 
 
-use DebugBar\DataCollector\PDO\PDOCollector;
+use DebugBar\DataCollector\AssetProvider;
+use DebugBar\DataCollector\DataCollector;
+use DebugBar\DataCollector\Renderable;
 use Phalcon\Db\Profiler;
+use Snowair\Debugbar\Phalcon\Db\Profiler\Item;
 
-class QueryCollector extends PDOCollector{
+class QueryCollector extends DataCollector  implements Renderable, AssetProvider
+{
 	/**
 	 * @var \Snowair\Debugbar\Phalcon\Db\Profiler $profiler
 	 */
 	protected $profiler;
 
+	protected $renderSqlWithParams = false;
 	protected $findSource = false;
 
 	public function __construct( Profiler $profiler)
@@ -24,9 +29,16 @@ class QueryCollector extends PDOCollector{
 		$this->profiler = $profiler;
 	}
 
+	public function setRenderSqlWithParams($enabled = true)
+	{
+		$this->renderSqlWithParams = $enabled;
+	}
+
 	public function collect()
 	{
+		/** @var Item[] $succeed */
 		$succeed = $this->profiler->getProfiles();
+		/** @var Item[] $failed */
 		$failed = $this->profiler->getFailedProfiles();
 		$data = array(
 			'nb_statements'        => count($succeed) +count($failed),
@@ -34,9 +46,10 @@ class QueryCollector extends PDOCollector{
 			'accumulated_duration' => $this->profiler->getTotalElapsedSeconds(),
 			'statements' => array()
 		);
+		$renderOrNot = $this->renderSqlWithParams;
 		foreach ( $failed as $profile ) {
 			$data['statements'][] = array(
-				'sql'          => $profile->getSQLStatement(),
+				'sql'          => $renderOrNot?$profile->getRealSQL():$profile->getSQLStatement(),
 				'params'       => $profile->getSqlVariables(),
 				'is_success'    => false,
 				'stmt_id'      =>  null,
@@ -46,7 +59,7 @@ class QueryCollector extends PDOCollector{
 		}
 		foreach ( $succeed as $profile ) {
 			$data['statements'][] = array(
-				'sql'          => $profile->getSQLStatement(),
+				'sql'          => $renderOrNot?$profile->getRealSQL():$profile->getSQLStatement(),
 				'params'       => $profile->getSqlVariables(),
 				'row_count'    => $profile->affect_rows,
 				'stmt_id'      => $profile->source,
@@ -103,5 +116,32 @@ class QueryCollector extends PDOCollector{
 		return ltrim( $path, realpath(dirname($_SERVER['DOCUMENT_ROOT'])));
 	}
 
+	public function getName()
+	{
+		return 'pdo';
+	}
 
+	public function getWidgets()
+	{
+		return array(
+			"database" => array(
+				"icon" => "inbox",
+				"widget" => "PhpDebugBar.Widgets.SQLQueriesWidget",
+				"map" => "pdo",
+				"default" => "[]"
+			),
+			"database:badge" => array(
+				"map" => "pdo.nb_statements",
+				"default" => 0
+			)
+		);
+	}
+
+	public function getAssets()
+	{
+		return array(
+			'css' => 'widgets/sqlqueries/widget.css',
+			'js' => 'widgets/sqlqueries/widget.js'
+		);
+	}
 }

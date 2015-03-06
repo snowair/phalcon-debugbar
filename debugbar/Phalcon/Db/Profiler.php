@@ -52,6 +52,7 @@ class Profiler extends  PhalconProfiler {
 		$activeProfile = new Item();
 
 		$activeProfile->setSqlStatement($sqlStatement);
+		$activeProfile->setRealSQL($this->setRealSql($sqlStatement,$sqlVariables));
 
 		if ( is_array($sqlVariables) ) {
 			$activeProfile->setSqlVariables($sqlVariables);
@@ -71,6 +72,39 @@ class Profiler extends  PhalconProfiler {
 
 		$this->_stoped = false;
 		return $this;
+	}
+
+	public function setRealSql( $sql, $variables ) {
+		if ( !$variables ) {
+			return $sql;
+		}
+		$pdo = $this->_db->getInternalHandler();
+		$indexes = array();
+		$keys    = array();
+		foreach ( $variables as $key=> $value ) {
+			if ( is_numeric($key) ) {
+				$indexes[$key] = $pdo->quote($value);
+			} else {
+				if ( is_numeric( substr( $key, 1 ) ) ) {
+					$keys[$key] = $pdo->quote($value);
+				} else {
+					$keys[':'.$key] = $pdo->quote($value);
+				}
+			}
+		}
+		$splited = preg_split('/(?=\?)|(?<=\?)/',$sql);
+
+		$result = array();
+		foreach ( $splited as $key => $value ) {
+			if ( $value=='?' ) {
+				$result[$key]=array_shift($indexes);
+			} else {
+				$result[$key]=$value;
+			}
+		}
+		$result = implode(' ', $result);
+		$result = strtr($result,$keys);
+		return $result;
 	}
 
 	/**
