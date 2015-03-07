@@ -23,10 +23,13 @@ use Phalcon\Events\Event;
 use Phalcon\Events\Manager;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
+use Phalcon\Mvc\ViewInterface;
+use Phalcon\Registry;
 use Snowair\Debugbar\DataCollector\PhalconRequestCollector;
 use Snowair\Debugbar\DataCollector\QueryCollector;
 use Snowair\Debugbar\DataCollector\RouteCollector;
 use Snowair\Debugbar\DataCollector\SessionCollector;
+use Snowair\Debugbar\DataCollector\ViewCollector;
 use Snowair\Debugbar\Phalcon\Db\Profiler;
 
 /**
@@ -160,10 +163,53 @@ class PhalconDebugbar extends DebugBar {
 		if ( $this->di->has( 'db' ) ) {
 			$this->attachDb( $this->di['db'] );
 		}
+		if ( $this->di->has( 'view' ) ) {
+			$this->attachView( $this->di['view'] );
+		}
 
 		$renderer = $this->getJavascriptRenderer();
 		$renderer->setIncludeVendors($this->config->get('include_vendors', true));
 		$renderer->setBindAjaxHandlerToXHR($this->config->get('capture_ajax', true));
+	}
+
+	public function attachView( ViewInterface $view )
+	{
+		if (!$this->shouldCollect('view', true)  ) {
+			return;
+		}
+		static $stated;
+		// You can add only One View instance
+		if ( !$stated ) {
+			$stated=true;
+			$eventsManager = new Manager();
+			$viewProfiler = new Registry();
+			$viewProfiler->templates=array();
+			$viewProfiler->engines = $view->getRegisteredEngines();
+			$eventsManager->attach('view:beforeRender',function($event,$view) use($viewProfiler)
+			{
+				$viewProfiler->startRender= microtime(true);
+
+			});
+			$eventsManager->attach('view:afterRender',function($event,$view) use($viewProfiler)
+			{
+				$viewProfiler->stopRender= microtime(true);
+				$viewProfiler->params = $view->getParamsToView();
+			});
+			$eventsManager->attach('view:beforeRenderView',function($event,$view,$viewFilePath) use($viewProfiler)
+			{
+				$viewProfiler->templates[$viewFilePath]	= array( 'startTime'=>microtime(true), );
+			});
+			$eventsManager->attach('view:afterRenderView',function($event,$view) use($viewProfiler)
+			{
+				$viewFilePath = $view->getActiveRenderPath();
+				$viewProfiler->templates[$viewFilePath]['stopTime'] = microtime(true);
+
+			});
+			$view->setEventsManager($eventsManager);
+
+			$collector = new ViewCollector($viewProfiler,$view);
+			$this->addCollector($collector);
+		}
 	}
 
 	/**

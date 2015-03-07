@@ -80,6 +80,7 @@ return array(
 		'config'          => true,
 		'route'           => true,
 		'db'              => true,
+		'view'            => true,
 	),
 
 	/*
