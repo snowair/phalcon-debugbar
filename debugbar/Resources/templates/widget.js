@@ -83,7 +83,7 @@
                 this.$list.set('data', data.templates);
                 this.$status.empty();
 
-	            if (data.vars && !$.isEmptyObject(data.vars)) {
+	            if ( data.vars && data.vars!='null' && !$.isEmptyObject(data.vars)) {
 		            var dl = $('<dl/>').addClass(csscls('kvlist')).addClass('varlist').appendTo(this.$el);
 		            var dt = $('<dt><span>View Variables:</span></dt>').addClass(csscls('key')).appendTo(dl);
 		            var dd = $('<dd/>').addClass(csscls('value')).insertAfter(dt);
