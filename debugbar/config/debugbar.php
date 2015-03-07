@@ -81,6 +81,7 @@ return array(
 		'route'           => true,
 		'db'              => true,
 		'view'            => true,
+		'mail'            => true,
 	),
 
 	/*
@@ -102,6 +103,12 @@ return array(
 			'explain'   => true,  // EXPLAIN select statement
 			'error_mode'=> \PDO::ERRMODE_SILENT, // \PDO::ERRMODE_SILENT , \PDO::ERRMODE_WARNING, \PDO::ERRMODE_EXCEPTION
 			'show_conn'=>false, // IF show connection info
+		),
+		'mail' => array(
+			'full_log' => false
+		),
+		'views' => array(
+			'data' => false,    //Note: Can slow down the application, because the data can be quite large..
 		),
 	),
 

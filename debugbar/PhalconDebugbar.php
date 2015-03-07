@@ -7,6 +7,8 @@
 
 namespace Snowair\Debugbar;
 
+use DebugBar\Bridge\SwiftMailer\SwiftLogCollector;
+use DebugBar\Bridge\SwiftMailer\SwiftMailCollector;
 use DebugBar\DataCollector\ConfigCollector;
 use DebugBar\DataCollector\ExceptionsCollector;
 use DebugBar\DataCollector\MemoryCollector;
@@ -167,9 +169,40 @@ class PhalconDebugbar extends DebugBar {
 			$this->attachView( $this->di['view'] );
 		}
 
+		if ($this->shouldCollect('mail', true) && $this->di->has('mailer') ) {
+			$this->attachMailer( $this->di['mailer'] );
+		}
+
 		$renderer = $this->getJavascriptRenderer();
 		$renderer->setIncludeVendors($this->config->get('include_vendors', true));
 		$renderer->setBindAjaxHandlerToXHR($this->config->get('capture_ajax', true));
+	}
+
+	public function attachMailer( $mailer ) {
+		if (!$this->shouldCollect('mail', false)  ) {
+			return;
+		}
+		static $started;
+		if ( !$started ) {
+			$started = true;
+			try {
+				if ( class_exists('\Swifit_Mailer') && ( $mailer instanceof \Swift_Mailer ) ) {
+					$this->addCollector(new SwiftMailCollector($mailer));
+					if ($this->config->options->mail->get('full_log',false) and $this->hasCollector(
+							'messages'
+						)
+					) {
+						$this['messages']->aggregate(new SwiftLogCollector($mailer));
+					}
+				}
+			} catch (\Exception $e) {
+				$this->addException(
+					new Exception(
+						'Cannot add MailCollector to Phalcon Debugbar: ' . $e->getMessage(), $e->getCode(), $e
+					)
+				);
+			}
+		}
 	}
 
 	public function attachView( ViewInterface $view )
@@ -177,23 +210,28 @@ class PhalconDebugbar extends DebugBar {
 		if (!$this->shouldCollect('view', true)  ) {
 			return;
 		}
-		static $stated;
+		static $started;
 		// You can add only One View instance
-		if ( !$stated ) {
-			$stated=true;
+		if ( !$started ) {
+			$started=true;
 			$eventsManager = new Manager();
 			$viewProfiler = new Registry();
 			$viewProfiler->templates=array();
 			$viewProfiler->engines = $view->getRegisteredEngines();
+			$config = $this->config;
 			$eventsManager->attach('view:beforeRender',function($event,$view) use($viewProfiler)
 			{
 				$viewProfiler->startRender= microtime(true);
 
 			});
-			$eventsManager->attach('view:afterRender',function($event,$view) use($viewProfiler)
+			$eventsManager->attach('view:afterRender',function($event,$view) use($viewProfiler,$config)
 			{
 				$viewProfiler->stopRender= microtime(true);
-				$viewProfiler->params = $view->getParamsToView();
+				if ( $config->options->views->get( 'data', false ) ) {
+					$viewProfiler->params = $view->getParamsToView();
+				}else{
+					$viewProfiler->params = null;
+				}
 			});
 			$eventsManager->attach('view:beforeRenderView',function($event,$view,$viewFilePath) use($viewProfiler)
 			{
