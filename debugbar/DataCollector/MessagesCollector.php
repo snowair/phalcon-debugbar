@@ -13,24 +13,38 @@ class MessagesCollector extends Message {
 
 	public function addMessage($message, $label = 'info', $isString = true)
 	{
+		$formatter = $this->getDataFormatter();
 		if ( is_object( $message ) ) {
+			$prefix = '['. get_class($message) .'] Convertd To : ';
 			if ( method_exists( $message, 'toArray' ) ) {
-				$message = $message->toArray();
-			}
-			if ( $message instanceof \StdClass ) {
+				$message = $prefix. $formatter->formatVar($message->toArray());
+			}else if ( $message instanceof \StdClass ) {
 				$message = (array)$message;
-			}
-			if ( $message instanceof \Traversable ) {
+			}else if ( $message instanceof \Traversable ) {
 				$result = array();
 				foreach ( $message as $k=>$v ) {
 					$result[$k]=$v;
 				}
-				$message = $result;
+				$message = $prefix. $formatter->formatVar($result);
+			}else{
+				try{
+					$message = $formatter->formatVar($message);
+				}catch (\Exception $e){
+					$label = 'error';
+					$message = 'Can not add Instance of [' . get_class($message) . '] to Debug bar.';
+				}
 			}
-		}
-		if (!is_string($message)) {
-			$message = $this->getDataFormatter()->formatVar($message);
 			$isString = false;
+		}else{
+			if (!is_string($message)) {
+				try{
+					$message = $formatter->formatVar($message);
+				}catch (\Exception $e){
+					$label = 'error';
+					$message = 'Can not add [' . gettype($message) . '] Variable to Debug bar.';
+				}
+				$isString = false;
+			}
 		}
 		$this->messages[] = array(
 			'message' => $message,
