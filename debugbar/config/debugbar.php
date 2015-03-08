@@ -108,7 +108,12 @@ return array(
 			'full_log' => false
 		),
 		'views' => array(
-			'data' => false,    //Note: Can slow down the application, because the data can be quite large..
+			'data' => true,    //Note: Can slow down the application, because the data can be quite large..
+		),
+		'config'=> array(
+			'protect'=>array(
+				'database.password', // 在debugbar中以******显示的敏感内容, 最多支持使用两次.号
+			),
 		),
 	),
 

@@ -9,7 +9,6 @@ namespace Snowair\Debugbar;
 
 use DebugBar\Bridge\SwiftMailer\SwiftLogCollector;
 use DebugBar\Bridge\SwiftMailer\SwiftMailCollector;
-use DebugBar\DataCollector\ConfigCollector;
 use DebugBar\DataCollector\ExceptionsCollector;
 use DebugBar\DataCollector\MemoryCollector;
 use DebugBar\DataCollector\PhpInfoCollector;
@@ -26,6 +25,7 @@ use Phalcon\Http\Request;
 use Phalcon\Http\Response;
 use Phalcon\Mvc\ViewInterface;
 use Phalcon\Registry;
+use Snowair\Debugbar\DataCollector\ConfigCollector;
 use Snowair\Debugbar\DataCollector\MessagesCollector;
 use Snowair\Debugbar\DataCollector\PhalconRequestCollector;
 use Snowair\Debugbar\DataCollector\QueryCollector;
@@ -341,6 +341,7 @@ class PhalconDebugbar extends DebugBar {
 	 */
 	public function modifyResponse($response){
 		$request = $this->di['request'];
+		$config  = $this->config;
 
 		if (!$this->isEnabled() || $this->isDebugbarRequest()) {
 			return $response;
@@ -348,8 +349,10 @@ class PhalconDebugbar extends DebugBar {
 
 		if ($this->shouldCollect('config', false) && $this->di->has('config')) {
 			try {
-				$configCollector = new ConfigCollector();
-				$configCollector->setData($this->di['config']->toArray());
+				$config_data = $this->di['config']->toArray();
+				$protect = $config->options->config->get('protect');
+				$configCollector = new ConfigCollector($config_data);
+				$configCollector->setProtect($protect);
 				$this->addCollector($configCollector);
 			} catch (\Exception $e) {
 				$this->addException(
