@@ -84,7 +84,13 @@ class ViewCollector  extends TwigCollector {
 		if(empty($templates)){
 			$vars = null;
 		}else if (!is_string( $vars = $profiler->params)) {
-			$vars = $this->getDataFormatter()->formatVar($vars);
+			try{
+				$vars = $this->getDataFormatter()->formatVar($vars);
+			}catch (\Exception $e){
+					$vars = array(
+						'Warining'=> 'View variables contains someing couldn\'t be add to debugbar. It\'s not a problem of your project.',
+					);
+			}
 		}
 		return array(
 			'nb_templates' => count($templates),
