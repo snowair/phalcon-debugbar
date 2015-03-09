@@ -113,7 +113,8 @@ class PhalconDebugbar extends DebugBar {
 			return;
 		}
 		$this->booted = true;
-		if (!$this->isEnabled() || $this->isDebugbarRequest()) {
+		if ( isset($_REQUEST['_url']) and $_REQUEST['_url']=='/favicon.ico'
+			|| isset($_SERVER['REQUEST_URI']) and $_SERVER['REQUEST_URI']=='/favicon.ico'|| !$this->isEnabled()) {
 			return;
 		}
 		// only for normal request
@@ -343,7 +344,7 @@ class PhalconDebugbar extends DebugBar {
 		$request = $this->di['request'];
 		$config  = $this->config;
 
-		if (!$this->isEnabled() || $this->isDebugbarRequest()) {
+		if (!$this->isEnabled() ) {
 			return $response;
 		}
 
@@ -399,6 +400,10 @@ class PhalconDebugbar extends DebugBar {
 			$profiler->handleFailed();
 		};
 
+		if ( $this->isDebugbarRequest() ) {
+			// Notice: All Collectors must be added before check if is debugbar request.
+			return $response;
+		}
 
 		try {
 			if ($this->isRedirection($response)) {
