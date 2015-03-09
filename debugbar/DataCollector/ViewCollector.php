@@ -12,6 +12,8 @@ use Phalcon\Mvc\ViewInterface;
 
 class ViewCollector  extends TwigCollector {
 
+	use Formatter;
+
 	protected $viewProfiler;
 	protected $view;
 
@@ -84,13 +86,11 @@ class ViewCollector  extends TwigCollector {
 		if(empty($templates)){
 			$vars = null;
 		}else if (!is_string( $vars = $profiler->params)) {
-			try{
-				$vars = $this->getDataFormatter()->formatVar($vars);
-			}catch (\Exception $e){
-					$vars = array(
-						'Warining'=> 'View variables contains someing couldn\'t be add to debugbar. It\'s not a problem of your project.',
-					);
+			if ( !empty($this->_customFormatMap) ) {
+				$vars = $this->preFormatVars($vars);
 			}
+			$formated = $this->formatVars($vars);
+			$vars = $formated[0];
 		}
 		return array(
 			'nb_templates' => count($templates),
@@ -99,6 +99,23 @@ class ViewCollector  extends TwigCollector {
 			'accumulated_render_time' => $accuRenderTime,
 			'accumulated_render_time_str' => $this->formatDuration($accuRenderTime)
 		);
+	}
+
+	protected function preFormatVars($vars){
+		foreach ( $vars as $key => $value ) {
+			if ( is_object( $value ) ){
+				$class=get_class($value);
+				if ( isset($this->_customFormatMap[$class]) && is_callable($callable = $this->_customFormatMap[$class] )) {
+					$array = call_user_func($callable,$vars);
+					if ( is_array( $array ) ) {
+						$vars[$key] = $array;
+					}else{
+						throw new \Exception('ViewCollector customFormatMap callable must return a native Array.');
+					}
+				}
+			}
+		}
+		return $vars;
 	}
 
 	protected function getEngine( $path, $engines ) {
@@ -123,6 +140,6 @@ class ViewCollector  extends TwigCollector {
 		if (file_exists($path)) {
 			$path = realpath($path);
 		}
-		return ltrim( $path, realpath(dirname($_SERVER['DOCUMENT_ROOT'])));
+		return substr($path,mb_strlen(realpath(dirname($_SERVER['DOCUMENT_ROOT']))));
 	}
 }
