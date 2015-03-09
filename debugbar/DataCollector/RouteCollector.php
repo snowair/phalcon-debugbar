@@ -55,7 +55,7 @@ class RouteCollector extends DataCollector implements Renderable {
 		$reflector = new \ReflectionMethod($controller_instance, $result['Action']);
 
 		if (isset($reflector)) {
-			$filename = ltrim($reflector->getFileName(), realpath(dirname($_SERVER['DOCUMENT_ROOT'])));
+			$filename = substr($reflector->getFileName(),mb_strlen(realpath(dirname($_SERVER['DOCUMENT_ROOT']))));
 			$result['file'] = $filename . ':' . $reflector->getStartLine() . '-' . $reflector->getEndLine();
 		}
 

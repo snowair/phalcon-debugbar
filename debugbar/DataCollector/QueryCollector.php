@@ -119,7 +119,7 @@ class QueryCollector extends PDOCollector{
 		if (file_exists($path)) {
 			$path = realpath($path);
 		}
-		return ltrim( $path, realpath(dirname($_SERVER['DOCUMENT_ROOT'])));
+		return substr($path,mb_strlen(realpath(dirname($_SERVER['DOCUMENT_ROOT']))));
 	}
 
 	/**
