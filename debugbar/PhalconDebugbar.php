@@ -65,7 +65,7 @@ class PhalconDebugbar extends DebugBar {
 
 	public function enable()
 	{
-		$this->config->enable=true;
+		$this->config->enabled=true;
 		if (!$this->booted) {
 			$this->boot();
 		}
