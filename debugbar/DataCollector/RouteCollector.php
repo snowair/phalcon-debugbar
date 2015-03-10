@@ -44,17 +44,19 @@ class RouteCollector extends DataCollector implements Renderable {
 		$paths = $route->getPaths();
 		$result['uri']    = $uri ?: '-';
 		$result['paths']  = $this->formatVar( $paths);
-		$result['params'] = $this->formatVar( $router->getParams());
+		if ( $params = $router->getParams()) {
+			$result['params'] = $this->formatVar($params);
+		}
 
 		($verbs = $route->getHttpMethods())? $result['HttpMethods'] = $verbs : null;
 		($name  = $route->getName())? $result['RouteName'] = $name : null;
 		($hostname  = $route->getHostname())? $result['hostname'] = $hostname : null;
 		if ( $this->di->has('app') && ($app=$this->di['app']) instanceof  Micro ) {
-				if ( ($handler=$app->getActiveHandler()) instanceof \Closure  ||  is_string($handler) ) {
-					$reflector = new \ReflectionFunction($handler);
-				}elseif(is_array($handler)){
-					$reflector = new \ReflectionMethod($handler[0], $handler[1]);
-				}
+			if ( ($handler=$app->getActiveHandler()) instanceof \Closure  ||  is_string($handler) ) {
+				$reflector = new \ReflectionFunction($handler);
+			}elseif(is_array($handler)){
+				$reflector = new \ReflectionMethod($handler[0], $handler[1]);
+			}
 		}else{
 			( $module=$this->router->getModuleName() )? $result['Moudle']=$module:null;
 			$result['Controller'] = get_class( $controller_instance = $dispatcher->getActiveController());
