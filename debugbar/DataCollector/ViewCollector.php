@@ -53,7 +53,7 @@ class ViewCollector  extends TwigCollector {
 			),
 			'views:badge' => array(
 				'map' => 'views.nb_templates',
-				'default' => 0
+				'default' => 'null',
 			)
 		);
 	}
