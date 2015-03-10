@@ -36,40 +36,79 @@ class ServiceProvider extends Injectable {
 			$debugbar->setHttpDriver(new PhalconHttpDriver());
 			return $debugbar;
 		});
+		$this->setRoute();
 		return $this;
 	}
 
+	protected function setRoute(){
+		$app= $this->di['app'];
+		$router = $this->di['router'];
+		if (  $app instanceof \Phalcon\Mvc\Micro ) {
+			$app->get( '/_debugbar/open', function(){
+				$controller = new \Snowair\Debugbar\Controllers\OpenHandlerController();
+				$controller->handleAction()->send();
+			})->setName('debugbar.openhandler');
+
+			$app->get( '/_debugbar/assets/stylesheets', function(){
+				$controller = new \Snowair\Debugbar\Controllers\AssetController;
+				$controller->cssAction()->send();
+			})->setName('debugbar.assets.css');
+
+			$app->get( '/_debugbar/assets/javascript', function(){
+				$controller = new \Snowair\Debugbar\Controllers\AssetController;
+				$controller->jsAction()->send();
+			})->setName('debugbar.assets.js');
+
+		}elseif (  $app instanceof \Phalcon\Mvc\Application ) {
+			$router->addGet('/_debugbar/open',array(
+				'namespace'=>'Snowair\Debugbar\Controllers',
+				'controller'=>'\OpenHandler',
+				'action'=>'handle',
+			))->setName('debugbar.openhandler');
+
+			$router->addGet('/_debugbar/assets/stylesheets',array(
+				'namespace'=>'Snowair\Debugbar\Controllers',
+				'controller'=>'Asset',
+				'action'=>'css',
+			))->setName('debugbar.assets.css');
+
+			$router->addGet('/_debugbar/assets/javascript',array(
+				'namespace'=>'Snowair\Debugbar\Controllers',
+				'controller'=>'Asset',
+				'action'=>'js',
+			))->setName('debugbar.assets.js');
+		}
+	}
+
 	public function boot() {
-		$group = new Group( array('namespace'=>'Snowair\Debugbar\Controllers') );
-		$group->setPrefix('/_debugbar/');
-		$group->addGet('open',array(
-			'controller'=>'\OpenHandler',
-			'action'=>'handle',
-		))->setName('debugbar.openhandler');
-
-		$group->addGet('assets/stylesheets',array(
-			'controller'=>'Asset',
-			'action'=>'css',
-		))->setName('debugbar.assets.css');
-
-		$group->addGet('assets/javascript',array(
-			'controller'=>'Asset',
-			'action'=>'js',
-		))->setName('debugbar.assets.js');
-
-		$this->router->mount($group);
-
+		$app      = $this->di['app'];
+		$debugbar = $this->di['debugbar'];
+		$router   = $this->di['router'];
 		if (! $this->di['config.debugbar']->get('enabled')) {
 			return;
 		}
-
-		$debugbar = $this->di['debugbar'];
-		$debugbar->boot();
-
 		$eventsManager = new Manager();
-		$eventsManager->attach('application:beforeSendResponse',function($event,$app,$response) use($debugbar){
-			$debugbar->modifyResponse($response);
-		});
-		$this->di['app']->setEventsManager($eventsManager);
+		if (  $app instanceof \Phalcon\Mvc\Micro ) {
+			$eventsManager->attach('micro:beforeExecuteRoute', function() use($router) {
+				ob_start();
+			});
+			$eventsManager->attach('micro:afterExecuteRoute',function($event,$app) use($debugbar){
+				$response = $app->response;
+				if ( null=== $returned=$app->getReturnedValue() ) {
+					$buffer = ob_get_clean();
+					$response->setContent($buffer);
+					$response = $debugbar->modifyResponse($response);
+					$response->send();
+				}elseif(is_object($returned) && ($returned instanceof \Phalcon\Http\ResponseInterface)){
+					$debugbar->modifyResponse($returned);
+				}
+			});
+		}elseif (  $app instanceof \Phalcon\Mvc\Application ) {
+			$eventsManager->attach('application:beforeSendResponse',function($event,$app,$response) use($debugbar){
+				$debugbar->modifyResponse($response);
+			});
+		}
+		$app->setEventsManager($eventsManager);
+		$debugbar->boot();
 	}
 }

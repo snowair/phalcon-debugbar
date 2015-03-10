@@ -73,7 +73,7 @@ class PhalconDebugbar extends DebugBar {
 
 	public function disable()
 	{
-		$this->config->enable=false;
+		$this->config->enabled=false;
 	}
 
 	/**
@@ -82,7 +82,7 @@ class PhalconDebugbar extends DebugBar {
 	 */
 	public function isEnabled()
 	{
-		return $this->config->enable;
+		return $this->config->enabled;
 	}
 
 	/**
@@ -152,7 +152,7 @@ class PhalconDebugbar extends DebugBar {
 
 		if ($this->shouldCollect('route') && $this->di->has('router') && $this->di->has('dispatcher')) {
 			try {
-				$this->addCollector(new RouteCollector($this->di['router'],$this->di['dispatcher']));
+				$this->addCollector(new RouteCollector($this->di));
 			} catch (\Exception $e) {
 				$this->addException(
 					new Exception(
