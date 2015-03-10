@@ -62,8 +62,11 @@ class ViewCollector  extends TwigCollector {
 	{
 		$profiler = $this->viewProfiler;
 		$all_templates = $profiler->templates;
-		$engines = $profiler->engines;
-		$accuRenderTime = $profiler->stopRender - $profiler->startRender;
+		$engines = (array)$profiler->engines;
+		$accuRenderTime = 0;
+		if ( isset($profiler->stopRender) ) {
+			$accuRenderTime = $profiler->stopRender - $profiler->startRender;
+		}
 
 		$templates = array();
 		foreach ($all_templates as $name=> $tpl) {
@@ -73,12 +76,12 @@ class ViewCollector  extends TwigCollector {
 					'name' => $this->normalizeFilename($name),
 					'render_time' => $render_time,
 					'render_time_str' => $this->formatDuration($render_time),
-					'type' => $this->getEngine($name, $engines ),
+					'type' => $engines?$this->getEngine($name, $engines ):'phtml',
 				);
 			}else{
 				$templates[] = array(
 					'name' => '[Skiped]'. $this->normalizeFilename($name),
-					'type' => $this->getEngine($name, $engines ),
+					'type' => $engines?$this->getEngine($name, $engines ):'phtml',
 				);
 			}
 		}
