@@ -135,4 +135,20 @@ class QueryCollector extends PDOCollector{
 	public function getProfiler() {
 		return $this->profiler;
 	}
+
+	public function getWidgets()
+	{
+		return array(
+			"database" => array(
+				"icon" => "inbox",
+				"widget" => "PhpDebugBar.Widgets.SQLQueriesWidget",
+				"map" => "pdo",
+				"default" => "[]"
+			),
+			"database:badge" => array(
+				"map" => "pdo.nb_statements",
+				"default" => 'null'
+			)
+		);
+	}
 }
