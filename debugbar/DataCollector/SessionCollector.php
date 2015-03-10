@@ -28,7 +28,7 @@ class SessionCollector extends DataCollector implements DataCollectorInterface, 
 	function collect() {
 		$data = array();
 		foreach ($this->session as $key => $value) {
-			$data[$key] = is_string($value) ? $value : $this->formatVar($value);
+			@$data[$key] = is_string($value) ? $value : $this->formatVar($value);
 		}
 		return $data;
 	}
