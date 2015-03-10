@@ -47,10 +47,9 @@ class RouteCollector extends DataCollector implements Renderable {
 		if ( $params = $router->getParams()) {
 			$result['params'] = $this->formatVar($params);
 		}
-
-		($verbs = $route->getHttpMethods())? $result['HttpMethods'] = $verbs : null;
-		($name  = $route->getName())? $result['RouteName'] = $name : null;
-		($hostname  = $route->getHostname())? $result['hostname'] = $hostname : null;
+		$result['HttpMethods'] = $route->getHttpMethods();
+		$result['RouteName'] = $route->getName();
+		$result['hostname'] = $route->getHostname();
 		if ( $this->di->has('app') && ($app=$this->di['app']) instanceof  Micro ) {
 			if ( ($handler=$app->getActiveHandler()) instanceof \Closure  ||  is_string($handler) ) {
 				$reflector = new \ReflectionFunction($handler);
@@ -58,7 +57,7 @@ class RouteCollector extends DataCollector implements Renderable {
 				$reflector = new \ReflectionMethod($handler[0], $handler[1]);
 			}
 		}else{
-			( $module=$this->router->getModuleName() )? $result['Moudle']=$module:null;
+			$result['Moudle']=$this->router->getModuleName();
 			$result['Controller'] = get_class( $controller_instance = $dispatcher->getActiveController());
 			$result['Action']     = $dispatcher->getActiveMethod();
 			$reflector = new \ReflectionMethod($controller_instance, $result['Action']);
@@ -72,7 +71,7 @@ class RouteCollector extends DataCollector implements Renderable {
 			$result['file'] = $filename . ':' . $reflector->getStartLine() . '-' . $reflector->getEndLine() . "  [CODE]: \n". implode("",$code);
 		}
 
-		return $result;
+		return array_filter($result);
 	}
 
 	/**

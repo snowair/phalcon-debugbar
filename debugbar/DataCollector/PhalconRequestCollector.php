@@ -65,7 +65,7 @@ class PhalconRequestCollector extends DataCollector implements DataCollectorInte
 			}
 		}
 		$data = array(
-			'status'      => $status,
+			'status'           => $status,
 			'request_query'    => $request->getQuery(),
 			'request_post'     => $request->getPost(),
 			'request_body'     => $request->getRawBody(),
@@ -74,6 +74,13 @@ class PhalconRequestCollector extends DataCollector implements DataCollectorInte
 			'request_server'   => $_SERVER,
 			'response_headers' => $responseHeaders,
 		);
+		$data = array_filter($data);
+		if ( isset($data['request_query']['_url']) ) {
+			unset($data['request_query']['_url']);
+		}
+		if ( empty($data['request_query']) ) {
+			unset($data['request_query']);
+		}
 
 		if (isset($data['request_headers']['php-auth-pw'])) {
 			$data['request_headers']['php-auth-pw'] = '******';
