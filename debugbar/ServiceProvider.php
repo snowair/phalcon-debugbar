@@ -8,9 +8,11 @@
 namespace Snowair\Debugbar;
 
 use Phalcon\Events\Manager;
-use Phalcon\Mvc\Router\Group;
-use Snowair\Debugbar\PhalconDebugbar;
-use Snowair\Debugbar\PhalconHttpDriver;
+use Phalcon\Http\ResponseInterface;
+use Phalcon\Mvc\Application;
+use Phalcon\Mvc\Micro;
+use Snowair\Debugbar\Controllers\AssetController;
+use Snowair\Debugbar\Controllers\OpenHandlerController;
 use Phalcon\Config\Adapter\Php;
 use Phalcon\DI\Injectable;
 
@@ -43,23 +45,23 @@ class ServiceProvider extends Injectable {
 	protected function setRoute(){
 		$app= $this->di['app'];
 		$router = $this->di['router'];
-		if (  $app instanceof \Phalcon\Mvc\Micro ) {
+		if (  $app instanceof Micro ) {
 			$app->get( '/_debugbar/open', function(){
-				$controller = new \Snowair\Debugbar\Controllers\OpenHandlerController();
+				$controller = new OpenHandlerController();
 				$controller->handleAction()->send();
 			})->setName('debugbar.openhandler');
 
 			$app->get( '/_debugbar/assets/stylesheets', function(){
-				$controller = new \Snowair\Debugbar\Controllers\AssetController;
+				$controller = new AssetController;
 				$controller->cssAction()->send();
 			})->setName('debugbar.assets.css');
 
 			$app->get( '/_debugbar/assets/javascript', function(){
-				$controller = new \Snowair\Debugbar\Controllers\AssetController;
+				$controller = new AssetController;
 				$controller->jsAction()->send();
 			})->setName('debugbar.assets.js');
 
-		}elseif (  $app instanceof \Phalcon\Mvc\Application ) {
+		}elseif (  $app instanceof Application ) {
 			$router->addGet('/_debugbar/open',array(
 				'namespace'=>'Snowair\Debugbar\Controllers',
 				'controller'=>'\OpenHandler',
@@ -88,7 +90,7 @@ class ServiceProvider extends Injectable {
 			return;
 		}
 		$eventsManager = new Manager();
-		if (  $app instanceof \Phalcon\Mvc\Micro ) {
+		if (  $app instanceof Micro ) {
 			$eventsManager->attach('micro:beforeExecuteRoute', function() use($router) {
 				ob_start();
 			});
@@ -99,11 +101,11 @@ class ServiceProvider extends Injectable {
 					$response->setContent($buffer);
 					$response = $debugbar->modifyResponse($response);
 					$response->send();
-				}elseif(is_object($returned) && ($returned instanceof \Phalcon\Http\ResponseInterface)){
+				}elseif(is_object($returned) && ($returned instanceof ResponseInterface)){
 					$debugbar->modifyResponse($returned);
 				}
 			});
-		}elseif (  $app instanceof \Phalcon\Mvc\Application ) {
+		}elseif (  $app instanceof Application ) {
 			$eventsManager->attach('application:beforeSendResponse',function($event,$app,$response) use($debugbar){
 				$debugbar->modifyResponse($response);
 			});

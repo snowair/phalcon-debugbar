@@ -10,8 +10,8 @@ namespace Snowair\Debugbar\DataCollector;
 
 use DebugBar\DataCollector\DataCollector;
 use DebugBar\DataCollector\Renderable;
+use Phalcon\Mvc\Micro;
 use Phalcon\Mvc\Router;
-use Phalcon\Dispatcher;
 
 class RouteCollector extends DataCollector implements Renderable {
 
@@ -49,7 +49,7 @@ class RouteCollector extends DataCollector implements Renderable {
 		($verbs = $route->getHttpMethods())? $result['HttpMethods'] = $verbs : null;
 		($name  = $route->getName())? $result['RouteName'] = $name : null;
 		($hostname  = $route->getHostname())? $result['hostname'] = $hostname : null;
-		if ( $this->di->has('app') && ($app=$this->di['app']) instanceof  \Phalcon\Mvc\Micro ) {
+		if ( $this->di->has('app') && ($app=$this->di['app']) instanceof  Micro ) {
 				if ( ($handler=$app->getActiveHandler()) instanceof \Closure  ||  is_string($handler) ) {
 					$reflector = new \ReflectionFunction($handler);
 				}elseif(is_array($handler)){
