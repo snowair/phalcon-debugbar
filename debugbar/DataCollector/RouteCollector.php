@@ -19,11 +19,13 @@ class RouteCollector extends DataCollector implements Renderable {
 	 * @var  Router $router
 	 */
 	protected $router;
+	protected $di;
 
-	public function __construct( Router $router, Dispatcher $dispatcher )
+	public function __construct( $di )
 	{
-		$this->router = $router;
-		$this->dispatcher = $dispatcher;
+		$this->di = $di;
+		$this->router = $di['router'];
+		$this->dispatcher = $di['dispatcher'];
 	}
 
 	/**
@@ -31,7 +33,8 @@ class RouteCollector extends DataCollector implements Renderable {
 	 * @return array Collected data
 	 */
 	function collect() {
-		$route = $this->router->getMatchedRoute();
+		$router = $this->router;
+		$route = $router->getMatchedRoute();
 		$dispatcher = $this->dispatcher;
 		if ( !$route) {
 			return array();
@@ -39,24 +42,32 @@ class RouteCollector extends DataCollector implements Renderable {
 
 		$uri   = $route->getPattern();
 		$paths = $route->getPaths();
+		$result['uri']    = $uri ?: '-';
+		$result['paths']  = $this->formatVar( $paths);
+		$result['params'] = $this->formatVar( $router->getParams());
 
-		$result = array(
-			'uri' => $uri ?: '-',
-			'paths'=> $this->formatVar( $paths),
-		);
 		($verbs = $route->getHttpMethods())? $result['HttpMethods'] = $verbs : null;
 		($name  = $route->getName())? $result['RouteName'] = $name : null;
 		($hostname  = $route->getHostname())? $result['hostname'] = $hostname : null;
-
-		$result['Moudle']     = $this->router->getModuleName();
-		$result['Controller'] = get_class( $controller_instance = $dispatcher->getActiveController());
-		$result['Action']     = $dispatcher->getActiveMethod();
-
-		$reflector = new \ReflectionMethod($controller_instance, $result['Action']);
+		if ( $this->di->has('app') && ($app=$this->di['app']) instanceof  \Phalcon\Mvc\Micro ) {
+				if ( ($handler=$app->getActiveHandler()) instanceof \Closure  ||  is_string($handler) ) {
+					$reflector = new \ReflectionFunction($handler);
+				}elseif(is_array($handler)){
+					$reflector = new \ReflectionMethod($handler[0], $handler[1]);
+				}
+		}else{
+			$result['Moudle']     = $this->router->getModuleName();
+			$result['Controller'] = get_class( $controller_instance = $dispatcher->getActiveController());
+			$result['Action']     = $dispatcher->getActiveMethod();
+			$reflector = new \ReflectionMethod($controller_instance, $result['Action']);
+		}
 
 		if (isset($reflector)) {
+			$start = $reflector->getStartLine()-1;
+			$stop  = $reflector->getEndLine();
 			$filename = substr($reflector->getFileName(),mb_strlen(realpath(dirname($_SERVER['DOCUMENT_ROOT']))));
-			$result['file'] = $filename . ':' . $reflector->getStartLine() . '-' . $reflector->getEndLine();
+			$code = array_slice( file($reflector->getFileName()),$start, $stop-$start );
+			$result['file'] = $filename . ':' . $reflector->getStartLine() . '-' . $reflector->getEndLine() . "  [CODE]: \n". implode("",$code);
 		}
 
 		return $result;
