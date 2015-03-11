@@ -1,4 +1,4 @@
-## Laravel Debugbar
+## Phalcon Debugbar
 
 这个扩展包将 [PHP Debug Bar](http://phpdebugbar.com/) 与  [Phalcon FrameWork](http://phalconphp.com) 集成在了一起.
  
