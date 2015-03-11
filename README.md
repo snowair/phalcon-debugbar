@@ -4,29 +4,7 @@
  
 要感谢 laravel-debugbar, 我从中得到了启发, 使用了其中的一些代码, 经过几天夜以继日的工作, PhpDebugbar 终于可以用在Phalcon项目上了!
 
-我在 Mac/PHP5.6/Phalcon 1.3.4 之下开发, 时间关系, 还为其他环境下的全面测试, 如果有问题, 欢迎提Issue或者Pull Reqeust. 
-
-* * * 
-
-![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/message.png)
-
-![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/timeline.png)
-
-![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/exception.png)
-
-![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/route.png)
-
-![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/database.png)
-
-![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/views.png)
-
-![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/config.png)
-
-![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/session.png)
-
-![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/request.png)
-
-![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/stackdata.png)
+我在 Mac/PHP5.6/Phalcon 1.3.4 之下开发, 时间关系, 其他环境只做了简单的测试, 没有做全面测试, 如果有问题, 欢迎提Issue或者Pull Reqeust. 
 
 注意: 这是一个开发辅助扩展, 切勿部署生产环境. 
 
@@ -123,3 +101,46 @@ db 和 view 服务添加到debugbar中.
     $debugbar->enable();
     $debugbar->disable();
     ```
+
+### 截图
+
+
+* * * 
+
+![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/message.png)
+
+* * * 
+
+![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/timeline.png)
+
+* * * 
+
+![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/exception.png)
+
+* * * 
+
+![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/route.png)
+
+* * * 
+
+![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/database.png)
+
+* * * 
+
+![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/views.png)
+
+* * * 
+
+![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/config.png)
+
+* * * 
+
+![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/session.png)
+
+* * * 
+
+![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/request.png)
+
+* * * 
+
+![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/stackdata.png)
