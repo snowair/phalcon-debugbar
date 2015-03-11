@@ -99,8 +99,8 @@ return array(
 		),
 		'db' => array(
 			'with_params'       => false,   // Render SQL with the parameters substituted
-			'backtrace' => true,  // EXPERIMENTAL: Use a backtrace to find the origin of the query in your files.
-			'explain'   => true,  // EXPLAIN select statement
+			'backtrace' => false,  // EXPERIMENTAL: Use a backtrace to find the origin of the query in your files.
+			'explain'   => false,  // EXPLAIN select statement
 			'error_mode'=> \PDO::ERRMODE_EXCEPTION, // \PDO::ERRMODE_SILENT , \PDO::ERRMODE_WARNING, \PDO::ERRMODE_EXCEPTION
 			'show_conn'=>false, // IF show connection info
 		),
