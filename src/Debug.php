@@ -162,7 +162,7 @@ class PhalconDebug{
 	 * @param string $name internal name, use to stop measure
 	 * @param null $label
 	 */
-	public function startMeasure( $name,$label=null ){
+	public static function startMeasure( $name,$label=null ){
 		self::debugbar()->startMeasure($name,$label);
 	}
 
@@ -170,7 +170,7 @@ class PhalconDebug{
 	 * Stop a measure
 	 * @param $name
 	 */
-	public function stopMeasure( $name ){
+	public static function stopMeasure( $name ){
 		self::debugbar()->stopMeasure($name);
 	}
 
