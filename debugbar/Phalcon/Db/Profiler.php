@@ -44,7 +44,9 @@ class Profiler extends  PhalconProfiler {
 
 	public function getConnectioinInfo() {
 		$info = $this->_db->getDescriptor();
-		if ( isset($info['port']) and  $info['port']!=3306 ) {
+		if(empty($info['host'])){
+			return $info['dbname'];
+		}else if ( isset($info['host']) && isset($info['port']) && !in_array($info['port'],array(3306,1521,5432,1433)) ) {
 			$info['host'].=':'.$info['port'];
 		}
 		return $info['host'].'/'.$info['dbname'];
