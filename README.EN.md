@@ -10,7 +10,7 @@ Thanks laravel-debugbar, I use some codes of it!
 1. Ajax request support
 2. Redirect support
 3. persistent support
-4. Simple App, Mulit Moudle App and Micro App support
+4. Simple App, Mulit module App and Micro App support
 
 ### Support Collectors
 

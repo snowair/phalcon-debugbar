@@ -1,5 +1,7 @@
 ## Phalcon Debugbar
 
+[English README](https://github.com/snowair/phalcon-debugbar/blob/master/README.EN.md)
+
 这个扩展包将 [PHP Debug Bar](http://phpdebugbar.com/) 与  [Phalcon FrameWork](http://phalconphp.com) 集成在了一起.
  
 要感谢 laravel-debugbar, 我从中得到了启发, 使用了其中的一些代码, 经过几天夜以继日的工作, PhpDebugbar 终于可以用在Phalcon项目上了!
