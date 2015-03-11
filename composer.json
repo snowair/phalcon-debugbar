@@ -10,7 +10,10 @@
     "autoload": {
         "psr-4": {
             "Snowair\\Debugbar\\": "src/"
-        }
+        },
+        "files":[
+          "src/Debug.php"
+        ]
     },
 
     "license": "MIT",
