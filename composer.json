@@ -1,16 +1,24 @@
 {
-    "name": "snowair/easy_phalcon",
-    "description": "A beginning of a phalcon project.",
-    "require-dev": {
-        "filp/whoops": "1.*",
-        "maximebf/debugbar": "1.*",
-        "vlucas/phpdotenv": "1.*"
+    "name": "snowair/phalcon-debugbar",
+    "description": "Integrates PHP Debug Bar with Phalcon.",
+    "keywords": ["phalcon", "debugbar", "profiler", "debug", "webprofiler"],
+    "require": {
+        "php": ">=5.3.6",
+        "ext-phalcon": ">=1.3.4",
+        "maximebf/debugbar": ">=1.10"
     },
+    "autoload": {
+        "psr-4": {
+            "Snowair\\Debugbar\\": "src/"
+        }
+    },
+
     "license": "MIT",
     "authors": [
         {
             "name": "snowair",
             "email": "xcoolcc@gmail.com"
         }
-    ]
+    ],
+    "minimum-stability": "dev"
 }
