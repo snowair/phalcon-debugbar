@@ -6,6 +6,8 @@
 
 我在 Mac/PHP5.6/Phalcon 1.3.4 之下开发, 时间关系, 还为其他环境下的全面测试, 如果有问题, 欢迎提Issue或者Pull Reqeust. 
 
+* * * 
+
 ![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/message.png)
 
 ![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/timeline.png)
@@ -23,6 +25,8 @@
 ![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/session.png)
 
 ![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/request.png)
+
+![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/stackdata.png)
 
 注意: 这是一个开发辅助扩展, 切勿部署生产环境. 
 
