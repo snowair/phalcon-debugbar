@@ -20,7 +20,7 @@ class PhalconDebug{
 	 */
 	public static function debugbar(){
 		if ( !self::$debugbar ) {
-			self::$debugbar = Di::getDefault()->get('debugbar');
+			self::$debugbar = Di::getDefault()->getShared('debugbar');
 		}
 		return self::$debugbar;
 	}
