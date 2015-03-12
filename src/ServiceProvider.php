@@ -15,6 +15,7 @@ use Snowair\Debugbar\Controllers\AssetController;
 use Snowair\Debugbar\Controllers\OpenHandlerController;
 use Phalcon\Config\Adapter\Php;
 use Phalcon\DI\Injectable;
+use Snowair\Debugbar\Controllers\ToolsController;
 
 class ServiceProvider extends Injectable {
 
@@ -63,6 +64,11 @@ class ServiceProvider extends Injectable {
 				$controller->jsAction()->send();
 			})->setName('debugbar.assets.js');
 
+			$app->get( '/_debugbar/tools/phpinfo', function($name){
+				$controller = new ToolsController();
+				$controller->phpinfoAction();
+			})->setName('debugbar.tools.phpinfo');
+
 		}elseif (  $app instanceof Application ) {
 			$router->addGet('/_debugbar/open',array(
 				'namespace'=>'Snowair\Debugbar\Controllers',
@@ -81,6 +87,12 @@ class ServiceProvider extends Injectable {
 				'controller'=>'Asset',
 				'action'=>'js',
 			))->setName('debugbar.assets.js');
+
+			$router->addGet('/_debugbar/tools/phpinfo',array(
+				'namespace'=>'Snowair\Debugbar\Controllers',
+				'controller'=>'Tools',
+				'action'=>'phpinfo',
+			))->setName('debugbar.tools.phpinfo');
 		}
 	}
 

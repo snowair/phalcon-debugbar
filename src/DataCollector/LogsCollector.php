@@ -36,6 +36,7 @@ class LogsCollector extends DataCollector{
 	}
 
 	public function log( $message, $type, $time, $context ) {
+		//TODO: log to message bar or logs bar
 		$this->_logs[]=array(
 			'message'=>$message,
 			'type'=>$type,
