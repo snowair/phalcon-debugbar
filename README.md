@@ -45,6 +45,8 @@ php composer.phar require --dev snowair/phalcon-debugbar
 
 下载后, 将package放在项目下, 在你的项目的loader注册代码区域, 注册debugbar的命名空间:
 
+注意: 你还需要下载`maximebf/debugbar`以及它依赖的`psr/log`,`symfony/var-dumper`并注册到应用, 我认为这远不如安装composer方便!
+
 ```
 $loader = new \Phalcon\Loader();
 $loader->registerNamespaces(array(

@@ -34,19 +34,6 @@ Thanks laravel-debugbar, I use some codes of it!
 php composer.phar require --dev snowair/phalcon-debugbar
 ```
 
-
-### manual install
-
-Download and unpack to your project. Then register namespace in your code: 
-
-```
-$loader = new \Phalcon\Loader();
-$loader->registerNamespaces(array(
-'Snowair\Debugbar' => 'Path-To-PhalconDebugbar',  
-));
-$loader->register();
-```
-
 ### settging
 
 Make sure your project directory is writeable for php. Or your can create `Runtime` directory under your project directory and make it writeable. You can change `Runtime/phalcon` directory to other by edit debugbar config file.
@@ -69,14 +56,14 @@ Make sure your project directory is writeable for php. Or your can create `Runti
     echo $application->handle()->getContent();
     ```
 
-3. Copy `config/debugbar.php` to your config directory, and change some setting your want. Than use it :
+3. Copy `config/debugbar.php` to your config directory, and change any settings your want. Than use it :
 
     ```
     $provider = new Snowair\Debugbar\ServiceProvider('your-debugbar-config-file-path');
     ```
 
 
-4. For multi modules application, you may need attach db and view service instance to debugbar:
+4. For multi modules application, you may need attach `db` and `view` service instance to debugbar:
 
     ```
     $di->set('db',function(...));
@@ -87,7 +74,7 @@ Make sure your project directory is writeable for php. Or your can create `Runti
         $debugbar->attachDb($di['db']);
         $debugbar->attachView($di['view']);
     }
-```
+    ```
 
 5. Your can attach many db service to debugbar:
 
