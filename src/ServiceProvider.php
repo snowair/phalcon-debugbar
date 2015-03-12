@@ -29,6 +29,8 @@ class ServiceProvider extends Injectable {
 		$this->di->set('config.debugbar', function() use($configPath){
 			if ( $configPath===null ) {
 				$configPath = __DIR__ . '/config/debugbar.php';
+			}elseif( is_object($configPath) && $configPath instanceof Php){
+				return $configPath;
 			}
 			return new Php($configPath);
 		});
