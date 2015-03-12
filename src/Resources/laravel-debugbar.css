@@ -205,7 +205,7 @@ ul.phpdebugbar-widgets-list li.phpdebugbar-widgets-list-item {
     padding: 5px 10px;
     border: none;
     font-family: inherit;
-    overflow: visible;
+    overflow: hidden;
 }
 
 ul.phpdebugbar-widgets-list li.phpdebugbar-widgets-list-item:nth-child(even) {
