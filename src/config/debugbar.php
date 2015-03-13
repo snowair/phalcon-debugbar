@@ -79,6 +79,7 @@ return array(
 		'session'         => true, // Display session data in a separate tab
 		'config'          => true,
 		'route'           => true,
+		'log'             => true,
 		'db'              => true,
 		'view'            => true,
 		'mail'            => false,

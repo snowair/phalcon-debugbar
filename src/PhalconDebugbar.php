@@ -26,6 +26,7 @@ use Phalcon\Http\Response;
 use Phalcon\Mvc\ViewInterface;
 use Phalcon\Registry;
 use Snowair\Debugbar\DataCollector\ConfigCollector;
+use Snowair\Debugbar\DataCollector\LogsCollector;
 use Snowair\Debugbar\DataCollector\MessagesCollector;
 use Snowair\Debugbar\DataCollector\PhalconRequestCollector;
 use Snowair\Debugbar\DataCollector\QueryCollector;
@@ -162,6 +163,9 @@ class PhalconDebugbar extends DebugBar {
 					)
 				);
 			}
+		}
+		if ($this->shouldCollect('log', false) && $this->di->has('log')) {
+			$this->addCollector(new LogsCollector($this->di));
 		}
 		if ( $this->di->has( 'db' ) ) {
 			$this->attachDb( $this->di['db'] );
