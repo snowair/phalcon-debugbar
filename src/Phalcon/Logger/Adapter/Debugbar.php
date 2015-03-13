@@ -24,8 +24,18 @@ class Debugbar extends Adapter{
 
 	protected function logInternal( $message, $type, $time, $context ) {
 		if ($this->_debugbar->hasCollector('log') && $this->_debugbar->shouldCollect('log') ) {
-			$this->_debugbar->getCollector('log')->log($message,$type,$time,$context);
+			// Phalcon\Logger\Adapter::log方法调用logInternal时传入的时间精确到秒,精确度太低,因此此处提高精确度
+			$this->_debugbar->getCollector('log')->add($message,$type,microtime(true),$context);
 		}
+	}
+
+	public function log($message, $type, array $context=null){
+		if ( is_scalar( $message ) ) {
+			parent::log($message,$type,$context);
+		}else{
+			$this->logInternal($message,$type,microtime(true),$context);
+		}
+		return $this;
 	}
 
 	/**

@@ -116,6 +116,9 @@ return array(
 				'database.password', // 在debugbar中以******显示的敏感内容, 最多支持使用两次.号
 			),
 		),
+		'log'=>array(
+			'aggregate'=>false, // If aggregate logs to messages panel?
+		),
 	),
 
 	/*

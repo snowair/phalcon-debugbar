@@ -13,7 +13,7 @@ class MessagesCollector extends Message {
 
 	use Formatter;
 
-	public function addMessage($message, $label = 'info', $isString = true)
+	public function addMessage($message, $label = 'info', $isString = true, $time=null)
 	{
 		$formated = $this->formatVars($message);
 		if ( $formated['exception'] ) {
@@ -23,7 +23,7 @@ class MessagesCollector extends Message {
 			'message' => $formated[0],
 			'is_string' => is_string($message),
 			'label' => $label,
-			'time' => microtime(true)
+			'time' => $time?$time:microtime(true)
 		);
 	}
 

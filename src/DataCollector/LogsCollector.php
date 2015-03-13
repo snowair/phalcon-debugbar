@@ -8,7 +8,6 @@
 namespace Snowair\Debugbar\DataCollector;
 
 
-use DebugBar\DataCollector\MessagesCollector;
 use Phalcon\DI;
 use Phalcon\Logger\Adapter;
 use Phalcon\Logger\Multiple;
@@ -22,20 +21,31 @@ class LogsCollector extends MessagesCollector{
 	protected $_di;
 	/** @var PhalconDebugbar $_debugbar */
 	protected $_debugbar;
+	protected $_levelMap = array(
+		0=>'EMERGENCY',
+		1=>'CRITICAL',
+		2=>'ALERT',
+		3=>'ERROR',
+		4=>'WARNING',
+		5=>'NOTICE',
+		6=>'INFO',
+		7=>'DEBUG',
+		8=>'CUSTOM',
+		9=>'SPECIAL'
+	);
 
 	public function __construct( DI $di, $aggregate = false ) {
 		$this->_di=$di;
 		$this->_debugbar = $this->_di['debugbar'];
-		if ( $di->has('log') && $log = $di['log'] ) {
+		if ( $di->has('log') && $log = $di->get('log') ) {
+			$di->remove('log');
 			$debugbar_loger = new Debugbar($di['debugbar']);
 			if ( $log instanceof Adapter ) {
 				$multiple = new Multiple();
 				$multiple->push( clone $log );
 				$multiple->push( $debugbar_loger );
 				/** @var DI\Service $service */
-				$service = $di->getService('log');
-				$service->setSharedInstance($multiple);
-				$service->setDefinition($multiple);
+				$di->set('log',$multiple);
 			}elseif($log instanceof Multiple){
 				$log->push( $debugbar_loger );
 			}
@@ -43,17 +53,18 @@ class LogsCollector extends MessagesCollector{
 		}
 	}
 
-	public function log( $message, $type, $time, $context ) {
+	public function add( $message, $type, $time, $context ) {
 		$debugbar = $this->_di['debugbar'];
 		if ( $this->_aggregate ) {
 			/** @var MessagesCollector $message_collector */
 			$message_collector = $debugbar->getCollector('messages');
-			$message_collector->addMessage($message,$type);
+			$message_collector->addMessage($message,'['.$this->_levelMap[$type].']',true,$time);
 		}else{
 			$this->_logs[]=array(
-				'message'=>$message,
-				'type'=>$type,
-				'time'=>$time,
+				'message'  =>$message,
+				'label'    =>$this->_levelMap[$type],
+				'time'     =>$time,
+				'is_string'=>is_string($message),
 				'context'=>$context,
 			);
 		}
@@ -71,13 +82,14 @@ class LogsCollector extends MessagesCollector{
 	 * @return array Collected data
 	 */
 	function collect() {
-		$logs = array();
-		foreach ( $this->_logs as $log ) {
-			$this->getDataFormatter()->formatVar($log);
+		foreach ( $this->_logs as &$log ) {
+			if (!is_string($log['message'])) {
+				$log['message'] = $this->getDataFormatter()->formatVar($log['message']);
+			}
 		}
 		return array(
-			'messages'=>$logs,
-			'count'=>count($logs),
+			'messages'=>$this->_logs,
+			'count'=>count($this->_logs),
 		);
 	}
 
@@ -95,13 +107,13 @@ class LogsCollector extends MessagesCollector{
 			return array();
 		}
 		return array(
-			"log" => array(
+			"logs" => array(
 				'icon' => 'list-alt',
 				"widget" => "PhpDebugBar.Widgets.MessagesWidget",
 				"map" => "log.messages",
 				"default" => "[]"
 			),
-			"log:badge" => array(
+			"logs:badge" => array(
 				"map" => "log.count",
 				"default" => "null"
 			)
