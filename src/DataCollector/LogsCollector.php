@@ -10,6 +10,9 @@ namespace Snowair\Debugbar\DataCollector;
 
 use Phalcon\DI;
 use Phalcon\Logger\Adapter;
+use Phalcon\Logger\Formatter\Line;
+use Phalcon\Logger\Formatter\Syslog;
+use Phalcon\Logger\FormatterInterface;
 use Phalcon\Logger\Multiple;
 use Snowair\Debugbar\Phalcon\Logger\Adapter\Debugbar;
 use Snowair\Debugbar\PhalconDebugbar;
@@ -33,10 +36,12 @@ class LogsCollector extends MessagesCollector{
 		8=>'CUSTOM',
 		9=>'SPECIAL'
 	);
+	protected $_formatter;
 
-	public function __construct( DI $di, $aggregate = false ) {
+	public function __construct( DI $di, $aggregate = true,$formatter='line' ) {
 		$this->_di=$di;
 		$this->_debugbar = $this->_di['debugbar'];
+		$this->_formatter = strtolower($formatter);
 		if ( $di->has('log') && $log = $di->get('log') ) {
 			$di->remove('log');
 			$debugbar_loger = new Debugbar($di['debugbar']);
@@ -55,10 +60,19 @@ class LogsCollector extends MessagesCollector{
 
 	public function add( $message, $type, $time, $context ) {
 		$debugbar = $this->_di['debugbar'];
+		if ( is_string($message) && $this->_formatter=='syslog' && $formatter = new Syslog ) {
+			$message = $formatter->format($message,$type,$time,$context);
+			$message = $message[1];
+		}elseif( is_string($message) && $this->_formatter=='line' && $formatter = new Line){
+			$message = $formatter->format($message,$type,$time,$context);
+		}elseif( class_exists($this->_formatter) && $this->_formatter instanceof FormatterInterface ){
+			$formatter = new $this->_formatter;
+			$message = $formatter->format($message,$type,$time,$context);
+		}
 		if ( $this->_aggregate ) {
 			/** @var MessagesCollector $message_collector */
 			$message_collector = $debugbar->getCollector('messages');
-			$message_collector->addMessage($message,'['.$this->_levelMap[$type].']',true,$time);
+			$message_collector->addMessage($message,$this->_levelMap[$type],true,$time);
 		}else{
 			$this->_logs[]=array(
 				'message'  =>$message,
@@ -84,7 +98,11 @@ class LogsCollector extends MessagesCollector{
 	function collect() {
 		foreach ( $this->_logs as &$log ) {
 			if (!is_string($log['message'])) {
-				$log['message'] = $this->getDataFormatter()->formatVar($log['message']);
+				$formated = $this->formatVars($log['message']);
+				if ( $formated['exception'] ) {
+					$log['label'] = '[ERROR]';
+				}
+				$log['message'] = $formated[0];
 			}
 		}
 		return array(

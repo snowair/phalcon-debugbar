@@ -165,7 +165,12 @@ class PhalconDebugbar extends DebugBar {
 			}
 		}
 		if ($this->shouldCollect('log', false) && $this->di->has('log')) {
-			$this->addCollector(new LogsCollector($this->di,$this->config->options->log->get('aggregate',false)));
+			$this->addCollector(
+				new LogsCollector($this->di,
+					$this->config->options->log->get('aggregate',false),
+					$this->config->options->log->get('formatter','line')
+				)
+			);
 		}
 		if ( $this->di->has( 'db' ) ) {
 			$this->attachDb( $this->di['db'] );

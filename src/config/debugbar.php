@@ -117,7 +117,8 @@ return array(
 			),
 		),
 		'log'=>array(
-			'aggregate'=>false, // If aggregate logs to messages panel?
+			'aggregate'=>true,
+			'formatter'=>'line', // line , syslog or a class implenment \Phalcon\Logger\FormatterInterface
 		),
 	),
 
