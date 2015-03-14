@@ -25,6 +25,7 @@ Thanks laravel-debugbar, I use some codes of it!
 - ConfigCollector: data in the config service.
 - SessionCollectior: session data
 - SwiftMailCollector: mailer info
+- LogsCollectors
 
 ## Install package
 

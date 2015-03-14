@@ -30,7 +30,8 @@
  - PhalconRequestCollector: 收集请求头信息, 请求数据, 解密后的cookie, RAW BODY, 以及响应头信息
  - ConfigCollector: 收集 config service中的数据.
  - SessionCollectior 收集session数据
- - SwiftMailCollector 收集邮件发送信息
+ - SwiftMailCollector: 收集邮件发送信息
+ - LogsCollector: 请求产生的日志
 
 ## 安装package
 
