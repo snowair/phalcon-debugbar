@@ -16,6 +16,8 @@ use DebugBar\DataCollector\RequestDataCollector;
 use DebugBar\DataCollector\TimeDataCollector;
 use DebugBar\DebugBar;
 use Exception;
+use Phalcon\Cache\Backend;
+use Phalcon\Cache\Multiple;
 use Phalcon\Db\Adapter;
 use Phalcon\Db\Adapter\Pdo;
 use Phalcon\DI;
@@ -25,6 +27,7 @@ use Phalcon\Http\Request;
 use Phalcon\Http\Response;
 use Phalcon\Mvc\ViewInterface;
 use Phalcon\Registry;
+use Snowair\Debugbar\DataCollector\CacheCollector;
 use Snowair\Debugbar\DataCollector\ConfigCollector;
 use Snowair\Debugbar\DataCollector\LogsCollector;
 use Snowair\Debugbar\DataCollector\MessagesCollector;
@@ -33,6 +36,7 @@ use Snowair\Debugbar\DataCollector\QueryCollector;
 use Snowair\Debugbar\DataCollector\RouteCollector;
 use Snowair\Debugbar\DataCollector\SessionCollector;
 use Snowair\Debugbar\DataCollector\ViewCollector;
+use Snowair\Debugbar\Phalcon\Cache\Proxy;
 use Snowair\Debugbar\Phalcon\Db\Profiler;
 
 /**
@@ -186,6 +190,31 @@ class PhalconDebugbar extends DebugBar {
 		$renderer = $this->getJavascriptRenderer();
 		$renderer->setIncludeVendors($this->config->get('include_vendors', true));
 		$renderer->setBindAjaxHandlerToXHR($this->config->get('capture_ajax', true));
+	}
+
+	public function attachCache($cacheService) {
+		static $mode,$collector;
+		if ( !$mode ) {
+			$mode      = $this->config->options->cache->get('mode',0);
+		}
+		if ( !$collector ) {
+			$mc = null;
+			if ( $this->hasCollector( 'messages' ) ) {
+				$mc = $this->getCollector('message');
+			}
+			$collector = new CacheCollector($mode,$mc);
+		}
+		if ( !is_string( $cacheService ) ) {
+			throw new \Exception('The parameter must be a cache service name.');
+		}
+		$backend = $this->di[$cacheService];
+		if ( $backend instanceof Multiple || $backend instanceof Backend ) {
+			if ($this->shouldCollect('cache',false)) {
+				$proxy = new Proxy($backend,$collector);
+				$this->di->remove($cacheService);
+				$this->di->set($cacheService,$proxy,true);
+			}
+		}
 	}
 
 	public function attachMailer( $mailer ) {

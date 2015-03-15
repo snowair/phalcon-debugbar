@@ -120,6 +120,9 @@ return array(
 			'aggregate'=>true,
 			'formatter'=>'line', // line , syslog or a class implenment \Phalcon\Logger\FormatterInterface
 		),
+		'cache'=>array(
+			'mode'=>0, // 0: only count; 1: show detail
+		),
 	),
 
 	/*
