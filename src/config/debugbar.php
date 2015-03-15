@@ -82,6 +82,7 @@ return array(
 		'log'             => true,
 		'db'              => true,
 		'view'            => true,
+		'cache'           => true,
 		'mail'            => false,
 	),
 
@@ -121,7 +122,7 @@ return array(
 			'formatter'=>'line', // line , syslog or a class implenment \Phalcon\Logger\FormatterInterface
 		),
 		'cache'=>array(
-			'mode'=>0, // 0: only count; 1: show detail
+			'mode'=>1, // 0: only count; 1: show detail
 		),
 	),
 

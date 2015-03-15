@@ -182,6 +182,15 @@ class PhalconDebugbar extends DebugBar {
 		if ( $this->di->has( 'view' ) ) {
 			$this->attachView( $this->di['view'] );
 		}
+		if ( $this->di->has( 'cache' ) ) {
+			$this->attachCache( 'cache' );
+		}
+		if ( $this->di->has( 'modelsCache' ) ) {
+			$this->attachCache( 'modelsCache' );
+		}
+		if ( $this->di->has( 'viewCache' ) ) {
+			$this->attachCache( 'viewCache' );
+		}
 
 		if ($this->shouldCollect('mail', true) && $this->di->has('mailer') ) {
 			$this->attachMailer( $this->di['mailer'] );
@@ -194,25 +203,29 @@ class PhalconDebugbar extends DebugBar {
 
 	public function attachCache($cacheService) {
 		static $mode,$collector;
-		if ( !$mode ) {
-			$mode      = $this->config->options->cache->get('mode',0);
-		}
-		if ( !$collector ) {
-			$mc = null;
-			if ( $this->hasCollector( 'messages' ) ) {
-				$mc = $this->getCollector('message');
-			}
-			$collector = new CacheCollector($mode,$mc);
+		if ( !$this->shouldCollect( 'cache',false ) ) {
+			return;
 		}
 		if ( !is_string( $cacheService ) ) {
 			throw new \Exception('The parameter must be a cache service name.');
 		}
-		$backend = $this->di[$cacheService];
+		if ( !$mode ) {
+			$mode  = $this->config->options->cache->get('mode',0);
+		}
+		if ( !$collector ) {
+			$mc = null;
+			if ( $this->hasCollector( 'messages' ) ) {
+				$mc = $this->getCollector('messages');
+			}
+			$collector = new CacheCollector($mode,$mc);
+			$this->addCollector($collector);
+		}
+		$backend = $this->di->get($cacheService);
 		if ( $backend instanceof Multiple || $backend instanceof Backend ) {
 			if ($this->shouldCollect('cache',false)) {
-				$proxy = new Proxy($backend,$collector);
+				$proxy = new Proxy(clone $backend,$collector);
 				$this->di->remove($cacheService);
-				$this->di->set($cacheService,$proxy,true);
+				$this->di->set($cacheService,$proxy);
 			}
 		}
 	}
@@ -557,6 +570,7 @@ class PhalconDebugbar extends DebugBar {
 	 */
 	public function collect()
 	{
+		$this->sortCollectors();
 		/** @var Request $request */
 		$request = $this->di['request'];
 
@@ -701,6 +715,16 @@ class PhalconDebugbar extends DebugBar {
 			/** @var \DebugBar\DataCollector\MessagesCollector $collector */
 			$collector = $this->getCollector('messages');
 			$collector->addMessage($message, $label);
+		}
+	}
+
+	public function sortCollectors() {
+		// move message collectors to end, so other collectors can add message to it at the end time.
+		$this->collectors;
+		if ( isset($this->collectors['messages']) ) {
+			$m = $this->collectors['messages'];
+			unset($this->collectors['messages']);
+			$this->collectors['messages'] = $m;
 		}
 	}
 
