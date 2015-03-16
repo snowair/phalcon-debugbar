@@ -1,5 +1,7 @@
 ## Directory-based project format:
 .idea/
+vendor/
+composer.lock
 ## File-based project format:
 *.ipr
 *.iws

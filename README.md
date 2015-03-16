@@ -1,14 +1,14 @@
 ## Phalcon Debugbar
 
-[English README](https://github.com/snowair/phalcon-debugbar/blob/master/README.EN.md)
+[README(English)](https://github.com/snowair/phalcon-debugbar/blob/master/README.EN.md)
 
 这个扩展包将 [PHP Debug Bar](http://phpdebugbar.com/) 与  [Phalcon FrameWork](http://phalconphp.com) 集成在了一起.
  
-要感谢 laravel-debugbar, 我从中得到了启发, 使用了其中的一些代码, 经过几天夜以继日的工作, PhpDebugbar 终于可以用在Phalcon项目上了!
+要感谢 laravel-debugbar, 我从中得到了启发, 并使用了其中的一些代码.
 
-我在 Mac/PHP5.6/Phalcon 1.3.4 之下开发, 时间关系, 只在PHP5.4/Linux下测试通过, 其他环境尚未测试, 如果有问题, 欢迎提Issue或者Pull Reqeust. 
+我在 Mac/PHP5.6/Phalcon 1.3.4 之下开发, 时间关系, 只在PHP5.4/Linux下测试通过, 其他环境尚未测试, 如果有问题, 欢迎提 Issue或者 Pull Reqeust. 
 
-注意: 这是一个开发辅助扩展, 切勿部署生产环境. 
+注意: 这是一个开发辅助扩展, 谨慎用于生产环境, 以免泄漏应用信息或影响应用性能.
 
 ## 功能特性
 
@@ -31,9 +31,10 @@
  - ConfigCollector: 收集 config service中的数据.
  - SessionCollectior 收集session数据
  - SwiftMailCollector: 收集邮件发送信息
- - LogsCollector: 请求产生的日志
+ - LogsCollector: 当前请求产生的日志
+ - CacheCollector: 缓存操作统计/详情
 
-## 安装package
+## 快速开始
 
 ### composer 安装
 
@@ -41,24 +42,13 @@
 php composer.phar require --dev snowair/phalcon-debugbar
 ```
 
+### 创建目录
 
-### 下载安装
+为了支持ajax调试和重定向调试, debugbar默认开启了调试数据持久化功能, 它会将收集到的调试信息以json文件保存在`Runtime/phalcon`目录下.
 
-下载后, 将package放在项目下, 在你的项目的loader注册代码区域, 注册debugbar的命名空间:
+如果该目录不存在, 会试图创建, 这需要你的项目目录**可写**, 否则将抛出warning错误. 建议手动创建`Runtime`目录并设置可写. 你也可以修改配置文件,使用其他目录进行持久化.
 
-注意: 你还需要下载`maximebf/debugbar`以及它依赖的`psr/log`,`symfony/var-dumper`并注册到应用, 我认为这远不如安装composer方便!
-
-```
-$loader = new \Phalcon\Loader();
-$loader->registerNamespaces(array(
-	'Snowair\Debugbar' => 'Path-To-PhalconDebugbar',  
-));
-$loader->register();
-```
-
-### 设置
-
-为了支持ajax调试和重定向调试, debugbar默认开启了调试数据持久化功能, 它会将收集到的调试信息以json文件保存在`Runtime/phalcon`目录下,如果该目录不存在,会试图创建, 这需要你的项目目录可写, 否则将抛出warning错误. 建议手动创建`Runtime`目录并设置可写. 你也可以修改配置文件,使用其他目录进行持久化.
+### 修改 index.php
 
 1. 将应用实例保存为app服务
 
@@ -68,50 +58,45 @@ $loader->register();
     $di['app'] = $application; // 将应用实例保存到$di的app服务中
     ```
 
-2. 在合适的位置插入下面的代码, 通常应该在所有服务都注册完以后的位置. 
+2. 在handle()方法前面的位置插入下面的代码.
 
     ```
-    $provider = new Snowair\Debugbar\ServiceProvider();
-    $provider->register();
-    $provider->boot();
-    echo $application->handle()->getContent(); // 通常在app handle 之前注册和启动Debugbar是最简单的
+    (new Snowair\Debugbar\ServiceProvider())->start();
+    // 在启动debugbar之后,立即handle应用.
+    echo $application->handle()->getContent();
     ```
     
-3. 将包内`config/debugbar.php`文件复制到你的项目配置目录下, 修改后使用:
+## 技巧
+    
+### 使用外部的配置文件,以便于composer更新
 
-    ```
-    $provider = new Snowair\Debugbar\ServiceProvider('your-config-file-path');
-    ```
-    * 建议使用自己的debugbar配置文件, 不要直接修改包内的默认配置文件, 以避免更新composer时覆盖掉配置.
+将包内`config/debugbar.php`文件复制到你的项目配置目录下, 修改后使用:
 
-4. 对于多模块应, 很可能你的 db 服务和 view 服务是在模块的服务配置中注册的, 它们晚于debugbar注册, 所以debugbar无法捕捉它们的调试数据. 这种情况,你只需要手动将
-db 和 view 服务添加到debugbar中:
+```
+$provider = new Snowair\Debugbar\ServiceProvider('your-config-file-path');
+```
 
-    ```
-    $di->set('db',function(...));
-    $di->set('view',function(...));
+### 多模块应用相关
 
-    if ( $di->has('debugbar') ) {
-        $debugbar = $di['debugbar'];
-        $debugbar->attachDb($di['db']);
-        $debugbar->attachView($di['view']);
-    }
-    ```
+我们认为以下习惯是良好的:
 
-5. 如果你的应用用到多个数据库连接, 例如读写分离. 则可以将每个数据库服务都添加到debugbar:
+1. 缓存服务的命名一定含有`cache`
+2. 数据库服务的命名一定含有`db`并且是以`db`开头或结尾
 
-    ```
-    $debugbar->attachDb($di['dbRead']);
-    $debugbar->attachDb($di['dbWrite']);
-    $debugbar->attachDb($di['anyOtherDb']);
-    ```
+debugbar无需任何特殊设置即可支持符合以上习惯的多模块应用. 
 
-6. 你也可以选择在运行时关闭或开启debugbar
+假如你的服务命名习惯与众不同,则需要手动将缓存或数据库服务绑定到debugbar中, 手动绑定示例代码如下:
 
-    ```
-    $debugbar->enable();
-    $debugbar->disable();
-    ```
+```
+$di->set('my-db-2',function(...));
+$di->set('huan-cun',function(...));
+
+if ( $di->has('debugbar') ) {
+    $debugbar = $di['debugbar'];
+    $debugbar->attachDb('my-db-2');
+    $debugbar->attachCache('huan-cun');
+}
+```
 
 ### 截图
 
@@ -139,6 +124,10 @@ db 和 view 服务添加到debugbar中:
 * * * 
 
 ![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/views.png)
+
+* * * 
+
+![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/caches.png)
 
 * * * 
 

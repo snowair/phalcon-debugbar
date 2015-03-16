@@ -25,6 +25,10 @@ class ServiceProvider extends Injectable {
 		$this->configPath = $configPath;
 	}
 
+	public function start() {
+		$this->register()->boot();
+	}
+
 	public function register( ){
 		$configPath = $this->configPath;
 		$this->di->set('config.debugbar', function() use($configPath){
