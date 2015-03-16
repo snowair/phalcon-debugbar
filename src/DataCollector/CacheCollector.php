@@ -23,6 +23,8 @@ class CacheCollector extends DataCollector implements Renderable{
 	protected $_deleted   = array();
 	protected $_failed    = array('inc'=>array(),'dec'=>array());
 	protected $_flushed   = false;
+	protected $_nulls     = 0;
+
 	/**
 	 * @var MessagesCollector $_messagesCollector
 	 */
@@ -36,21 +38,19 @@ class CacheCollector extends DataCollector implements Renderable{
 	public function save($key,$content,$lifetime) {
 		if ( $this->_mode ) {
 			$data = array(
-				'key'=>$key,
+				'key'     =>$key,
 				'lifetime'=>$lifetime,
-				'content'=>$content,
+				'content' =>$content,
+				'time'    =>microtime(true),
 			);
-			if ( $lifetime===null ) {
-				unset($data['lifetime']);
-			}
-			$this->_saved[] =$data;
+			$this->_saved[$key] =$data;
 		}else{
 			$this->_saved[] = true;
 		}
 	}
 
 	public function decrement( $key, $step, $value ) {
-		$data = array( 'key'=>$key, 'step'=>$step, 'new_value'=>$value, );
+		$data = array( 'key'=>$key, 'step'=>$step, 'new_value'=>$value,'time'=>microtime(true) );
 		if ( $value===false || $value===null ) {
 			$this->_failed['dec'][] = $data;
 		}elseif ( $this->_mode ) {
@@ -61,7 +61,7 @@ class CacheCollector extends DataCollector implements Renderable{
 	}
 
 	public function increment( $key, $step, $value ) {
-		$data = array( 'key'=>$key, 'step'=>$step, 'new_value'=>$value, );
+		$data = array( 'key'=>$key, 'step'=>$step, 'new_value'=>$value,'time'=>microtime(true) );
 		if ( $value===false || $value===null ) {
 			$this->_failed['inc'][] = $data;
 		}elseif ( $this->_mode ) {
@@ -74,9 +74,12 @@ class CacheCollector extends DataCollector implements Renderable{
 	public function get() {
 		$params = func_get_args();
 		if ( func_num_args()==2 ) {
-			$data = array( 'key'=>$params[0], 'value'=>$params[1] );
+			$data = array( 'key'=>$params[0], 'value'=>$params[1],'time'=>microtime(true) );
 		}else{
-			$data = array( 'key'=>$params[0], 'value'=>$params[2] );
+			$data = array( 'key'=>$params[0], 'value'=>$params[2],'time'=>microtime(true) );
+		}
+		if ( $data['value']===null ) {
+			$this->_nulls++;
 		}
 		if ( $this->_mode ) {
 			$this->_fetched[$params[0]] = $data;
@@ -86,7 +89,7 @@ class CacheCollector extends DataCollector implements Renderable{
 	}
 
 	public function delete( $key ) {
-		$this->_deleted[] = $key;
+		$this->_deleted[] = array( 'key'=>$key,'time'=>microtime(true));
 	}
 
 	public function flush($bool) {
@@ -117,6 +120,9 @@ class CacheCollector extends DataCollector implements Renderable{
 			);
 		}
 		$message = "Caches Count: [ Saved:{$n_saved} ; Gets:{$n_fetched}";
+		if ( $this->_nulls>0 ) {
+			$message .= "(nulls:{$this->_nulls})";
+		}
 		if ( $n_inc>0 ) {
 			$message .= " ; Inc:{$n_inc}";
 		}
@@ -127,76 +133,109 @@ class CacheCollector extends DataCollector implements Renderable{
 			$message .= " ; Deleted:{$n_deleted}";
 		}
 		if ( $this->_flushed ) {
-			$message .= " ; Have Flushed";
+			$message .= " ; Has Flushed";
 		}
 		$data['messages'][] = array(
 			'message'  => $message.' ]',
 			'is_string'=> true,
 			'label'    => 'Caches Summary'
 		);
-		$messages = $data['messages'];
 
 		if ( !$this->_mode && $this->_messagesCollector ) {
-			foreach ( $messages as $value ) {
+			foreach ( $data['messages'] as $value ) {
 				$this->_messagesCollector->addMessage($value['message'],$value['label'],$value['is_string']);
 			}
 			return array();
 		}
 
-		foreach ( $this->_saved as $value ) {
-			$m = $this->formatVars($value);
+		$messages = array();
+		foreach ( $this->_saved as $key=>$value ) {
+			$lifetime = '';
+			if ( $value['lifetime']!==null ) {
+				$lifetime = "Lifetime=>"."{$value['lifetime']}";
+			}
+			$content    = $value['content'];
+			if ( !is_string( $content ) ) {
+				$content = $this->formatVars($content);
+				$message= "Saved: [ Key=>\"$key\"  $lifetime  Value=> $content[0] ]";
+			}else{
+				$message= "Saved: [ Key=>\"$key\"  $lifetime  Value=> \"$content\" ]";
+			}
 			$messages[] = array(
-				'message' => substr_replace($m[0],'Saved:',0,7),
-				'is_string' => false,
-				'label' => 'Saved',
+				'message'   => $message,
+				'is_string' => mb_strlen($message)>100?false:true,
+				'label'     => 'Saved',
+				'time'      =>$value['time'],
 			);
 		}
-		foreach ( $this->_fetched as $value ) {
-			$m = $this->formatVars($value);
+		foreach ( $this->_fetched as $key=>$value ) {
+			$content = $value['value'];
+			if ( !is_string( $value ) ) {
+				$content = $this->formatVars($content);
+				$message= "Gets: [ Key=>\"$key\"   Value=> $content[0] ]";
+			}else{
+				$message= "Gets: [ Key=>\"$key\"   Value=> \"$content\" ]";
+			}
 			$messages[] = array(
-				'message' => substr_replace($m[0],'Gets:',0,7),
-				'is_string' => false,
-				'label' => 'Gets',
+				'message'   => $message,
+				'is_string' => mb_strlen($message)>100?false:true,
+				'label'     => 'Gets',
+				'time'      => $value['time'],
 			);
 		}
 		foreach ( $this->_deleted as $value ) {
 			$messages[] = array(
-				'message' => 'DeletedKey: [ '.$value.' ]',
+				'message'   => 'DeletedKey: [ '.$value['key'].' ]',
 				'is_string' => true,
-				'label' => 'Deleted',
+				'label'     => 'Deleted',
+				'time'      => $value['time'],
 			);
 		}
 		foreach ( $this->_increased as $value ) {
 			$messages[] = array(
-				'message' => "Increased: [ Key:{$value['key']} , Step:{$value['step']} , NewValue:{$value['new_value']}] ",
+				'message'   => "Increased: [ Key:{$value['key']} , Step:{$value['step']} , NewValue:{$value['new_value']}] ",
 				'is_string' => true,
-				'label' => 'Increased',
+				'label'     => 'Increased',
+				'time'      => $value['time'],
 			);
 		}
 		foreach ( $this->_decreased as $value ) {
 			$messages[] = array(
-				'message' => "Decreased: [ Key:{$value['key']} , Step:{$value['step']} , NewValue:{$value['new_value']}] ",
+				'message'   => "Decreased: [ Key:{$value['key']} , Step:{$value['step']} , NewValue:{$value['new_value']}] ",
 				'is_string' => true,
-				'label' => 'Decreased',
+				'label'     => 'Decreased',
+				'time'      => $value['time'],
 			);
 		}
 		foreach ( $this->_failed['inc'] as $value ) {
 			$messages[] = array(
-				'message' => "IncFailed: [ Key:{$value['key']} , Step:{$value['step']}] ",
+				'message'   => "IncFailed: [ Key:{$value['key']} , Step:{$value['step']}] ",
 				'is_string' => true,
-				'label' => 'IncFailed',
+				'label'     => 'IncFailed',
+				'time'      => $value['time'],
 			);
 		}
 		foreach ( $this->_failed['dec'] as $value ) {
 			$messages[] = array(
-				'message' => "DecFailed: [ Key:{$value['key']} , Step:{$value['step']}] ",
+				'message'   => "DecFailed: [ Key:{$value['key']} , Step:{$value['step']}] ",
 				'is_string' => true,
-				'label' => 'DecFailed',
+				'label'     => 'DecFailed',
+				'time'      => $value['time'],
 			);
 		}
-		$data['messages'] = $messages;
-		$data['count'] = count($messages)-1;
+		$data['messages'] = array_merge($data['messages'],  $this->sort($messages));
+		$data['count'] = count($messages);
 		return $data;
+	}
+
+	public function sort($messages) {
+		usort($messages, function ($a, $b) {
+			if ($a['time'] === $b['time']) {
+				return 0;
+			}
+			return $a['time'] < $b['time'] ? -1 : 1;
+		});
+		return $messages;
 	}
 
 	/**
@@ -218,7 +257,7 @@ class CacheCollector extends DataCollector implements Renderable{
 		}
 		return array(
 			"caches" => array(
-				'icon' => 'list-alt',
+				'icon' => 'star',
 				"widget" => "PhpDebugBar.Widgets.MessagesWidget",
 				"map" => "caches.messages",
 				"default" => "[]"

@@ -36,7 +36,6 @@ use Snowair\Debugbar\DataCollector\QueryCollector;
 use Snowair\Debugbar\DataCollector\RouteCollector;
 use Snowair\Debugbar\DataCollector\SessionCollector;
 use Snowair\Debugbar\DataCollector\ViewCollector;
-use Snowair\Debugbar\Phalcon\Cache\Proxy;
 use Snowair\Debugbar\Phalcon\Db\Profiler;
 
 /**
@@ -202,7 +201,11 @@ class PhalconDebugbar extends DebugBar {
 	}
 
 	public function attachCache($cacheService) {
-		static $mode,$collector;
+		static $mode,$collector,$hasAttachd = array();
+		if ( in_array( $cacheService, $hasAttachd ) ) {
+			return;
+		}
+		$hasAttachd[] = $cacheService;
 		if ( !$this->shouldCollect( 'cache',false ) ) {
 			return;
 		}
@@ -223,11 +226,36 @@ class PhalconDebugbar extends DebugBar {
 		$backend = $this->di->get($cacheService);
 		if ( $backend instanceof Multiple || $backend instanceof Backend ) {
 			if ($this->shouldCollect('cache',false)) {
-				$proxy = new Proxy(clone $backend,$collector);
+				$proxy = $this->createProxy(clone $backend,$collector);
 				$this->di->remove($cacheService);
 				$this->di->set($cacheService,$proxy);
 			}
 		}
+	}
+
+	protected function createProxy( $backend,$collector ) {
+		$base_class = get_class($backend);
+		$prefix = ltrim(strrchr($base_class,'\\'),'\\');
+		$namespace = __NAMESPACE__ .'\\Phalcon\\Cache';
+		$classname = $prefix.'Proxy';
+		$full_class = $namespace.'\\'.$classname;
+		if (!class_exists($full_class)) {
+			$class =<<<"class"
+namespace $namespace;
+
+class $classname extends \\$base_class
+{
+	use ProxyTrait;
+
+	public function __construct(\$backend,\$collector ) {
+		\$this->_collector = \$collector;
+		\$this->_backend = \$backend;
+	}
+}
+class;
+			eval($class);
+		}
+		return new $full_class($backend,$collector);
 	}
 
 	public function attachMailer( $mailer ) {
@@ -723,7 +751,10 @@ class PhalconDebugbar extends DebugBar {
 		$this->collectors;
 		if ( isset($this->collectors['messages']) ) {
 			$m = $this->collectors['messages'];
+			$t = $this->collectors['time'];
 			unset($this->collectors['messages']);
+			unset($this->collectors['time']);
+			$this->collectors['time'] = $t;
 			$this->collectors['messages'] = $m;
 		}
 	}

@@ -118,11 +118,11 @@ return array(
 			),
 		),
 		'log'=>array(
-			'aggregate'=>true,
+			'aggregate'=>false,  // Set to True will aggregate logs to MessagesCollector
 			'formatter'=>'line', // line , syslog or a class implenment \Phalcon\Logger\FormatterInterface
 		),
 		'cache'=>array(
-			'mode'=>1, // 0: only count; 1: show detail
+			'mode'=>1, // 0: only count and aggregate summary to MessagesCollector; 1: show detail on CacheCollector
 		),
 	),
 
