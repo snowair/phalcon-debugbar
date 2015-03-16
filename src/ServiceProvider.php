@@ -32,12 +32,15 @@ class ServiceProvider extends Injectable {
 	public function register( ){
 		$configPath = $this->configPath;
 		$this->di->set('config.debugbar', function() use($configPath){
-			if ( $configPath===null ) {
-				$configPath = __DIR__ . '/config/debugbar.php';
+			$base =new Php(__DIR__ . '/config/debugbar.php');
+			if ( is_string( $configPath) && is_file($configPath) ) {
+				$config = new Php($configPath);
+				$base->merge($config);
 			}elseif( is_object($configPath) && $configPath instanceof Php){
-				return $configPath;
+				$base->merge($configPath);
+			}else{
 			}
-			return new Php($configPath);
+			return $base;
 		});
 
 		$this->di->set('debugbar', function(){
