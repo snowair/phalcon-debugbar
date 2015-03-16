@@ -53,7 +53,6 @@ php composer.phar require --dev snowair/phalcon-debugbar
 1. 将应用实例保存为app服务
 
     ```
-    $di = new Phalcon\DI\FactoryDefault();
     $application = new Phalcon\Mvc\Application($di); // 将$di作为构造参数传入  Micro应用也一样: new Phalcon\Mvc\Micro($di);
     $di['app'] = $application; // 将应用实例保存到$di的app服务中
     ```
@@ -97,6 +96,12 @@ if ( $di->has('debugbar') ) {
     $debugbar->attachCache('huan-cun');
 }
 ```
+
+### 出现问题怎么办
+
+1. 依次将配置文件中 `collectors`中的各项关闭, 直到问题不再出现, 从而确定是哪个collector的问题, 然后在git@osc 提 issue 反馈
+
+2. 直接提 issue 反馈
 
 ### 截图
 
