@@ -30,11 +30,7 @@ class Debugbar extends Adapter{
 	}
 
 	public function log($message, $type, array $context=null){
-		if ( is_scalar( $message ) ) {
-			parent::log($message,$type,$context);
-		}else{
-			$this->logInternal($message,$type,microtime(true),$context);
-		}
+		$this->logInternal($message,$type,microtime(true),$context);
 		return $this;
 	}
 

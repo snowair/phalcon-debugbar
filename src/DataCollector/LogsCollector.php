@@ -60,10 +60,10 @@ class LogsCollector extends MessagesCollector{
 
 	public function add( $message, $type, $time, $context ) {
 		$debugbar = $this->_di['debugbar'];
-		if ( is_string($message) && $this->_formatter=='syslog' && $formatter = new Syslog ) {
+		if ( is_scalar($message) && $this->_formatter=='syslog' && $formatter = new Syslog ) {
 			$message = $formatter->format($message,$type,$time,$context);
 			$message = $message[1];
-		}elseif( is_string($message) && $this->_formatter=='line' && $formatter = new Line){
+		}elseif( is_scalar($message) && $this->_formatter=='line' && $formatter = new Line){
 			$message = $formatter->format($message,$type,$time,$context);
 		}elseif( class_exists($this->_formatter) && $this->_formatter instanceof FormatterInterface ){
 			$formatter = new $this->_formatter;

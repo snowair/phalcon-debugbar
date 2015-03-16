@@ -47,8 +47,10 @@ trait Formatter  {
 						$array = call_user_func($callable,$vars);
 						if ( is_array( $array ) ) {
 							@$vars = $formatter->formatVar($array);
+						}elseif(is_string($array)){
+							$vars = $array;
 						}else{
-							throw new \Exception('CustomFormatMap callable must return a native Array.');
+							throw new \Exception('CustomFormatMap callable must return a native Array or String.');
 						}
 					}else{
 						@$vars = $formatter->formatVar($vars);
