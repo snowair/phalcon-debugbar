@@ -124,6 +124,9 @@ class ServiceProvider extends Injectable {
 				$debugbar->modifyResponse($response);
 			});
 		}
+		$eventsManager->attach('application:afterStartModule',function($event,$app,$module) use($debugbar){
+			$debugbar->attachServices();
+		});
 		$app->setEventsManager($eventsManager);
 		$debugbar->boot();
 	}

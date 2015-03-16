@@ -175,29 +175,30 @@ class PhalconDebugbar extends DebugBar {
 				)
 			);
 		}
-		if ( $this->di->has( 'db' ) ) {
-			$this->attachDb( $this->di['db'] );
-		}
-		if ( $this->di->has( 'view' ) ) {
-			$this->attachView( $this->di['view'] );
-		}
-		if ( $this->di->has( 'cache' ) ) {
-			$this->attachCache( 'cache' );
-		}
-		if ( $this->di->has( 'modelsCache' ) ) {
-			$this->attachCache( 'modelsCache' );
-		}
-		if ( $this->di->has( 'viewCache' ) ) {
-			$this->attachCache( 'viewCache' );
-		}
 
-		if ($this->shouldCollect('mail', true) && $this->di->has('mailer') ) {
-			$this->attachMailer( $this->di['mailer'] );
-		}
+		$this->attachServices();
 
 		$renderer = $this->getJavascriptRenderer();
 		$renderer->setIncludeVendors($this->config->get('include_vendors', true));
 		$renderer->setBindAjaxHandlerToXHR($this->config->get('capture_ajax', true));
+	}
+
+	public function attachServices() {
+		$services = array_keys($this->di->getServices());
+		foreach ( $services as $name ) {
+			if ( stripos( $name, 'cache' )!==false ) {
+				$this->attachCache( $name );
+			}
+			if ( stripos($name,'db')===0 || strtolower(substr($name,-2)) =='db' ) {
+				$this->attachDb( $name );
+			}
+		}
+		if ( $this->di->has( 'view' ) ) {
+			$this->attachView( $this->di['view'] );
+		}
+		if ($this->shouldCollect('mail', true) && $this->di->has('mailer') ) {
+			$this->attachMailer( $this->di['mailer'] );
+		}
 	}
 
 	public function attachCache($cacheService) {
@@ -265,6 +266,9 @@ class;
 		static $started;
 		if ( !$started ) {
 			$started = true;
+			if ( is_string( $mailer ) ) {
+				$mailer = $this->di[$mailer];
+			}
 			try {
 				if ( class_exists('\Swifit_Mailer') && ( $mailer instanceof \Swift_Mailer ) ) {
 					$this->addCollector(new SwiftMailCollector($mailer));
@@ -285,7 +289,7 @@ class;
 		}
 	}
 
-	public function attachView( ViewInterface $view )
+	public function attachView( $view )
 	{
 		if (!$this->shouldCollect('view', true)  ) {
 			return;
@@ -293,6 +297,9 @@ class;
 		static $started;
 		// You can add only One View instance
 		if ( !$started ) {
+			if ( is_string( $view ) ) {
+				$view = $this->di[$view];
+			}
 			$started=true;
 			$eventsManager = new Manager();
 			$viewProfiler = new Registry();
@@ -544,6 +551,9 @@ class;
 						$e
 					)
 				);
+			}
+			if ( is_string( $db ) ) {
+				$db = $this->di[$db];
 			}
 			$pdo = $db->getInternalHandler();
 			$pdo->setAttribute(\PDO::ATTR_ERRMODE, $config->options->db->error_mode);

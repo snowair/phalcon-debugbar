@@ -126,7 +126,7 @@ class LogsCollector extends MessagesCollector{
 		}
 		return array(
 			"logs" => array(
-				'icon' => 'list-alt',
+				'icon' => 'pencil',
 				"widget" => "PhpDebugBar.Widgets.MessagesWidget",
 				"map" => "log.messages",
 				"default" => "[]"
