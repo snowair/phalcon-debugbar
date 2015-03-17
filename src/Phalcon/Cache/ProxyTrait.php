@@ -8,6 +8,7 @@ namespace Snowair\Debugbar\Phalcon\Cache;
 
 use Phalcon\Cache\Exception;
 use Phalcon\Cache\Frontend\Base64;
+use Phalcon\Cache\Frontend\Output;
 
 trait ProxyTrait {
 
@@ -59,6 +60,9 @@ trait ProxyTrait {
 
 	public function start( $keyName, $lifetime = null ) {
 		static $reflector;
+		if ( ! $this->_backend->getFrontend() instanceof Output ) {
+			return null;
+		}
 		if ( !$reflector ) {
 			$reflector = new \ReflectionObject($this->_backend);
 		}
@@ -93,6 +97,13 @@ trait ProxyTrait {
 		return $existingCache;
 	}
 
+	public function stop( $stopBuffer = true ) {
+		if ( ! $this->_backend->getFrontend() instanceof Output ) {
+			return null;
+		}
+		return $this->_backend->stop($stopBuffer);
+	}
+
 
 	public function save($keyName=null, $content=null, $lifetime=null, $stopBuffer=null)
 	{
@@ -100,7 +111,11 @@ trait ProxyTrait {
 			$keyName=$this->getLastKey();
 		}
 		if ( $content===null ) {
-			$content = $this->_backend->getFrontend()->getContent();
+			if ( !$this->_backend->getFrontend() instanceof Output ) {
+				return null;
+			}else{
+				$content = $this->_backend->getFrontend()->getContent();
+			}
 		}
 		return $this->call('save', array($keyName, $content, $lifetime, $stopBuffer));
 	}
@@ -175,10 +190,6 @@ trait ProxyTrait {
 
 	public function getFrontend() {
 		return $this->_backend->getFrontend();
-	}
-
-	public function stop( $stopBuffer = true ) {
-		return $this->_backend->stop($stopBuffer);
 	}
 
 	public function getLifetime() {
