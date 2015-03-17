@@ -36,11 +36,18 @@
 
 ## 快速开始
 
-### composer 安装
+### composer
 
-```
-php composer.phar require --dev snowair/phalcon-debugbar
-```
+* 安装
+
+    ```
+    php composer.phar require --dev snowair/phalcon-debugbar
+    ```
+* 更新
+
+    ```
+    php composer.phar udpate snowair/phalcon-debugbar
+    ```
 
 ### 创建目录
 
