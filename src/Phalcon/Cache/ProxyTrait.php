@@ -105,7 +105,7 @@ trait ProxyTrait {
 	}
 
 
-	public function save($keyName=null, $content=null, $lifetime=null, $stopBuffer=null)
+	public function save($keyName=null, $content=null, $lifetime=null, $stopBuffer=true)
 	{
 		if ( $keyName===null ) {
 			$keyName=$this->getLastKey();
