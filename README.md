@@ -46,7 +46,7 @@
 * 更新
 
     ```
-    php composer.phar udpate snowair/phalcon-debugbar
+    php composer.phar update snowair/phalcon-debugbar
     ```
 
 ### 创建目录
