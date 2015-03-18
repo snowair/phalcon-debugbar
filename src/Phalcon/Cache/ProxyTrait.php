@@ -66,9 +66,6 @@ trait ProxyTrait {
 		if ( !$reflector ) {
 			$reflector = new \ReflectionObject($this->_backend);
 		}
-		/**
-		 * Get the cache content verifying if it was expired
-		 */
 		$existingCache = $this->get($keyName, $lifetime);
 		if( $existingCache === null) {
 			$fresh = true;
@@ -98,9 +95,6 @@ trait ProxyTrait {
 	}
 
 	public function stop( $stopBuffer = true ) {
-		if ( ! $this->_backend->getFrontend() instanceof Output ) {
-			return null;
-		}
 		return $this->_backend->stop($stopBuffer);
 	}
 

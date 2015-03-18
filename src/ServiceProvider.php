@@ -110,7 +110,10 @@ class ServiceProvider extends Injectable {
 		if (! $this->di['config.debugbar']->get('enabled')) {
 			return;
 		}
-		$eventsManager = new Manager();
+		$eventsManager = $app->getEventsManager();
+		if ( !is_object( $eventsManager ) ) {
+			$eventsManager = new Manager();
+		}
 		if (  $app instanceof Micro ) {
 			$eventsManager->attach('micro:beforeExecuteRoute', function() use($router) {
 				ob_start();

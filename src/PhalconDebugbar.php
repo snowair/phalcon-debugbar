@@ -25,6 +25,7 @@ use Phalcon\Events\Event;
 use Phalcon\Events\Manager;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
+use Phalcon\Mvc\View;
 use Phalcon\Mvc\ViewInterface;
 use Phalcon\Registry;
 use Snowair\Debugbar\DataCollector\CacheCollector;
@@ -227,10 +228,10 @@ class PhalconDebugbar extends DebugBar {
 		$backend = $this->di->get($cacheService);
 		if ( $backend instanceof Multiple || $backend instanceof Backend ) {
 			if ($this->shouldCollect('cache',false)) {
-				$proxy = $this->createProxy(clone $backend,$collector);
 				$this->di->remove($cacheService);
-				$this->di->set($cacheService,$proxy);
-			}
+				$this->di->set($cacheService, function()use($backend,$collector){
+					return $this->createProxy(clone $backend,$collector);
+				}); }
 		}
 	}
 
@@ -289,6 +290,11 @@ class;
 		}
 	}
 
+	/**
+	 * @param $view
+	 *
+	 * @throws \DebugBar\DebugBarException
+	 */
 	public function attachView( $view )
 	{
 		if (!$this->shouldCollect('view', true)  ) {
@@ -301,11 +307,16 @@ class;
 				$view = $this->di[$view];
 			}
 			$started=true;
-			$eventsManager = new Manager();
 			$viewProfiler = new Registry();
 			$viewProfiler->templates=array();
 			$viewProfiler->engines = $view->getRegisteredEngines();
 			$config = $this->config;
+
+			$eventsManager = $view->getEventsManager();
+			if ( !is_object( $eventsManager ) ) {
+				$eventsManager = new Manager();
+			}
+
 			$eventsManager->attach('view:beforeRender',function($event,$view) use($viewProfiler)
 			{
 				$viewProfiler->startRender= microtime(true);
@@ -558,7 +569,11 @@ class;
 			$pdo = $db->getInternalHandler();
 			$pdo->setAttribute(\PDO::ATTR_ERRMODE, $config->options->db->error_mode);
 			if ( !$eventsManager ) {
-				$eventsManager = new Manager();
+
+				$eventsManager = $db->getEventsManager();
+				if ( !is_object( $eventsManager ) ) {
+					$eventsManager = new Manager();
+				}
 				$eventsManager->attach('db', function(Event $event, Adapter $db, $params)  use (
 					$profiler,$queryCollector
 				) {
