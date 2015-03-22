@@ -14,19 +14,19 @@ Thanks laravel-debugbar, I use some codes of it!
 
 ### Support Collectors
 
-- MessagesCollector : support scalar, array, object
-- TimeDataCollector : custom time measure
-- MemoryCollector : memory usage
-- ExceptionsCollector : exception chain
-- QueryCollector: SQL statement, spend time of every SQL, EXPLAIN result of SELECT statement
-- RouteCollector: Route info
-- ViewCollector:  All the rendered templates, spend time of every template, all the templates variables.
-- PhalconRequestCollector: request headers, cookies, server variables, response headers, querys, post data,raw body
-- ConfigCollector: data in the config service.
-- SessionCollectior: session data
-- SwiftMailCollector: mailer info
-- LogsCollectors: logs of current request.
-- CacheCollectors: caches summary(saved,gets,incs,decs,failds) , and every cache operation detail
+- `MessagesCollector` : Collect custom message, support scalar, array and object
+- `TimeDataCollector` : Collect custom time measure.
+- `ExceptionsCollector` : Add a exception object to debugbar.
+- `MemoryCollector` : Collect memory usage
+- `QueryCollector`: Capture each SQL statement, measure spent time of each SQL, show EXPLAIN result of each SELECT statement
+- `RouteCollector`: Show Route info of currect request.
+- `ViewCollector`:  Show all the rendered templates, measure spent time of each template, show all the templates variables.
+- `PhalconRequestCollector`: Show request headers, cookies, server variables, response headers, querys, post data,raw body
+- `ConfigCollector`: Show the data in the config service.
+- `SessionCollectior`: Show session data
+- `SwiftMailCollector`: mailer info
+- `LogsCollectors`: Show logs of current request.
+- `CacheCollectors`: Show caches summary(saved,gets,incs,decs,failds), and each cache operation detail.
 
 ## Quick start
 
@@ -132,6 +132,10 @@ Your can modify the debugbar config file, close collector one by one, retry it u
 * * * 
 
 ![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/views.png)
+
+* * * 
+
+![Screenshot](http://git.oschina.net/zhuyajie/phalcon-debugbar/raw/master/snapshots/caches.png)
 
 * * * 
 
