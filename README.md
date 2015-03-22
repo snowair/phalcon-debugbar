@@ -67,6 +67,20 @@ The default directory for store debugbar data is `Runtime/phalcon`. If it not ex
 
 ## More
 
+### send custome meessage to debugbar
+
+```
+\PhalconDebug::startMeasure('start-1','how long');
+\PhalconDebug::addMeasurePoint('start');
+\PhalconDebug::info('this is info');
+\PhalconDebug::addMessageIfTrue('1 == "1"', 1=='1');
+\PhalconDebug::addMessageIfTrue('will not show', 1=='0');
+\PhalconDebug::addMessageIfFalse('1 != "0" ', 1=='0');
+\PhalconDebug::addException(new \Exception('oh , error'));
+\PhalconDebug::addMeasurePoint('stop');
+\PhalconDebug::stopMeasure('start-1');
+```
+
 ### use your config
 
 
