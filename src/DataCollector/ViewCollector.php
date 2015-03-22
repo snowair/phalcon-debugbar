@@ -86,14 +86,16 @@ class ViewCollector  extends TwigCollector {
 			}
 		}
 
-		if(empty($templates)){
+		if(empty($templates) || ! $vars=$profiler->params ){
 			$vars = null;
-		}else if (!is_string( $vars = $profiler->params)) {
+		}else if (!is_string( $vars)) {
 			if ( !empty($this->_customFormatMap) ) {
 				$vars = $this->preFormatVars($vars);
 			}
-			$formated = $this->formatVars($vars);
-			$vars = $formated[0];
+			foreach ( $vars as $key => $value ) {
+				$vars[$key] = $this->_preformat($value);
+			}
+			$vars = $this->formatVars($vars)[0];
 		}
 		return array(
 			'nb_templates' => count($templates),
