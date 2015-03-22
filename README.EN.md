@@ -25,25 +25,34 @@ Thanks laravel-debugbar, I use some codes of it!
 - ConfigCollector: data in the config service.
 - SessionCollectior: session data
 - SwiftMailCollector: mailer info
-- LogsCollectors
+- LogsCollectors: logs of current request.
+- CacheCollectors: caches summary(saved,gets,incs,decs,failds) , and every cache operation detail
 
-## Install package
+## Quick start
 
-### composer install
+### composer
 
-```
-php composer.phar require --dev snowair/phalcon-debugbar
-```
+* install
 
-### settging
+    ```
+    php composer.phar require --dev snowair/phalcon-debugbar
+    ```
+* update
 
-Make sure your project directory is writeable for php. Or your can create `Runtime` directory under your project directory and make it writeable. You can change `Runtime/phalcon` directory to other by edit debugbar config file.
+    ```
+    php composer.phar update snowair/phalcon-debugbar
+    ```
 
+### pesistent directory
+
+The default directory for store debugbar data is `Runtime/phalcon`. If it not exists, will try to create auto.
+
+
+### modify index.php
 
 1. Set your App Instance to DI:
 
     ```
-    $di = new Phalcon\DI\FactoryDefault();
     $application = new Phalcon\Mvc\Application( $di ); // Important: mustn't ignore $di param . The Same Micro APP: new Phalcon\Mvc\Micro($di);
     $di['app'] = $application; //  Important
     ```
@@ -51,46 +60,51 @@ Make sure your project directory is writeable for php. Or your can create `Runti
 2. Before handle app, register and boot debugbar provider. 
 
     ```
-    $provider = new Snowair\Debugbar\ServiceProvider();
-    $provider->register();
-    $provider->boot();
+    (new Snowair\Debugbar\ServiceProvider())->start();
+    // after start the debugbar, you can do noting but handle your app right now.
     echo $application->handle()->getContent();
     ```
 
-3. Copy `config/debugbar.php` to your config directory, and change any settings your want. Than use it :
+## More
 
-    ```
-    $provider = new Snowair\Debugbar\ServiceProvider('your-debugbar-config-file-path');
-    ```
+### use your config
 
 
-4. For multi modules application, you may need attach `db` and `view` service instance to debugbar:
+Copy `config/debugbar.php` to your config directory, and change any settings your want. Than use your debugbar config file by:
 
-    ```
-    $di->set('db',function(...));
-    $di->set('view',function(...));
+```
+(new Snowair\Debugbar\ServiceProvider('your-debugbar-config-file-path'))->start();
+```
 
-    if ( $di->has('debugbar') ) {
-        $debugbar = $di['debugbar'];
-        $debugbar->attachDb($di['db']);
-        $debugbar->attachView($di['view']);
-    }
-    ```
+### Mutlti Modules
 
-5. Your can attach many db service to debugbar:
+Usually, You needn't modify any other files, if you follow rules bellow:
 
-    ```
-    $debugbar->attachDb($di['dbRead']);
-    $debugbar->attachDb($di['dbWrite']);
-    $debugbar->attachDb($di['anyOtherDb']);
-    ```
+1. All the sevices for cahce has a name with `cache`.
+2. All the sevices for db has a name start with `db` or end with `db`.
 
-6. You can enable/disable debugbar in runtime.
+If your service name is't match these rules, you need attach it to debugbar: 
 
-    ```
-    $debugbar->enable();
-    $debugbar->disable();
-    ```
+```
+// service.php
+$di->set('read-db-test',function(...)); // db service
+$di->set('redis',function(...)); // cache service
+if ( $di->has('debugbar') ) {
+    $debugbar = $di['debugbar'];
+    $debugbar->attachDb('read-db-test');
+    $debugbar->attachCache('redis');
+}
+```
+
+### TroubleShooting
+
+* For ajax/json request, the debug data only stored in the persistent directory as a json file. You can
+ Load it to the debugbar form Openhandler(Open icon on the right).
+
+* If the debugbar does not work, the most possible reason is one or more collectors tirgger a error in the runtime.
+Your can modify the debugbar config file, close collector one by one, retry it until found the collector cause problem.
+
+* For any problem, you can open a Issue on Github.
 
 ### Snapshots
 

@@ -79,7 +79,7 @@
 将包内`config/debugbar.php`文件复制到你的项目配置目录下, 修改后使用:
 
 ```
-$provider = new Snowair\Debugbar\ServiceProvider('your-config-file-path');
+(new Snowair\Debugbar\ServiceProvider('your-debugbar-config-file-path'))->start();
 ```
 
 ### 多模块应用相关
@@ -94,9 +94,9 @@ debugbar无需任何特殊设置即可支持符合以上习惯的多模块应用
 假如你的服务命名习惯与众不同,则需要手动将缓存或数据库服务绑定到debugbar中, 手动绑定示例代码如下:
 
 ```
+// service.php
 $di->set('my-db-2',function(...));
 $di->set('huan-cun',function(...));
-
 if ( $di->has('debugbar') ) {
     $debugbar = $di['debugbar'];
     $debugbar->attachDb('my-db-2');
