@@ -25,8 +25,7 @@ use Phalcon\Events\Event;
 use Phalcon\Events\Manager;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
-use Phalcon\Mvc\View;
-use Phalcon\Mvc\ViewInterface;
+use Phalcon\Mvc\View\Engine\Volt;
 use Phalcon\Registry;
 use Snowair\Debugbar\DataCollector\CacheCollector;
 use Snowair\Debugbar\DataCollector\ConfigCollector;
@@ -38,6 +37,7 @@ use Snowair\Debugbar\DataCollector\RouteCollector;
 use Snowair\Debugbar\DataCollector\SessionCollector;
 use Snowair\Debugbar\DataCollector\ViewCollector;
 use Snowair\Debugbar\Phalcon\Db\Profiler;
+use Snowair\Debugbar\Phalcon\View\VoltFunctions;
 
 /**
  * Debug bar subclass which adds all without Request and with Collector.
@@ -305,6 +305,24 @@ class;
 		if ( !$started ) {
 			if ( is_string( $view ) ) {
 				$view = $this->di[$view];
+			}
+			$engins =$view->getRegisteredEngines();
+			if ( isset($engins['.volt']) ) {
+				$volt = $engins['.volt'];
+				if ( is_object( $volt ) ) {
+					if ( $volt instanceof \Closure ) {
+						$volt = $volt($view,$this->di);
+					}
+				}elseif(is_string($volt)){
+					if ( class_exists( $volt ) ) {
+						$volt = new Volt( $view, $this->di );
+					}elseif( $this->di->has($volt)){
+						$volt = $this->di->getShared($volt);
+					}
+				}
+				$engins['.volt'] = $volt;
+				$view->registerEngines($engins);
+				$volt->getCompiler()->addExtension(new VoltFunctions($this->di));
 			}
 			$started=true;
 			$viewProfiler = new Registry();

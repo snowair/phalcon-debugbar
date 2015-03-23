@@ -17,10 +17,16 @@ class PhalconDebug{
 	/**
 	 * GET the debugbar service Instance
 	 * @return \Snowair\Debugbar\PhalconDebugbar
+	 * @throws \DebugBar\DebugBarException
 	 */
-	public static function debugbar(){
+	protected static function debugbar(){
 		if ( !self::$debugbar ) {
-			self::$debugbar = Di::getDefault()->getShared('debugbar');
+			$di = Di::getDefault();
+			if ( $di->has( 'debugbar' ) ) {
+				return self::$debugbar=$di->getShared('debugbar');
+			}else{
+				throw new \DebugBar\DebugBarException('Can not get "debugbar" service from the default DI instance.');
+			}
 		}
 		return self::$debugbar;
 	}
@@ -127,6 +133,42 @@ class PhalconDebug{
 	 */
 	public static function addMessageIfFalse($message,$condition,$label='info'){
 		if ( $condition===false ) {
+			self::debugbar()->addMessage($message,$label);
+		}
+	}
+
+	/**
+	 * Add a custom message to debugbar only when $condition===null
+	 * @param        $message
+	 * @param        $condition
+	 * @param string $label
+	 */
+	public static function addMessageIfNull($message,$condition,$label='info'){
+		if ( $condition===null ) {
+			self::debugbar()->addMessage($message,$label);
+		}
+	}
+
+	/**
+	 * Add a custom message to debugbar only when empty($condition)===true
+	 * @param        $message
+	 * @param        $condition
+	 * @param string $label
+	 */
+	public static function addMessageIfEmpty($message,$condition,$label='info'){
+		if ( empty($condition)===true ) {
+			self::debugbar()->addMessage($message,$label);
+		}
+	}
+
+	/**
+	 * Add a custom message to debugbar only when empty($condition)===true
+	 * @param        $message
+	 * @param        $condition
+	 * @param string $label
+	 */
+	public static function addMessageIfNotEmpty($message,$condition,$label='info'){
+		if ( empty($condition)===false ) {
 			self::debugbar()->addMessage($message,$label);
 		}
 	}
