@@ -21,7 +21,7 @@ class MessagesCollector extends Message {
 		}
 		$this->messages[] = array(
 			'message' => $formated[0],
-			'is_string' => is_string($message),
+			'is_string' => is_scalar($message),
 			'label' => $label,
 			'time' => $time?$time:microtime(true)
 		);
