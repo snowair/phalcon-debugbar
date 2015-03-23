@@ -33,74 +33,65 @@ class PhalconDebug{
 
 	/**
 	 * Add a info message to debugbar
-	 * @param $message
 	 */
-	public static function info($message){
-		self::debugbar()->info($message);
+	public static function info(){
+		call_user_func_array( [self::debugbar(),'info'] ,func_get_args());
 	}
 
 	/**
 	 * Add a warning message to debugbar
-	 * @param $message
 	 */
-	public static function warning($message){
-		self::debugbar()->warning($message);
+	public static function warning(){
+		call_user_func_array( [self::debugbar(),'warning'] ,func_get_args());
 	}
 
 	/**
 	 * Add a debug message to debugbar
-	 * @param $message
 	 */
-	public static function debug($message){
-		self::debugbar()->debug($message);
+	public static function debug(){
+		call_user_func_array( [self::debugbar(),'debug'] ,func_get_args());
 	}
 
 	/**
 	 * Add a notice message to debugbar
-	 * @param $message
 	 */
-	public static function notice($message){
-		self::debugbar()->notice($message);
+	public static function notice(){
+		call_user_func_array( [self::debugbar(),'notice'] ,func_get_args());
 	}
 
 	/**
 	 * Add a notice message to debugbar
-	 * @param $message
 	 */
-	public static function error($message){
-		self::debugbar()->error($message);
+	public static function error(){
+		call_user_func_array( [self::debugbar(),'error'] ,func_get_args());
 	}
 
 	/**
 	 * Add a alert message to debugbar
-	 * @param $message
 	 */
-	public static function alert($message){
-		self::debugbar()->alert($message);
+	public static function alert(){
+		call_user_func_array( [self::debugbar(),'alert'] ,func_get_args());
 	}
 
 	/**
 	 * Add a log message to debugbar
-	 * @param $message
 	 */
-	public static function log($message){
-		self::debugbar()->log($message);
+	public static function log(){
+		call_user_func_array( [self::debugbar(),'log'] ,func_get_args());
 	}
 
 	/**
 	 * Add a emergency message to debugbar
-	 * @param $message
 	 */
-	public static function emergency($message){
-		self::debugbar()->emergency($message);
+	public static function emergency(){
+		call_user_func_array( [self::debugbar(),'emergency'] ,func_get_args());
 	}
 
 	/**
 	 * Add a critical message to debugbar
-	 * @param $message
 	 */
-	public static function critical($message){
-		self::debugbar()->critical($message);
+	public static function critical(){
+		call_user_func_array( [self::debugbar(),'critical'] ,func_get_args());
 	}
 
 	/**
@@ -217,3 +208,4 @@ class PhalconDebug{
 	}
 
 }
+
