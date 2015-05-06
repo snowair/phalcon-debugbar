@@ -4,7 +4,7 @@
     "keywords": ["phalcon", "debugbar", "profiler", "debug", "webprofiler"],
     "require": {
         "php": ">=5.4",
-        "ext-phalcon": ">=1.3.4",
+        "ext-phalcon": ">=1.3.4,>=2.0",
         "maximebf/debugbar": ">=1.10"
     },
     "autoload": {
