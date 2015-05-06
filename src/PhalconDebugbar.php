@@ -317,7 +317,7 @@ class;
 					if ( class_exists( $volt ) ) {
 						$volt = new Volt( $view, $this->di );
 					}elseif( $this->di->has($volt)){
-						$volt = $this->di->getShared($volt);
+                        $volt = $this->di->getShared($volt,array($view,$this->di));
 					}
 				}
 				$engins['.volt'] = $volt;
@@ -351,12 +351,16 @@ class;
 			});
 			$eventsManager->attach('view:beforeRenderView',function($event,$view,$viewFilePath) use($viewProfiler)
 			{
-				$viewProfiler->templates[$viewFilePath]	= array( 'startTime'=>microtime(true), );
+                $templates = $viewProfiler->templates;
+                $templates[$viewFilePath]['startTime'] = microtime(true);
+                $viewProfiler->templates =  $templates;
 			});
 			$eventsManager->attach('view:afterRenderView',function($event,$view) use($viewProfiler)
 			{
 				$viewFilePath = $view->getActiveRenderPath();
-				$viewProfiler->templates[$viewFilePath]['stopTime'] = microtime(true);
+                $templates = $viewProfiler->templates;
+                $templates[$viewFilePath]['stopTime'] = microtime(true);
+                $viewProfiler->templates =  $templates;
 
 			});
 			$view->setEventsManager($eventsManager);
@@ -533,7 +537,8 @@ class;
 			) {
 					$this->collect();
 			} elseif ($this->config->get('inject', true)) {
-					$this->injectDebugbar($response);
+                $response->setHeader('Phalcon-Debugbar','on');
+				$this->injectDebugbar($response);
 			}
 		} catch (\Exception $e) {
 			$this->addException($e);

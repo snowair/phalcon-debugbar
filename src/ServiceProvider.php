@@ -71,7 +71,7 @@ class ServiceProvider extends Injectable {
 				$controller->jsAction()->send();
 			})->setName('debugbar.assets.js');
 
-			$app->get( '/_debugbar/tools/phpinfo', function($name){
+			$app->get( '/_debugbar/tools/phpinfo', function(){
 				$controller = new ToolsController();
 				$controller->phpinfoAction();
 			})->setName('debugbar.tools.phpinfo');
