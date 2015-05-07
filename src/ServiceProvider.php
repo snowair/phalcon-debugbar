@@ -79,7 +79,7 @@ class ServiceProvider extends Injectable {
 		}elseif (  $app instanceof Application ) {
 			$router->addGet('/_debugbar/open',array(
 				'namespace'=>'Snowair\Debugbar\Controllers',
-				'controller'=>'\OpenHandler',
+				'controller'=>'open_handler',
 				'action'=>'handle',
 			))->setName('debugbar.openhandler');
 
