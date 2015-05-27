@@ -8,7 +8,6 @@
 namespace Snowair\Debugbar\DataCollector;
 
 use DebugBar\Bridge\Twig\TwigCollector;
-use Phalcon\Mvc\ViewInterface;
 
 class ViewCollector  extends TwigCollector {
 
@@ -20,14 +19,14 @@ class ViewCollector  extends TwigCollector {
 	/**
 	 * Create a ViewCollector
 	 *
-	 * @param \DebugBar\Bridge\Twig\TraceableTwigEnvironment $viewProfiler
-	 * @param ViewInterface                                  $view
-	 */
-	public function __construct($viewProfiler,ViewInterface $view)
-	{
-		$this->viewProfiler = $viewProfiler;
-		$this->view = $view;
-	}
+     * @param \DebugBar\Bridge\Twig\TraceableTwigEnvironment $viewProfiler
+     * @param \Phalcon\Mvc\ViewInterface|\Phalcon\Mvc\ViewBaseInterface  $view
+     */
+    public function __construct($viewProfiler,$view)
+    {
+        $this->viewProfiler = $viewProfiler;
+        $this->view = $view;
+    }
 
 	public function getName()
 	{
