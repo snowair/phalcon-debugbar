@@ -73,6 +73,7 @@ class PhalconRequestCollector extends DataCollector implements DataCollectorInte
 			'request_headers'  => $request->getHeaders(),
 			'request_server'   => $_SERVER,
 			'response_headers' => $responseHeaders,
+            'response_body'    => $request->isAjax()?$response->getContent():'',
 		);
 		$data = array_filter($data);
 		if ( isset($data['request_query']['_url']) ) {
