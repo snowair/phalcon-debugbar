@@ -349,8 +349,9 @@ class;
 					$viewProfiler->params = null;
 				}
 			});
-			$eventsManager->attach('view:beforeRenderView',function($event,$view,$viewFilePath) use($viewProfiler)
+			$eventsManager->attach('view:beforeRenderView',function($event,$view) use($viewProfiler)
 			{
+                $viewFilePath = $view->getActiveRenderPath();
                 $templates = $viewProfiler->templates;
                 $templates[$viewFilePath]['startTime'] = microtime(true);
                 $viewProfiler->templates =  $templates;

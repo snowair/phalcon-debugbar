@@ -141,9 +141,11 @@ class ViewCollector  extends TwigCollector {
 
 	protected function normalizeFilename($path)
 	{
-		if (file_exists($path)) {
-			$path = realpath($path);
-		}
-		return substr($path,mb_strlen(realpath(dirname($_SERVER['DOCUMENT_ROOT']))));
+        if (file_exists($path)) {
+            $path = realpath($path);
+            return substr($path,mb_strlen(realpath(dirname($_SERVER['DOCUMENT_ROOT']))));
+        }else{
+            return $path;
+        }
 	}
 }
