@@ -41,7 +41,7 @@ class ServiceProvider extends Injectable {
 			}else{
 			}
 			return $base;
-		});
+		},true);
 
 		$this->di->set('debugbar', function(){
 			$debugbar = new PhalconDebugbar($this->di);
@@ -107,9 +107,7 @@ class ServiceProvider extends Injectable {
 		$app      = $this->di['app'];
 		$debugbar = $this->di['debugbar'];
 		$router   = $this->di['router'];
-		if (! $this->di['config.debugbar']->get('enabled')) {
-			return;
-		}
+
 		$eventsManager = $app->getEventsManager();
 		if ( !is_object( $eventsManager ) ) {
 			$eventsManager = new Manager();
@@ -138,6 +136,38 @@ class ServiceProvider extends Injectable {
 			$debugbar->attachServices();
 		});
 		$app->setEventsManager($eventsManager);
+
+        $this->safeCheck();
+
 		$debugbar->boot();
 	}
+
+    protected function safeCheck()
+    {
+        $config   = $this->di['config.debugbar'];
+        $router   = $this->di['router'];
+        $debugbar = $this->di['debugbar'];
+
+        if ( $config->get('enabled')) {
+            $white_lists = $config->get('white_lists');
+            if ( !empty($white_lists) && !in_array($this->di['request']->getClientAddress(true),(array)$white_lists)) {
+                $debugbar->disable();
+                return;
+            }
+
+            $router->handle();
+            $deny_routes  = $config->get('deny_routes');
+            $allow_routes = $config->get('allow_routes');
+
+            if( !empty($allow_routes)  && !in_array( $router->getMatchedRoute()->getName(),(array)$allow_routes )){
+                $debugbar->disable();
+                return;
+            }
+
+            if( !empty($deny_routes)  && in_array( $router->getMatchedRoute()->getName(),(array)$deny_routes )){
+                $debugbar->disable();
+                return;
+            }
+        }
+    }
 }

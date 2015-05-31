@@ -110,6 +110,11 @@ class PhalconDebugbar extends DebugBar {
 	 * 启动debugbar: 设置collector
 	 */
 	public function boot() {
+
+        if (!$this->isEnabled() ) {
+            return;
+        }
+
 		$debugbar = $this;
 		if ( !$this->isDataPersisted() ) {
 			$this->selectStorage($debugbar); // for normal request and debugbar request both
@@ -185,6 +190,11 @@ class PhalconDebugbar extends DebugBar {
 	}
 
 	public function attachServices() {
+
+        if (!$this->isEnabled() ) {
+            return;
+        }
+
 		$services = array_keys($this->di->getServices());
 		foreach ( $services as $name ) {
 			if ( stripos( $name, 'cache' )!==false ) {

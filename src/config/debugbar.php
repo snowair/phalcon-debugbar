@@ -18,11 +18,7 @@ return array(
 	 | Storage settings
 	 |--------------------------------------------------------------------------
 	 |
-	 | DebugBar stores data for session/ajax requests.
-	 | You can disable this, so the debugbar stores data in headers/session,
-	 | but this can cause problems with large data collectors.
-	 | By default, file storage (in the storage folder) is used. Redis and PDO
-	 | can also be used. For PDO, run the package migrations first.
+	 | 'file' driver is the only supported now.
 	 |
 	 */
 	'storage' => array(
@@ -30,6 +26,45 @@ return array(
 		'driver' => 'file',
 		'path' => '../Runtime/debugbar', // For file driver
 	),
+
+    /*
+     |--------------------------------------------------------------------------
+     | Safe check: White Lists settings
+     | check order: white_list, allow_routes, deny_routes
+     |--------------------------------------------------------------------------
+     |
+     | the values are clients IPs, if allow all ips, leave  a empty array.
+     |
+     */
+    'white_lists'=>array(
+        //        '127.0.0.1'
+    ),
+
+
+    /*
+     |--------------------------------------------------------------------------
+     | Safe check: Allowed Routes settings
+     |--------------------------------------------------------------------------
+     |
+     | the values are route names.
+     |
+     */
+    'allow_routes'=>array(
+
+    ),
+
+    /*
+     |--------------------------------------------------------------------------
+     | Safe check: Exclude Routes settings
+     |--------------------------------------------------------------------------
+     |
+     | the values are route names.
+     |
+     */
+    'deny_routes'=>array(
+
+    ),
+
 
 	/*
 	 |--------------------------------------------------------------------------
