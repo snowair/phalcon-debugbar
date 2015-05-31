@@ -149,22 +149,28 @@ class ServiceProvider extends Injectable {
         $debugbar = $this->di['debugbar'];
 
         if ( $config->get('enabled')) {
-            $white_lists = $config->get('white_lists');
-            if ( !empty($white_lists) && !in_array($this->di['request']->getClientAddress(true),(array)$white_lists)) {
+            $white_lists = (array)$config->get('white_lists');
+            if ( !empty($white_lists) && !in_array($this->di['request']->getClientAddress(true),$white_lists)) {
                 $debugbar->disable();
                 return;
             }
 
             $router->handle();
-            $deny_routes  = $config->get('deny_routes');
-            $allow_routes = $config->get('allow_routes');
+            $deny_routes  = (array)$config->get('deny_routes');
+            $allow_routes = (array)$config->get('allow_routes');
 
-            if( !empty($allow_routes)  && !in_array( $router->getMatchedRoute()->getName(),(array)$allow_routes )){
+            $current = $router->getMatchedRoute()->getName();
+
+            if ( strpos($current,'debugbar')===0 ) {
+                return;
+            }
+
+            if(  !empty($allow_routes)  && !in_array( $current,$allow_routes ) ){
                 $debugbar->disable();
                 return;
             }
 
-            if( !empty($deny_routes)  && in_array( $router->getMatchedRoute()->getName(),(array)$deny_routes )){
+            if( !empty($deny_routes)  && in_array( $current,$deny_routes )){
                 $debugbar->disable();
                 return;
             }
