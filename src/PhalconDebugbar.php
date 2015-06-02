@@ -365,7 +365,7 @@ class;
 			{
                 $viewFilePath = $view->getActiveRenderPath();
                 if (Version::getId()>=2000140) {
-                    if ( $view instanceof \Phalcon\Mvc\ViewBaseInterface) {
+                    if ( !$view instanceof \Phalcon\Mvc\ViewInterface && $view instanceof \Phalcon\Mvc\ViewBaseInterface) {
                         $viewFilePath = realpath($view->getViewsDir()).DIRECTORY_SEPARATOR.$viewFilePath;
                     }
                 }elseif( $view instanceof Simple){
@@ -380,7 +380,7 @@ class;
 			{
                 $viewFilePath = $view->getActiveRenderPath();
                 if (Version::getId()>=2000140) {
-                    if ( $view instanceof \Phalcon\Mvc\ViewBaseInterface) {
+                    if ( !$view instanceof \Phalcon\Mvc\ViewInterface && $view instanceof \Phalcon\Mvc\ViewBaseInterface) {
                         $viewFilePath = realpath($view->getViewsDir()).DIRECTORY_SEPARATOR.$viewFilePath;
                     }
                 }elseif( $view instanceof Simple){
