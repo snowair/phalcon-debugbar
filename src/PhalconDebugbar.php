@@ -26,7 +26,9 @@ use Phalcon\Events\Manager;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
 use Phalcon\Mvc\View\Engine\Volt;
+use Phalcon\Mvc\View\Simple;
 use Phalcon\Registry;
+use Phalcon\Version;
 use Snowair\Debugbar\DataCollector\CacheCollector;
 use Snowair\Debugbar\DataCollector\ConfigCollector;
 use Snowair\Debugbar\DataCollector\LogsCollector;
@@ -362,13 +364,29 @@ class;
 			$eventsManager->attach('view:beforeRenderView',function($event,$view) use($viewProfiler)
 			{
                 $viewFilePath = $view->getActiveRenderPath();
+                if (Version::getId()>=2000140) {
+                    if ( $view instanceof \Phalcon\Mvc\ViewBaseInterface) {
+                        $viewFilePath = realpath($view->getViewsDir()).DIRECTORY_SEPARATOR.$viewFilePath;
+                    }
+                }elseif( $view instanceof Simple){
+                    $viewFilePath = realpath($view->getViewsDir()).DIRECTORY_SEPARATOR.$viewFilePath;
+                }
+
                 $templates = $viewProfiler->templates;
                 $templates[$viewFilePath]['startTime'] = microtime(true);
                 $viewProfiler->templates =  $templates;
 			});
 			$eventsManager->attach('view:afterRenderView',function($event,$view) use($viewProfiler)
 			{
-				$viewFilePath = $view->getActiveRenderPath();
+                $viewFilePath = $view->getActiveRenderPath();
+                if (Version::getId()>=2000140) {
+                    if ( $view instanceof \Phalcon\Mvc\ViewBaseInterface) {
+                        $viewFilePath = realpath($view->getViewsDir()).DIRECTORY_SEPARATOR.$viewFilePath;
+                    }
+                }elseif( $view instanceof Simple){
+                    $viewFilePath = realpath($view->getViewsDir()).DIRECTORY_SEPARATOR.$viewFilePath;
+                }
+
                 $templates = $viewProfiler->templates;
                 $templates[$viewFilePath]['stopTime'] = microtime(true);
                 $viewProfiler->templates =  $templates;
