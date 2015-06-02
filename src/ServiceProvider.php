@@ -159,21 +159,26 @@ class ServiceProvider extends Injectable {
             $deny_routes  = (array)$config->get('deny_routes');
             $allow_routes = (array)$config->get('allow_routes');
 
-            $current = $router->getMatchedRoute()->getName();
+            $current = $router->getMatchedRoute();
 
-            if ( strpos($current,'debugbar')===0 ) {
-                return;
-            }
+            if (is_object( $current )) {
+                $current = $current->getName();
 
-            if(  !empty($allow_routes)  && !in_array( $current,$allow_routes ) ){
-                $debugbar->disable();
-                return;
-            }
+                if ( strpos($current,'debugbar')===0 ) {
+                    return;
+                }
 
-            if( !empty($deny_routes)  && in_array( $current,$deny_routes )){
-                $debugbar->disable();
-                return;
+                if(  !empty($allow_routes)  && !in_array( $current,$allow_routes ) ){
+                    $debugbar->disable();
+                    return;
+                }
+
+                if( !empty($deny_routes)  && in_array( $current,$deny_routes )){
+                    $debugbar->disable();
+                    return;
+                }
             }
+            return;
         }
     }
 }
