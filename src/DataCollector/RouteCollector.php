@@ -24,8 +24,6 @@ class RouteCollector extends DataCollector implements Renderable {
 	public function __construct( $di )
 	{
 		$this->di = $di;
-		$this->router = $di['router'];
-		$this->dispatcher = $di['dispatcher'];
 	}
 
 	/**
@@ -33,9 +31,9 @@ class RouteCollector extends DataCollector implements Renderable {
 	 * @return array Collected data
 	 */
 	function collect() {
-		$router = $this->router;
+        $dispatcher = $this->di['dispatcher'];
+		$router = $this->di['router'];
 		$route = $router->getMatchedRoute();
-		$dispatcher = $this->dispatcher;
 		if ( !$route) {
 			return array();
 		}
@@ -57,7 +55,7 @@ class RouteCollector extends DataCollector implements Renderable {
 				$reflector = new \ReflectionMethod($handler[0], $handler[1]);
 			}
 		}else{
-			$result['Moudle']=$this->router->getModuleName();
+			$result['Moudle']=$router->getModuleName();
 			$result['Controller'] = get_class( $controller_instance = $dispatcher->getActiveController());
 			$result['Action']     = $dispatcher->getActiveMethod();
 			$reflector = new \ReflectionMethod($controller_instance, $result['Action']);

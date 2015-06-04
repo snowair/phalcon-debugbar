@@ -165,6 +165,11 @@ class ServiceProvider extends Injectable {
                 $current = $current->getName();
 
                 if ( strpos($current,'debugbar')===0 ) {
+                    $app = $this->di['app'];
+                    $app->useImplicitView(false);
+                    $debugbar->isDebugbarRequest=true;
+                    $debugbar->debugbarRequestCollector();
+                    $debugbar->disable();
                     return;
                 }
 

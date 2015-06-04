@@ -144,8 +144,9 @@ class ViewCollector  extends TwigCollector {
         if (file_exists($path)) {
             $path = realpath($path);
             return substr($path,mb_strlen(realpath(dirname($_SERVER['DOCUMENT_ROOT']))));
-        }else{
-            return $path;
+        }elseif( file_exists( dirname($path) ) ){
+            return substr($path,mb_strlen(realpath(dirname($_SERVER['DOCUMENT_ROOT']))));
         }
+        return $path;
 	}
 }

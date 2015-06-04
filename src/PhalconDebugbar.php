@@ -26,7 +26,9 @@ use Phalcon\Events\Manager;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
 use Phalcon\Mvc\View\Engine\Volt;
+use Phalcon\Mvc\View\Simple;
 use Phalcon\Registry;
+use Phalcon\Version;
 use Snowair\Debugbar\DataCollector\CacheCollector;
 use Snowair\Debugbar\DataCollector\ConfigCollector;
 use Snowair\Debugbar\DataCollector\LogsCollector;
@@ -61,6 +63,7 @@ class PhalconDebugbar extends DebugBar {
 	protected $di;
 	protected $config;
 	protected $booted = false;
+    public    $isDebugbarRequest=false;
 
 	public function __construct($di)
 	{
@@ -88,17 +91,6 @@ class PhalconDebugbar extends DebugBar {
 	public function isEnabled()
 	{
 		return $this->config->enabled;
-	}
-
-	/**
-	 * Check if this is a request to the Debugbar OpenHandler
-	 *
-	 * @return bool
-	 */
-	protected function isDebugbarRequest()
-	{
-		$segment =explode('/', trim($this->di['request']->getUri(),'/'));
-		return $segment[0] == '_debugbar';
 	}
 
 	public function shouldCollect($name, $default = false)
@@ -188,6 +180,20 @@ class PhalconDebugbar extends DebugBar {
 		$renderer->setIncludeVendors($this->config->get('include_vendors', true));
 		$renderer->setBindAjaxHandlerToXHR($this->config->get('capture_ajax', true));
 	}
+
+    public function debugbarRequestCollector()
+    {
+        if ($this->shouldCollect('db')) {
+            $queryCollector = new QueryCollector(new Profiler());
+            $this->addCollector($queryCollector);
+        }
+
+        if ($this->shouldCollect('view')) {
+            $viewCollector = new ViewCollector(null,null);
+            $this->addCollector($viewCollector);
+        }
+
+    }
 
 	public function attachServices() {
 
@@ -362,13 +368,29 @@ class;
 			$eventsManager->attach('view:beforeRenderView',function($event,$view) use($viewProfiler)
 			{
                 $viewFilePath = $view->getActiveRenderPath();
+                if (Version::getId()>=2000140) {
+                    if ( !$view instanceof \Phalcon\Mvc\ViewInterface && $view instanceof \Phalcon\Mvc\ViewBaseInterface) {
+                        $viewFilePath = realpath($view->getViewsDir()).DIRECTORY_SEPARATOR.$viewFilePath;
+                    }
+                }elseif( $view instanceof Simple){
+                    $viewFilePath = realpath($view->getViewsDir()).DIRECTORY_SEPARATOR.$viewFilePath;
+                }
+
                 $templates = $viewProfiler->templates;
                 $templates[$viewFilePath]['startTime'] = microtime(true);
                 $viewProfiler->templates =  $templates;
 			});
 			$eventsManager->attach('view:afterRenderView',function($event,$view) use($viewProfiler)
 			{
-				$viewFilePath = $view->getActiveRenderPath();
+                $viewFilePath = $view->getActiveRenderPath();
+                if (Version::getId()>=2000140) {
+                    if ( !$view instanceof \Phalcon\Mvc\ViewInterface && $view instanceof \Phalcon\Mvc\ViewBaseInterface) {
+                        $viewFilePath = realpath($view->getViewsDir()).DIRECTORY_SEPARATOR.$viewFilePath;
+                    }
+                }elseif( $view instanceof Simple){
+                    $viewFilePath = realpath($view->getViewsDir()).DIRECTORY_SEPARATOR.$viewFilePath;
+                }
+
                 $templates = $viewProfiler->templates;
                 $templates[$viewFilePath]['stopTime'] = microtime(true);
                 $viewProfiler->templates =  $templates;
@@ -530,7 +552,7 @@ class;
 			$profiler->handleFailed();
 		};
 
-		if ( $this->isDebugbarRequest() ) {
+		if ( $this->isDebugbarRequest ) {
 			// Notice: All Collectors must be added before check if is debugbar request.
 			return $response;
 		}
