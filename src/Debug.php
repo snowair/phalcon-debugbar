@@ -25,7 +25,7 @@ class PhalconDebug{
 			if ( $di->has( 'debugbar' ) ) {
 				return self::$debugbar=$di->getShared('debugbar');
 			}else{
-				throw new \DebugBar\DebugBarException('Can not get "debugbar" service from the default DI instance.');
+                return self::$debugbar= new \Snowair\Debugbar\EmptyDebugbar();
 			}
 		}
 		return self::$debugbar;
