@@ -75,7 +75,9 @@ class PhalconRequestCollector extends DataCollector implements DataCollectorInte
 			'response_headers' => $responseHeaders,
             'response_body'    => $request->isAjax()?$response->getContent():'',
 		);
-        if ( Version::getId()>=2000000 ) {
+        if ( Version::getId()<2000000 && $request->isAjax()) {
+            $data['request_headers']=''; // 1.3.x has a ajax bug , so we use empty string insdead.
+        }else{
             $data['request_headers']=$request->getHeaders();
         }
 
