@@ -14,6 +14,7 @@ use DebugBar\DataCollector\Renderable;
 use Phalcon\DiInterface;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
+use Phalcon\Version;
 
 class PhalconRequestCollector extends DataCollector implements DataCollectorInterface,Renderable {
 
@@ -70,11 +71,14 @@ class PhalconRequestCollector extends DataCollector implements DataCollectorInte
 			'request_post'     => $request->getPost(),
 			'request_body'     => $request->getRawBody(),
 			'request_cookies'  => $cookies,
-			'request_headers'  => $request->getHeaders(),
 			'request_server'   => $_SERVER,
 			'response_headers' => $responseHeaders,
             'response_body'    => $request->isAjax()?$response->getContent():'',
 		);
+        if ( Version::getId()>=2000000 ) {
+            $data['request_headers']=$request->getHeaders();
+        }
+
 		$data = array_filter($data);
 		if ( isset($data['request_query']['_url']) ) {
 			unset($data['request_query']['_url']);
