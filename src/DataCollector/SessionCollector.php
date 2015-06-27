@@ -27,7 +27,7 @@ class SessionCollector extends DataCollector implements DataCollectorInterface, 
 	 */
 	function collect() {
         $data = array();
-        if (count($_SESSION)>1  ) {
+        if ( !empty($_SESSION)  ) {
             $opt = $this->session->getOptions();
             $prefix = 0;
             if (isset($opt['uniqueId'])) {
