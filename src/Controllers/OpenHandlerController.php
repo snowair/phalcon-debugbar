@@ -16,10 +16,7 @@ class OpenHandlerController extends BaseController {
 	public function handleAction()
 	{
 		$debugbar = $this->debugbar;
-
-		if (!$debugbar->isEnabled()) {
-			throw new Exception('Debugbar is not enabled',500);
-		}
+        $debugbar->enable();
 
 		$openHandler = new OpenHandler($debugbar);
 
