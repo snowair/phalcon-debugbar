@@ -33,6 +33,9 @@ class ServiceProvider extends Injectable {
 		$configPath = $this->configPath;
 		$this->di->set('config.debugbar', function() use($configPath){
 			$base =new Php(__DIR__ . '/config/debugbar.php');
+            $base['collectors']['phpinfo']=true;
+            $base['collectors']['time']=true;
+            $base['collectors']['messages']=true;
 			if ( is_string( $configPath) && is_file($configPath) ) {
 				$config = new Php($configPath);
 				$base->merge($config);

@@ -104,20 +104,17 @@ return array(
 	 */
 
 	'collectors' => array(
-		'phpinfo'         => true,  // Php version
-		'messages'        => true,  // Messages
-		'time'            => true,  // Time Datalogger
 		'memory'          => true,  // Memory usage
 		'exceptions'      => true,  // Exception displayer
 		'default_request' => false, // Regular or special Symfony request logger
 		'phalcon_request' => true,  // Only one can be enabled..
-		'session'         => true, // Display session data in a separate tab
-		'config'          => true,
-		'route'           => true,
-		'log'             => true,
-		'db'              => true,
-		'view'            => true,
-		'cache'           => true,
+		'session'         => false,  // Display session data in a separate tab
+		'config'          => false, // Display the config service content
+		'route'           => false, // Display the current route infomations.
+		'log'             => false, // Display messages of the log service sent.
+		'db'              => false, // Display the sql statments infomations.
+		'view'            => false, // Display the rendered views infomations.
+		'cache'           => false, // Display the cache operation infomations.
 		'mail'            => false,
 	),
 
