@@ -7,6 +7,7 @@
 
 namespace Snowair\Debugbar\Phalcon\Logger\Adapter;
 
+use Phalcon\Version;
 use Phalcon\Logger\Adapter;
 use Phalcon\Logger\Formatter\Line;
 use Snowair\Debugbar\PhalconDebugbar;
@@ -29,10 +30,14 @@ class Debugbar extends Adapter{
 		}
 	}
 
-	public function log($message, $type, array $context=null){
-		$this->logInternal($message,$type,microtime(true),$context);
-		return $this;
-	}
+    public function log($type, $message = NULL, array $context = NULL){
+        if (Version::getId()<'2000000') {
+            $this->logInternal($type,$message,microtime(true),$context);
+        }else{
+            $this->logInternal($message,$type,microtime(true),$context);
+        }
+        return $this;
+    }
 
 	/**
 	 * Returns the internal formatter
