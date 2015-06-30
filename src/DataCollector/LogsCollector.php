@@ -43,9 +43,9 @@ class LogsCollector extends MessagesCollector{
 		$this->_debugbar = $this->_di['debugbar'];
 		$this->_formatter = strtolower($formatter);
 		if ( $di->has('log') && $log = $di->get('log') ) {
-			$di->remove('log');
 			$debugbar_loger = new Debugbar($di['debugbar']);
 			if ( $log instanceof Adapter ) {
+                $di->remove('log');
 				$multiple = new Multiple();
 				$multiple->push( clone $log );
 				$multiple->push( $debugbar_loger );
@@ -53,7 +53,6 @@ class LogsCollector extends MessagesCollector{
 				$di->set('log',$multiple);
 			}elseif($log instanceof Multiple){
 				$log->push( $debugbar_loger );
-				$di->set('log',$log);
 			}
 			$this->_aggregate = $this->isAggregate($aggregate);
 		}
