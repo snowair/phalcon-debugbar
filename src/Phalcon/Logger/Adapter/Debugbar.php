@@ -8,10 +8,11 @@
 namespace Snowair\Debugbar\Phalcon\Logger\Adapter;
 
 use Phalcon\Logger\Adapter;
+use Phalcon\Logger\AdapterInterface;
 use Phalcon\Logger\Formatter\Line;
 use Snowair\Debugbar\PhalconDebugbar;
 
-class Debugbar extends Adapter{
+class Debugbar extends Adapter implements AdapterInterface{
 
 	/**
 	 * @var PhalconDebugbar $_debugbar
@@ -29,7 +30,7 @@ class Debugbar extends Adapter{
 		}
 	}
 
-	public function log($message, $type, array $context=null){
+	public function log($type, $message = null, array $context = null){
 		$this->logInternal($message,$type,microtime(true),$context);
 		return $this;
 	}
