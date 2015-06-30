@@ -53,6 +53,7 @@ class LogsCollector extends MessagesCollector{
 				$di->set('log',$multiple);
 			}elseif($log instanceof Multiple){
 				$log->push( $debugbar_loger );
+				$di->set('log',$log);
 			}
 			$this->_aggregate = $this->isAggregate($aggregate);
 		}
