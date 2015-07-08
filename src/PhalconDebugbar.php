@@ -632,7 +632,7 @@ class;
 					$profiler->setDb($db);
 					if ($event->getType() == 'beforeQuery') {
 						$sql = $db->getRealSQLStatement();
-						if ( stripos( $sql, 'SELECT IF(COUNT(*)>0, 1 , 0) FROM `INFORMATION_SCHEMA`.`TABLES`' )===false
+                        if ( stripos( strtr($sql,[' '=>'']), 'SELECTIF(COUNT(*)>0,1,0)FROM`INFORMATION_SCHEMA`.`TABLES`' )===false
 							&& stripos( $sql, 'DESCRIBE')!==0) {
 							$profiler->startProfile($sql,$params);
 							if ($queryCollector->getFindSource()) {
@@ -646,7 +646,7 @@ class;
 					}
 					if ($event->getType() == 'afterQuery') {
 						$sql = $db->getRealSQLStatement();
-						if ( stripos( $sql, 'SELECT IF(COUNT(*)>0, 1 , 0) FROM `INFORMATION_SCHEMA`.`TABLES`' )===false
+                        if ( stripos( strtr($sql,[' '=>'']), 'SELECTIF(COUNT(*)>0,1,0)FROM`INFORMATION_SCHEMA`.`TABLES`' )===false
 							&& stripos( $sql, 'DESCRIBE')!==0) {
 							$profiler->stopProfile();
 						}
