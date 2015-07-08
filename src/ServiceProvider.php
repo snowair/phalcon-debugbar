@@ -77,25 +77,25 @@ class ServiceProvider extends Injectable {
 			})->setName('debugbar.tools.phpinfo');
 
 		}elseif (  $app instanceof Application ) {
-			$router->addGet('/_debugbar/open',array(
+			$router->add('/_debugbar/open',array(
 				'namespace'=>'Snowair\Debugbar\Controllers',
 				'controller'=>'open_handler',
 				'action'=>'handle',
 			))->setName('debugbar.openhandler');
 
-			$router->addGet('/_debugbar/assets/stylesheets',array(
+			$router->add('/_debugbar/assets/stylesheets',array(
 				'namespace'=>'Snowair\Debugbar\Controllers',
 				'controller'=>'Asset',
 				'action'=>'css',
 			))->setName('debugbar.assets.css');
 
-			$router->addGet('/_debugbar/assets/javascript',array(
+			$router->add('/_debugbar/assets/javascript',array(
 				'namespace'=>'Snowair\Debugbar\Controllers',
 				'controller'=>'Asset',
 				'action'=>'js',
 			))->setName('debugbar.assets.js');
 
-			$router->addGet('/_debugbar/tools/phpinfo',array(
+			$router->add('/_debugbar/tools/phpinfo',array(
 				'namespace'=>'Snowair\Debugbar\Controllers',
 				'controller'=>'Tools',
 				'action'=>'phpinfo',
