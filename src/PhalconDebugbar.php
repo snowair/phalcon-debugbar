@@ -632,9 +632,10 @@ class;
 					$profiler->setDb($db);
 					if ($event->getType() == 'beforeQuery') {
 						$sql = $db->getRealSQLStatement();
+                        $bindTypes = $db->getSQLBindTypes();
                         if ( stripos( strtr($sql,[' '=>'']), 'SELECTIF(COUNT(*)>0,1,0)FROM`INFORMATION_SCHEMA`.`TABLES`' )===false
 							&& stripos( $sql, 'DESCRIBE')!==0) {
-							$profiler->startProfile($sql,$params);
+                            $profiler->startProfile($sql,$params,$bindTypes);
 							if ($queryCollector->getFindSource()) {
 								try {
 									$source = $queryCollector->findSource();

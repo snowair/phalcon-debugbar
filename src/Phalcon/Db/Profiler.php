@@ -8,6 +8,8 @@
 namespace Snowair\Debugbar\Phalcon\Db;
 
 use Phalcon\Db\Adapter;
+use Phalcon\Version;
+use Phalcon\Db\Column;
 use \Phalcon\Db\Profiler as PhalconProfiler;
 use Snowair\Debugbar\Phalcon\Db\Profiler\Item;
 
@@ -67,7 +69,7 @@ class Profiler extends  PhalconProfiler {
 		$activeProfile = new Item();
 
 		$activeProfile->setSqlStatement($sqlStatement);
-		$activeProfile->setRealSQL($this->getRealSql($sqlStatement,$sqlVariables));
+		$activeProfile->setRealSQL($this->getRealSql($sqlStatement,$sqlVariables,$sqlBindTypes));
 
 		if ( is_array($sqlVariables) ) {
 			$activeProfile->setSqlVariables($sqlVariables);
@@ -89,82 +91,68 @@ class Profiler extends  PhalconProfiler {
 		return $this;
 	}
 
-	public function getRealSql( $sql, $variables ) {
-		if ( !$variables ) {
-			return $sql;
-		}
-		$pdo = $this->_db->getInternalHandler();
-		$indexes = array();
-		$keys    = array();
-		foreach ( $variables as $key=> $value ) {
-			if ( is_numeric($key) ) {
-				$indexes[$key] = $pdo->quote($value);
-			} else {
-				if ( is_numeric( substr( $key, 1 ) ) ) {
-					$keys[$key] = $pdo->quote($value);
-				} else {
-					$keys[':'.$key] = $pdo->quote($value);
-				}
-			}
-		}
-		$splited = preg_split('/(?=\?)|(?<=\?)/',$sql);
+    public function getRealSql( $sql, $variables, $sqlBindTypes ) {
+        if ( !$variables ) {
+            return $sql;
+        }
+        $pdo = $this->_db->getInternalHandler();
+        $indexes = array();
+        $keys    = array();
+        foreach ( $variables as $key=> $value ) {
+            if (is_array( $value ) && Version::getId()>=2000440) {
+                foreach ($value as $k => $v) {
+                    $keys[':'.$key.$k]=$pdo->quote($v);
+                }
+            }else{
+                $type = isset($sqlBindTypes[$key])?$sqlBindTypes[$key]:null;
+                if ( is_numeric($key) ) {
+                    $indexes[$key] = $this->quote($pdo,$value,$type);
+                } else {
+                    if ( is_numeric( substr( $key, 1 ) ) ) {
+                        $keys[$key] = $this->quote($pdo,$value,$type);
+                    } else {
+                        $keys[':'.$key] = $this->quote($pdo,$value,$type);
+                    }
+                }
+            }
+        }
+        $splited = preg_split('/(?=\?)|(?<=\?)/',$sql);
 
-		$result = array();
-		foreach ( $splited as $key => $value ) {
-			if ( $value=='?' ) {
-				$result[$key]=array_shift($indexes);
-			} else {
-				$result[$key]=$value;
-			}
-		}
-		$result = implode(' ', $result);
-		$result = strtr($result,$keys);
-		return $result;
-	}
+        $result = array();
+        foreach ( $splited as $key => $value ) {
+            if ( $value=='?' ) {
+                $result[$key]=array_shift($indexes);
+            } else {
+                $result[$key]=$value;
+            }
+        }
+        $result = implode(' ', $result);
+        $result = strtr($result,$keys);
+        return $result;
+    }
 
-	/**
-	 * Stops the active profile
-	 *
-	 * @return PhalconProfiler
-	 */
-	public function stopProfile()
-	{
-
-		$finalTime = microtime(true);
-		$activeProfile = $this->_activeProfile;
-		$activeProfile->setFinalTime($finalTime);
-
-		$initialTime = $activeProfile->getInitialTime();
-		$this->_totalSeconds = $this->_totalSeconds + ($finalTime - $initialTime);
-
-		if ( $this->_db ) {
-			$pdo  = $this->_db->getInternalHandler();
-			$sql  = $activeProfile->getSQLStatement();
-			$data = array( 'last_insert_id'=>0, 'affect_rows'=>0 );
-			$data['connection']=$this->getConnectioinInfo();
-			if ( stripos( $sql, 'INSERT' )===0 ) {
-				$data['last_insert_id'] =  $pdo->lastInsertId();
-			}
-			if ( stripos( $sql, 'INSERT')===0  || stripos( $sql, 'UPDATE')===0 || stripos( $sql, 'DELETE')===0) {
-				$data['affect_rows'] =  $this->_db->affectedRows();
-			}
-			if ( stripos( $sql, 'SELECT')===0 && $this->_explainQuery ) {
-				$stmt = $pdo->prepare( 'explain '.$activeProfile->getSQLStatement());
-				$stmt->execute($activeProfile->getSQLVariables());
-				$data['explain'] = $stmt->fetchAll(\PDO::FETCH_CLASS);
-			}
-			$activeProfile->setExtra($data);
-		}
-
-		$this->_allProfiles[] = $activeProfile;
-
-		if (method_exists($this, "afterEndProfile")) {
-			$this->afterEndProfile($activeProfile);
-		}
-
-		$this->_stoped = true;
-		return $this;
-	}
+    public function quote($pdo, $value, $type=null )
+    {
+        if ($type===null) {
+            return $pdo->quote($value);
+        }
+        switch($type){
+            case Column::BIND_SKIP:
+                break;
+            case Column::BIND_PARAM_INT:
+                $value = (int)$value;
+                break;
+            case Column::BIND_PARAM_NULL:
+                $value = 'null';
+                break;
+            case Column::BIND_PARAM_BOOL:
+                $value = $value?'true':'false';
+                break;
+            default:
+                $value = $pdo->quote($value);
+        }
+        return $value;
+    }
 
 	/**
 	 * @return array
