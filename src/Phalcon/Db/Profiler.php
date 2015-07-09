@@ -154,6 +154,49 @@ class Profiler extends  PhalconProfiler {
         return $value;
     }
 
+    /**
+     * Stops the active profile
+     *
+     * @return PhalconProfiler
+     */
+    public function stopProfile()
+    {
+        $finalTime = microtime(true);
+        $activeProfile = $this->_activeProfile;
+        $activeProfile->setFinalTime($finalTime);
+
+        $initialTime = $activeProfile->getInitialTime();
+        $this->_totalSeconds = $this->_totalSeconds + ($finalTime - $initialTime);
+
+        if ( $this->_db ) {
+            $pdo  = $this->_db->getInternalHandler();
+            $sql  = $activeProfile->getSQLStatement();
+            $data = array( 'last_insert_id'=>0, 'affect_rows'=>0 );
+            $data['connection']=$this->getConnectioinInfo();
+            if ( stripos( $sql, 'INSERT' )===0 ) {
+                $data['last_insert_id'] =  $pdo->lastInsertId();
+            }
+            if ( stripos( $sql, 'INSERT')===0  || stripos( $sql, 'UPDATE')===0 || stripos( $sql, 'DELETE')===0) {
+                $data['affect_rows'] =  $this->_db->affectedRows();
+            }
+            if ( stripos( $sql, 'SELECT')===0 && $this->_explainQuery ) {
+                $stmt = $pdo->prepare( 'explain '.$activeProfile->getSQLStatement());
+                $stmt->execute($activeProfile->getSQLVariables());
+                $data['explain'] = $stmt->fetchAll(\PDO::FETCH_CLASS);
+            }
+            $activeProfile->setExtra($data);
+        }
+
+        $this->_allProfiles[] = $activeProfile;
+
+        if (method_exists($this, "afterEndProfile")) {
+            $this->afterEndProfile($activeProfile);
+        }
+
+        $this->_stoped = true;
+        return $this;
+    }
+
 	/**
 	 * @return array
 	 */
