@@ -112,7 +112,8 @@ return array(
 		'config'          => false, // Display the config service content
 		'route'           => false, // Display the current route infomations.
 		'log'             => false, // Display messages of the log service sent.
-		'db'              => false, // Display the sql statments infomations.
+		'db'              => false, // Display the sql statments infomations. Just for Phalcon ORM/PHQL
+		'doctrine'        => false, // Display the sql statments infomations. Just for Doctrine
 		'view'            => false, // Display the rendered views infomations.
 		'cache'           => false, // Display the cache operation infomations.
 		'mail'            => false,

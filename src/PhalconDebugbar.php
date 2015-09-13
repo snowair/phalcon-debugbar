@@ -7,6 +7,7 @@
 
 namespace Snowair\Debugbar;
 
+use DebugBar\Bridge\DoctrineCollector;
 use DebugBar\Bridge\SwiftMailer\SwiftLogCollector;
 use DebugBar\Bridge\SwiftMailer\SwiftMailCollector;
 use DebugBar\DataCollector\ExceptionsCollector;
@@ -132,6 +133,12 @@ class PhalconDebugbar extends DebugBar {
 		if ($this->shouldCollect('default_request', false)) {
 			$this->addCollector(new RequestDataCollector());
 		}
+		if ($this->shouldCollect('doctrine', false)) {
+			$debugStack = new \Doctrine\DBAL\Logging\DebugStack();
+			$entityManager = $this->di['entityManager'];
+			$entityManager->getConnection()->getConfiguration()->setSQLLogger($debugStack);
+			$this->addCollector(new DoctrineCollector($debugStack));
+		}
 		if ($this->shouldCollect('exceptions', true)) {
 			try {
 				$exceptionCollector = new ExceptionsCollector();
@@ -183,6 +190,13 @@ class PhalconDebugbar extends DebugBar {
 
     public function debugbarRequestCollector()
     {
+		// 如果 collector 需要额外的js合并, 需要在此添加一次, 以保证debugbar.widget.js不报js错误
+		if ($this->shouldCollect('doctrine', false)) {
+			$debugStack = new \Doctrine\DBAL\Logging\DebugStack();
+			$entityManager = $this->di['entityManager'];
+			$entityManager->getConnection()->getConfiguration()->setSQLLogger($debugStack);
+			$this->addCollector(new DoctrineCollector($debugStack));
+		}
         if ($this->shouldCollect('db')) {
             $queryCollector = new QueryCollector(new Profiler());
             $this->addCollector($queryCollector);

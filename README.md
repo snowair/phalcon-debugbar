@@ -19,14 +19,25 @@ Thanks laravel-debugbar, I use some codes of it!
 - `ExceptionsCollector` : Add a exception object to debugbar.
 - `MemoryCollector` : Collect memory usage
 - `QueryCollector`: Capture each SQL statement, measure spent time of each SQL, show EXPLAIN result of each SELECT statement
+    * collect infomations from the `db` service.
+- `DoctrineCollector`: Capture each SQL statement in Dortrine, measure spent time of each SQL.
+    * collect infomations from the `entityManager` service.
 - `RouteCollector`: Show Route info of currect request.
+    * collect infomations from the `router` service.
 - `ViewCollector`:  Show all the rendered templates, measure spent time of each template, show all the templates variables.
+    * collect infomations from the `view` service.
 - `PhalconRequestCollector`: Show request headers, cookies, server variables, response headers, querys, post data,raw body
+    * collect infomations from the `request` service.
 - `ConfigCollector`: Show the data in the config service.
+    * collect infomations from the `config` service.
 - `SessionCollectior`: Show session data
+    * collect infomations from the `session` service.
 - `SwiftMailCollector`: mailer info
+    * collect infomations from the `mail` service.
 - `LogsCollectors`: Show logs of current request.
+    * collect infomations from the `log` service.
 - `CacheCollectors`: Show caches summary(saved,gets,incs,decs,failds), and each cache operation detail.
+    * collect infomations from the `cache` service.
 
 ## Quick start
 
