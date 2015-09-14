@@ -181,7 +181,18 @@ class Profiler extends  PhalconProfiler {
             }
             if ( stripos( $sql, 'SELECT')===0 && $this->_explainQuery ) {
                 $stmt = $pdo->prepare( 'explain '.$activeProfile->getSQLStatement());
-                $stmt->execute($activeProfile->getSQLVariables());
+                $binds = $activeProfile->getSQLVariables();
+                $bind_params = [];
+                foreach ($binds as $key => $value) {
+                    if (is_array($value)) {
+                        foreach ($value as $k => $v) {
+                            $bind_params[$key.$k]=$v;
+                        }
+                    }else{
+                        $bind_params[$key]=$value;
+                    }
+                }
+                $stmt->execute($bind_params);
                 $data['explain'] = $stmt->fetchAll(\PDO::FETCH_CLASS);
             }
             $activeProfile->setExtra($data);
