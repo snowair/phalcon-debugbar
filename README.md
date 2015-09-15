@@ -22,9 +22,9 @@ Thanks laravel-debugbar, I use some codes of it!
 - **ExceptionsCollector** : Add a exception object to debugbar.
 - **MemoryCollector** : Collect memory usage
 - **QueryCollector**: Capture each SQL statement, measure spent time of each SQL, show EXPLAIN result of each SELECT statement
-    * collect infomations from the `db` service.
+    * collect infomations from the `db` service. Only for Phalcon ORM.
 - **DoctrineCollector**: Capture each SQL statement in Dortrine, measure spent time of each SQL.
-    * collect infomations from the `entityManager` service.
+    * collect infomations from the `entityManager` service. Only for Doctrine ORM.
 - **RouteCollector**: Show Route info of currect request.
     * collect infomations from the `router` service.
 - **ViewCollector**:  Show all the rendered templates, measure spent time of each template, show all the templates variables.

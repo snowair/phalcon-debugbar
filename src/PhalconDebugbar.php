@@ -224,7 +224,7 @@ class PhalconDebugbar extends DebugBar {
 		if ($this->shouldCollect('mail', true) && $this->di->has('mailer') ) {
 			$this->attachMailer( $this->di['mailer'] );
 		}
-        if ($this->shouldCollect('doctrine', false) && !$this->hasCollector('doctrine')) {
+        if ($this->shouldCollect('doctrine', false) &&!$this->hasCollector('doctrine') && !$this->hasCollector('pdo') ) {
             $debugStack = new \Doctrine\DBAL\Logging\DebugStack();
             $entityManager = $this->di['entityManager'];
             $entityManager->getConnection()->getConfiguration()->setSQLLogger($debugStack);
