@@ -133,12 +133,6 @@ class PhalconDebugbar extends DebugBar {
 		if ($this->shouldCollect('default_request', false)) {
 			$this->addCollector(new RequestDataCollector());
 		}
-		if ($this->shouldCollect('doctrine', false)) {
-			$debugStack = new \Doctrine\DBAL\Logging\DebugStack();
-			$entityManager = $this->di['entityManager'];
-			$entityManager->getConnection()->getConfiguration()->setSQLLogger($debugStack);
-			$this->addCollector(new DoctrineCollector($debugStack));
-		}
 		if ($this->shouldCollect('exceptions', true)) {
 			try {
 				$exceptionCollector = new ExceptionsCollector();
@@ -230,6 +224,12 @@ class PhalconDebugbar extends DebugBar {
 		if ($this->shouldCollect('mail', true) && $this->di->has('mailer') ) {
 			$this->attachMailer( $this->di['mailer'] );
 		}
+        if ($this->shouldCollect('doctrine', false) && !$this->hasCollector('doctrine')) {
+            $debugStack = new \Doctrine\DBAL\Logging\DebugStack();
+            $entityManager = $this->di['entityManager'];
+            $entityManager->getConnection()->getConfiguration()->setSQLLogger($debugStack);
+            $this->addCollector(new DoctrineCollector($debugStack));
+        }
 	}
 
 	public function attachCache($cacheService) {

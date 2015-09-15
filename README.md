@@ -4,6 +4,9 @@ Integrates [PHP Debug Bar](http://phpdebugbar.com/) with  [Phalcon FrameWork](ht
 
 Thanks laravel-debugbar, I use some codes of it!
 
+[Demo Online](http://invo.coding.io/)
+
+[中文文档](https://github.com/snowair/phalcon-debugbar/blob/master/%E8%AF%B4%E6%98%8E%E6%96%87%E4%BB%B6.md)
 
 ## Features
 
@@ -14,29 +17,29 @@ Thanks laravel-debugbar, I use some codes of it!
 
 ### Support Collectors
 
-- `MessagesCollector` : Collect custom message, support scalar, array and object
-- `TimeDataCollector` : Collect custom time measure.
-- `ExceptionsCollector` : Add a exception object to debugbar.
-- `MemoryCollector` : Collect memory usage
-- `QueryCollector`: Capture each SQL statement, measure spent time of each SQL, show EXPLAIN result of each SELECT statement
+- **MessagesCollector** : Collect custom message, support scalar, array and object
+- **TimeDataCollector** : Collect custom time measure.
+- **ExceptionsCollector** : Add a exception object to debugbar.
+- **MemoryCollector** : Collect memory usage
+- **QueryCollector**: Capture each SQL statement, measure spent time of each SQL, show EXPLAIN result of each SELECT statement
     * collect infomations from the `db` service.
-- `DoctrineCollector`: Capture each SQL statement in Dortrine, measure spent time of each SQL.
+- **DoctrineCollector**: Capture each SQL statement in Dortrine, measure spent time of each SQL.
     * collect infomations from the `entityManager` service.
-- `RouteCollector`: Show Route info of currect request.
+- **RouteCollector**: Show Route info of currect request.
     * collect infomations from the `router` service.
-- `ViewCollector`:  Show all the rendered templates, measure spent time of each template, show all the templates variables.
+- **ViewCollector**:  Show all the rendered templates, measure spent time of each template, show all the templates variables.
     * collect infomations from the `view` service.
-- `PhalconRequestCollector`: Show request headers, cookies, server variables, response headers, querys, post data,raw body
+- **PhalconRequestCollector**: Show request headers, cookies, server variables, response headers, querys, post data,raw body
     * collect infomations from the `request` service.
-- `ConfigCollector`: Show the data in the config service.
+- **ConfigCollector**: Show the data in the config service.
     * collect infomations from the `config` service.
-- `SessionCollectior`: Show session data
+- **SessionCollectior**: Show session data
     * collect infomations from the `session` service.
-- `SwiftMailCollector`: mailer info
+- **SwiftMailCollector**: mailer info
     * collect infomations from the `mail` service.
-- `LogsCollectors`: Show logs of current request.
+- **LogsCollectors**: Show logs of current request.
     * collect infomations from the `log` service.
-- `CacheCollectors`: Show caches summary(saved,gets,incs,decs,failds), and each cache operation detail.
+- **CacheCollectors**: Show caches summary(saved,gets,incs,decs,failds), and each cache operation detail.
     * collect infomations from the `cache` service.
 
 ## Quick start
@@ -150,6 +153,8 @@ if ( $di->has('debugbar') ) {
 ```
 
 ### TroubleShooting
+
+* I strongly suggest you to assign a **host domain** to your project, and set the **baseUri** of uri service to `/`. Otherwise, Phalcon debugbar may not work.
 
 * For ajax/json request, the debug data only stored in the persistent directory as a json file. You can
  Load it to the debugbar form Openhandler(Open icon on the right).
