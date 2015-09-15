@@ -192,8 +192,12 @@ class Profiler extends  PhalconProfiler {
                         $bind_params[$key]=$value;
                     }
                 }
-                $stmt->execute($bind_params);
-                $data['explain'] = $stmt->fetchAll(\PDO::FETCH_CLASS);
+                try{
+                    $stmt->execute($bind_params);
+                    $data['explain'] = $stmt->fetchAll(\PDO::FETCH_CLASS);
+                }catch (\Exception $e){
+
+                }
             }
             $activeProfile->setExtra($data);
         }
