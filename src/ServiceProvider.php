@@ -11,6 +11,7 @@ use Phalcon\Events\Manager;
 use Phalcon\Http\ResponseInterface;
 use Phalcon\Mvc\Application;
 use Phalcon\Mvc\Micro;
+use Phalcon\Version;
 use Snowair\Debugbar\Controllers\AssetController;
 use Snowair\Debugbar\Controllers\OpenHandlerController;
 use Phalcon\Config\Adapter\Php;
@@ -47,7 +48,8 @@ class ServiceProvider extends Injectable {
 		},true);
 
 		$this->di->set('debugbar', function(){
-			$debugbar = new PhalconDebugbar($this->di);
+			$di = (Version::getId() > 2010000) ? $this : $this->di;
+			$debugbar = new PhalconDebugbar($di);
 			$debugbar->setHttpDriver(new PhalconHttpDriver());
 			return $debugbar;
 		});

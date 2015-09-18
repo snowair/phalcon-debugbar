@@ -110,6 +110,8 @@ class Profiler extends  PhalconProfiler {
                 } else {
                     if ( is_numeric( substr( $key, 1 ) ) ) {
                         $keys[$key] = $this->quote($pdo,$value,$type);
+                    } elseif (substr($key, 0, 1) === ':') {
+                        $keys[$key] = $this->quote($pdo,$value,$type);
                     } else {
                         $keys[':'.$key] = $this->quote($pdo,$value,$type);
                     }
