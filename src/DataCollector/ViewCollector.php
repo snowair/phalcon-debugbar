@@ -85,7 +85,7 @@ class ViewCollector  extends TwigCollector {
 			}
 		}
 
-		if(empty($templates) || ! $vars=$profiler->params ){
+		if(empty($templates) || !isset($profiler->params) || ! $vars=$profiler->params ){
 			$vars = null;
 		}else if (!is_string( $vars)) {
 			if ( !empty($this->_customFormatMap) ) {
