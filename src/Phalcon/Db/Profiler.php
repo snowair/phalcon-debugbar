@@ -51,7 +51,11 @@ class Profiler extends  PhalconProfiler {
 		}else if ( isset($info['host']) && isset($info['port']) && !in_array($info['port'],array(3306,1521,5432,1433)) ) {
 			$info['host'].=':'.$info['port'];
 		}
-		return $info['host'].'/'.$info['dbname'];
+        	if (isset($info['dbname'])) {
+			return $info['host'] . '/' . $info['dbname'];
+		} else {
+			return $info['host'] ;
+		}
 	}
 
 	/**
