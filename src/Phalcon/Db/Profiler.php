@@ -189,7 +189,7 @@ class Profiler extends  PhalconProfiler {
                 $stmt = $pdo->prepare( 'explain '.$activeProfile->getSQLStatement());
                 $binds = $activeProfile->getSQLVariables();
                 $bind_params = [];
-                foreach ($binds as $key => $value) {
+                foreach ((array)$binds as $key => $value) {
                     if (is_array($value)) {
                         foreach ($value as $k => $v) {
                             $bind_params[$key.$k]=$v;
