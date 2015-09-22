@@ -8,12 +8,14 @@
 namespace Snowair\Debugbar\DataCollector;
 
 
+use Monolog\Logger;
 use Phalcon\DI;
 use Phalcon\Logger\Adapter;
 use Phalcon\Logger\Formatter\Line;
 use Phalcon\Logger\Formatter\Syslog;
 use Phalcon\Logger\FormatterInterface;
 use Phalcon\Logger\Multiple;
+use Psr\Log\LoggerInterface;
 use Snowair\Debugbar\Phalcon\Logger\Adapter\Debugbar;
 use Snowair\Debugbar\PhalconDebugbar;
 
@@ -53,7 +55,11 @@ class LogsCollector extends MessagesCollector{
 				$di->set('log',$multiple);
 			}elseif($log instanceof Multiple){
 				$log->push( $debugbar_loger );
+			}elseif( class_exists('Monolog\Logger') && $log instanceof Logger ){
+				$handler = new \Snowair\Debugbar\Monolog\Handler\Debugbar($this->_debugbar);
+				$log->pushHandler($handler);
 			}
+
 			$this->_aggregate = $this->isAggregate($aggregate);
 		}
 	}
