@@ -701,7 +701,7 @@ class;
 				'utime' => microtime(true),
 				'method' => $request->getMethod(),
 				'uri' => $request->getURI(),
-				'ip' => $request->getClientAddress()
+				'ip' => $request->getClientAddress(true)
 			)
 		);
 
