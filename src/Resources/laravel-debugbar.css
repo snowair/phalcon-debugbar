@@ -212,21 +212,29 @@ ul.phpdebugbar-widgets-list li.phpdebugbar-widgets-list-item:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-div.phpdebugbar-widgets-messages li.phpdebugbar-widgets-list-item span.phpdebugbar-widgets-value.phpdebugbar-widgets-error:before {
+div.phpdebugbar-widgets-messages li.phpdebugbar-widgets-list-item span.phpdebugbar-widgets-value.phpdebugbar-widgets-error:before ,
+div.phpdebugbar-widgets-messages li.phpdebugbar-widgets-list-item span.phpdebugbar-widgets-value.phpdebugbar-widgets-ERROR:before
+{
     font-size: 12px;
     color: #FF0000;
 }
 
-div.phpdebugbar-widgets-messages li.phpdebugbar-widgets-list-item span.phpdebugbar-widgets-value.phpdebugbar-widgets-warning:before {
+div.phpdebugbar-widgets-messages li.phpdebugbar-widgets-list-item span.phpdebugbar-widgets-value.phpdebugbar-widgets-warning:before,
+div.phpdebugbar-widgets-messages li.phpdebugbar-widgets-list-item span.phpdebugbar-widgets-value.phpdebugbar-widgets-WARNING:before
+{
     font-size: 12px;
     color: #D2AA07;
 }
 
-div.phpdebugbar-widgets-messages li.phpdebugbar-widgets-list-item span.phpdebugbar-widgets-value.phpdebugbar-widgets-error {
+div.phpdebugbar-widgets-messages li.phpdebugbar-widgets-list-item span.phpdebugbar-widgets-value.phpdebugbar-widgets-error,
+div.phpdebugbar-widgets-messages li.phpdebugbar-widgets-list-item span.phpdebugbar-widgets-value.phpdebugbar-widgets-ERROR
+{
     color: #FF0000;
 }
 
-.phpdebugbar-widgets-value.phpdebugbar-widgets-warning {
+.phpdebugbar-widgets-value.phpdebugbar-widgets-warning,
+.phpdebugbar-widgets-value.phpdebugbar-widgets-WARNING
+{
     color: #D2AA07;
 }
 

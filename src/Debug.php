@@ -100,7 +100,7 @@ class PhalconDebug{
 	 * @param        $message
 	 * @param string $label
 	 */
-	public static function addMessage($message,$label='info'){
+	public static function addMessage($message,$label='INFO'){
 		self::debugbar()->addMessage($message,$label);
 	}
 
@@ -110,7 +110,7 @@ class PhalconDebug{
 	 * @param        $condition
 	 * @param string $label
 	 */
-	public static function addMessageIfTrue($message,$condition,$label='info'){
+	public static function addMessageIfTrue($message,$condition,$label='INFO'){
 		if ( $condition===true ) {
 			self::debugbar()->addMessage($message,$label);
 		}
@@ -122,7 +122,7 @@ class PhalconDebug{
 	 * @param        $condition
 	 * @param string $label
 	 */
-	public static function addMessageIfFalse($message,$condition,$label='info'){
+	public static function addMessageIfFalse($message,$condition,$label='INFO'){
 		if ( $condition===false ) {
 			self::debugbar()->addMessage($message,$label);
 		}
@@ -134,7 +134,7 @@ class PhalconDebug{
 	 * @param        $condition
 	 * @param string $label
 	 */
-	public static function addMessageIfNull($message,$condition,$label='info'){
+	public static function addMessageIfNull($message,$condition,$label='INFO'){
 		if ( $condition===null ) {
 			self::debugbar()->addMessage($message,$label);
 		}
@@ -146,7 +146,7 @@ class PhalconDebug{
 	 * @param        $condition
 	 * @param string $label
 	 */
-	public static function addMessageIfEmpty($message,$condition,$label='info'){
+	public static function addMessageIfEmpty($message,$condition,$label='INFO'){
 		if ( empty($condition)===true ) {
 			self::debugbar()->addMessage($message,$label);
 		}
@@ -158,7 +158,7 @@ class PhalconDebug{
 	 * @param        $condition
 	 * @param string $label
 	 */
-	public static function addMessageIfNotEmpty($message,$condition,$label='info'){
+	public static function addMessageIfNotEmpty($message,$condition,$label='INFO'){
 		if ( empty($condition)===false ) {
 			self::debugbar()->addMessage($message,$label);
 		}

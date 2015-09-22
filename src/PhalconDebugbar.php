@@ -869,7 +869,7 @@ class;
 		$messageLevels = array('emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug', 'log');
 		if (in_array($method, $messageLevels)) {
 			foreach($args as $arg) {
-				$this->addMessage($arg, $method);
+				$this->addMessage($arg, strtoupper($method));
 			}
 		}
 	}
