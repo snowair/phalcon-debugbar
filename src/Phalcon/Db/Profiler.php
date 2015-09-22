@@ -36,7 +36,7 @@ class Profiler extends  PhalconProfiler {
 				$latest->setExtra(array(
 					'err_code'=>$pdo->errorCode(),
 					'err_msg'=>$pdo->errorInfo(),
-					'connection'=>$this->getConnectioinInfo(),
+					'connection'=>$this->getConnectionInfo(),
 				));
 			}
 			$this->_lastFailed = $latest;
@@ -44,14 +44,18 @@ class Profiler extends  PhalconProfiler {
 		}
 	}
 
-	public function getConnectioinInfo() {
+	public function getConnectionInfo() {
 		$info = $this->_db->getDescriptor();
 		if(empty($info['host'])){
 			return $info['dbname'];
 		}else if ( isset($info['host']) && isset($info['port']) && !in_array($info['port'],array(3306,1521,5432,1433)) ) {
 			$info['host'].=':'.$info['port'];
 		}
-		return $info['host'].'/'.$info['dbname'];
+        	if (isset($info['dbname'])) {
+			return $info['host'] . '/' . $info['dbname'];
+		} else {
+			return $info['host'] ;
+		}
 	}
 
 	/**
@@ -174,7 +178,7 @@ class Profiler extends  PhalconProfiler {
             $pdo  = $this->_db->getInternalHandler();
             $sql  = $activeProfile->getSQLStatement();
             $data = array( 'last_insert_id'=>0, 'affect_rows'=>0 );
-            $data['connection']=$this->getConnectioinInfo();
+            $data['connection']=$this->getConnectionInfo();
             if ( stripos( $sql, 'INSERT' )===0 ) {
                 $data['last_insert_id'] =  $pdo->lastInsertId();
             }
