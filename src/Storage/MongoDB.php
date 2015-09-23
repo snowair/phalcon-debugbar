@@ -40,7 +40,7 @@ class MongoDB implements StorageInterface
      */
     function get( $id )
     {
-        $this->collection->find(array('_id'=>$id));
+        return (array)$this->collection->findOne(array('_id'=>$id));
     }
 
     /**
