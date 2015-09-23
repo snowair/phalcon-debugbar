@@ -41,6 +41,8 @@ use Snowair\Debugbar\DataCollector\SessionCollector;
 use Snowair\Debugbar\DataCollector\ViewCollector;
 use Snowair\Debugbar\Phalcon\Db\Profiler;
 use Snowair\Debugbar\Phalcon\View\VoltFunctions;
+use Snowair\Debugbar\Storage\Filesystem;
+use Snowair\Debugbar\Storage\MongoDB;
 
 /**
  * Debug bar subclass which adds all without Request and with Collector.
@@ -422,10 +424,16 @@ class;
 		if ($config->storage->enabled) {
 			$driver = $config->storage->get('driver','file');
 			switch ($driver) {
-				//TODO:: other driver
+				case 'mongodb':
+					$connection = $config->storage->mongodb->connection;
+					$db = $config->storage->mongodb->db;
+					$options = $config->storage->mongodb->options;
+					$collection = $config->storage->mongodb->collection;
+					$storage = new MongoDB($connection,$db,$collection,$options);
+					break;
 				default:
 					$path = $config->storage->path;
-					$storage = new FilesystemStorage($path);
+					$storage = new Filesystem($path);
 					break;
 			}
 

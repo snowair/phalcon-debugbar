@@ -23,8 +23,14 @@ return array(
 	 */
 	'storage' => array(
 		'enabled' => true,
-		'driver' => 'file',
+		'driver' => 'file', // file, mongodb
 		'path' => '../Runtime/debugbar', // For file driver
+		'mongodb' => array(  // mongodb driver
+                             'connection' => 'mongodb://localhost:27017',
+                             'db'=>'debugbar',
+                             'collection' => 'debugbar',
+                             'options'=>array(),
+		),
 	),
 
     /*
