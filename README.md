@@ -10,10 +10,11 @@ Thanks laravel-debugbar, I use some codes of it!
 
 ## Features
 
-1. Ajax request support
-2. Redirect support
-3. persistent support
-4. Simple App, Mulit module App and Micro App support
+1. Normal request capturing
+2. Ajax request capturing
+3. Redirect request chain capturing
+4. Data collected persistent : save to Local File or MongoDB
+5. Simple App, Mulit module App and Micro App support
 
 ### Support Collectors
 
@@ -57,10 +58,11 @@ Thanks laravel-debugbar, I use some codes of it!
     php composer.phar update snowair/phalcon-debugbar
     ```
 
-### pesistent directory
+### data pesistent
 
-The default directory for store debugbar data is `Runtime/phalcon`. If it not exists, will try to create auto.
+For **file** driver, The default directory for store debugbar data is `Runtime/phalcon`. If it not exists, will try to create auto. You can change it by reconfig.
 
+For **mongodb** driver, The default connection is `mongodb://localhost:27017`, the database  and collection are both named **debugbar**. You must install the **mongo** extension for php.
 
 ### modify index.php
 
@@ -78,6 +80,22 @@ The default directory for store debugbar data is `Runtime/phalcon`. If it not ex
     // after start the debugbar, you can do noting but handle your app right now.
     echo $application->handle()->getContent();
     ```
+
+### about baseUri
+
+Be aware of the **baseUri** configuration of your project, you **must** set a currect baseUri for your **uri** service.
+
+If you are using apache, you should enable the Rewirte mod and have a `.htaccess` file under the baseUri directory.
+
+If you are using nginx, you should enable the Rewirte mod and edit the location block of the server configuration like this:
+
+```
+    location @rewrite {
+        # replace 'baseuri' to your real baseuri
+        rewrite ^/baseuri/(.*)$ /baseuri/index.php?_url=/$1;
+    }
+```
+
 
 ## More
 
@@ -154,7 +172,7 @@ if ( $di->has('debugbar') ) {
 
 ### TroubleShooting
 
-* I strongly suggest you to assign a **host domain** to your project, and set the **baseUri** of uri service to `/`. Otherwise, Phalcon debugbar may not work.
+* I strongly suggest you to assign a **host domain** to your project, and set the **baseUri** of uri service to `/`. 
 
 * For ajax/json request, the debug data only stored in the persistent directory as a json file. You can
  Load it to the debugbar form Openhandler(Open icon on the right).
