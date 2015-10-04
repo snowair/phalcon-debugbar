@@ -38,10 +38,8 @@ class JsRender extends JavascriptRenderer{
 		}
 
  		// get current application base uri and srote it in a variable
-	        $baseUri = $this->url->getBaseUri();
-	        
+
 	        // set debugger base uri
-	        $this->url->setBaseUri('/');
 
 		$jsModified = $this->getModifiedTime('js');
 		$cssModified = $this->getModifiedTime('css');
@@ -63,7 +61,6 @@ class JsRender extends JavascriptRenderer{
 		}
 		
 		// reset base uri to its default
-        	$this->url->setBaseUri($baseUri);
 
 		return $html;
 	}

@@ -747,13 +747,9 @@ class;
 		$renderer = $this->getJavascriptRenderer();
 		if ($this->getStorage()) {
 			
-		        $baseUri = $this->di['url']->getBaseUri();
-		        $this->di['url']->setBaseUri('/');
-			
 			$openHandlerUrl = $this->di['url']->get( array('for'=>'debugbar.openhandler') );
 			$renderer->setOpenHandlerUrl($openHandlerUrl);
 			 
-        		$this->di['url']->setBaseUri($baseUri);
 		}
 
 		$renderedContent = $renderer->renderHead() . $renderer->render();
