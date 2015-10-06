@@ -1,3 +1,8 @@
+[![Latest Stable Version](https://poser.pugx.org/snowair/phalcon-debugbar/v/stable)](https://packagist.org/packages/snowair/phalcon-debugbar) 
+[![Total Downloads](https://poser.pugx.org/snowair/phalcon-debugbar/downloads)](https://packagist.org/packages/snowair/phalcon-debugbar) 
+[![Latest Unstable Version](https://poser.pugx.org/snowair/phalcon-debugbar/v/unstable)](https://packagist.org/packages/snowair/phalcon-debugbar) 
+[![License](https://poser.pugx.org/snowair/phalcon-debugbar/license)](https://packagist.org/packages/snowair/phalcon-debugbar)
+
 ## Phalcon Debugbar
 
 Integrates [PHP Debug Bar](http://phpdebugbar.com/) with  [Phalcon FrameWork](http://phalconphp.com).
