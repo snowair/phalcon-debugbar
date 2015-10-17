@@ -5,13 +5,11 @@
 
 ## Phalcon Debugbar
 
-Integrates [PHP Debug Bar](http://phpdebugbar.com/) with [Phalcon Framework](http://phalconphp.com).
-
-Thanks laravel-debugbar, I use some codes of it!
+Integrates [PHP Debug Bar](https://github.com/maximebf/php-debugbar) with [Phalcon Framework](https://github.com/phalcon/cphalcon).
 
 [Demo Online](http://invo.coding.io/)
 
-[中文文档](https://github.com/snowair/phalcon-debugbar/blob/master/%E8%AF%B4%E6%98%8E%E6%96%87%E4%BB%B6.md)
+[中文说明](https://github.com/snowair/phalcon-debugbar/blob/master/README_zh.md)
 
 ## Features
 
@@ -43,7 +41,7 @@ Thanks laravel-debugbar, I use some codes of it!
     * collect information from the `session` service.
 - **SwiftMailCollector**: mailer info
     * collect information from the `mail` service.
-- **LogsCollectors**: Show logs of current request.
+- **LogsCollectors**: Show logs of current request. Support `Phalcon\Logger` and **Monolog**
     * collect information from the `log` service.
 - **CacheCollectors**: Show caches summary (saved,gets,incs,decs,failds), and each cache operation detail.
     * collect information from the `cache` service.
@@ -63,12 +61,6 @@ Thanks laravel-debugbar, I use some codes of it!
     php composer.phar update snowair/phalcon-debugbar
     ```
 
-### Data Persistent
-
-For **file** driver, the default directory for store debugbar data is `Runtime/phalcon`. If it doesn't exist, it will be created automatically. You can change it by reconfig.
-
-For **mongodb** driver, the default connection is `mongodb://localhost:27017`, the database and collection are both named **debugbar**. You must install the **mongo** extension for PHP.
-
 ### Modify index.php
 
 1. Set your App Instance to DI:
@@ -85,6 +77,12 @@ For **mongodb** driver, the default connection is `mongodb://localhost:27017`, t
     // after start the debugbar, you can do noting but handle your app right now.
     echo $application->handle()->getContent();
     ```
+    
+### Data Persistent
+
+For **file** driver, the default directory for store debugbar data is `Runtime/phalcon`. If it doesn't exist, it will be created automatically. You can change it by reconfig.
+
+For **mongodb** driver, the default connection is `mongodb://localhost:27017`, the database and collection are both named **debugbar**. You must install the **mongo** extension for PHP.
 
 ### About baseUri
 
@@ -103,6 +101,14 @@ If you are using nginx, you should enable the Rewrite mod and edit the location 
 
 
 ## More
+
+### Use your config
+
+Copy `config/debugbar.php` to your config directory, and change any settings you want. Then use your debugbar config file by:
+
+```php
+(new Snowair\Debugbar\ServiceProvider('your-debugbar-config-file-path'))->start();
+```
 
 ### Send custom messages to debugbar
 
@@ -144,14 +150,6 @@ debug/info/notice/warning/error/emergency/critical
 {{ debug( var1, var2 )}}
 {{ info( var1, var2 )}}
 {{ addMessageIfTrue('$var === true', var ) }}
-```
-
-### Use your config
-
-Copy `config/debugbar.php` to your config directory, and change any settings you want. Then use your debugbar config file by:
-
-```php
-(new Snowair\Debugbar\ServiceProvider('your-debugbar-config-file-path'))->start();
 ```
 
 ### Multi Modules
