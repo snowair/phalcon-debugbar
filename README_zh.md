@@ -75,7 +75,44 @@
     // 在启动debugbar之后,立即handle应用.
     echo $application->handle()->getContent();
     ```
-    
+
+### 修改权限控制代码
+
+下面的acl控制代码适用于 INVO:
+
+```
+public function beforeDispatch(Event $event, Dispatcher $dispatcher)
+    {
+        $auth = $this->session->get('auth');
+        if (!$auth){
+            $role = 'Guests';
+        } else {
+            $role = 'Users';
+        }
+
+        $controller = $dispatcher->getControllerName();
+        $action = $dispatcher->getActionName();
+
+        /* Debugbar start */
+        $ns = $dispatcher->getNamespaceName();
+        if ($ns=='Snowair\Debugbar\Controllers') {
+            return true;
+        }
+        /* Debugbar end */
+
+        $acl = $this->getAcl();
+        $allowed = $acl->isAllowed($role, $controller, $action);
+        if ($allowed != Acl::ALLOW) {
+            $dispatcher->forward(array(
+                'controller' => 'errors',
+                'action'     => 'show401'
+            ));
+                        $this->session->destroy();
+            return false;
+        }
+    }
+```
+
 ### 数据持久化
 
 每次请求的调试数据都可以被保存下了, 供你进行系统分析.
