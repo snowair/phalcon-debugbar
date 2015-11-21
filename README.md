@@ -78,6 +78,43 @@ Integrates [PHP Debug Bar](https://github.com/maximebf/php-debugbar) with [Phalc
     echo $application->handle()->getContent();
     ```
     
+### Modify The ACL Code
+
+Here is a example for INVO:
+
+```
+public function beforeDispatch(Event $event, Dispatcher $dispatcher)
+    {
+        $auth = $this->session->get('auth');
+        if (!$auth){
+            $role = 'Guests';
+        } else {
+            $role = 'Users';
+        }
+        
+        $controller = $dispatcher->getControllerName();
+        $action = $dispatcher->getActionName();
+        
+        /* Debugbar start */
+        $ns = $dispatcher->getNamespaceName();
+        if ($ns=='Snowair\Debugbar\Controllers') {
+            return true;
+        }
+        /* Debugbar end */
+        
+        $acl = $this->getAcl();
+        $allowed = $acl->isAllowed($role, $controller, $action);
+        if ($allowed != Acl::ALLOW) {
+            $dispatcher->forward(array(
+                'controller' => 'errors',
+                'action'     => 'show401'
+            ));
+                        $this->session->destroy();
+            return false;
+        }
+    }
+```
+
 ### Data Persistent
 
 For **file** driver, the default directory for store debugbar data is `Runtime/phalcon`. If it doesn't exist, it will be created automatically. You can change it by reconfig.
