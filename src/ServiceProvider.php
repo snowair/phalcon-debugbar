@@ -15,6 +15,7 @@ use Phalcon\Version;
 use Snowair\Debugbar\Controllers\AssetController;
 use Snowair\Debugbar\Controllers\OpenHandlerController;
 use Phalcon\Config\Adapter\Php;
+use Phalcon\Config;
 use Phalcon\DI\Injectable;
 use Snowair\Debugbar\Controllers\ToolsController;
 
@@ -40,7 +41,7 @@ class ServiceProvider extends Injectable {
 			if ( is_string( $configPath) && is_file($configPath) ) {
 				$config = new Php($configPath);
 				$base->merge($config);
-			}elseif( is_object($configPath) && $configPath instanceof Php){
+			}elseif( is_object($configPath) && $configPath instanceof Config){
 				$base->merge($configPath);
 			}else{
 			}
