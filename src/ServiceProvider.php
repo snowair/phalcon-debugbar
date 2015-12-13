@@ -15,6 +15,10 @@ use Phalcon\Version;
 use Snowair\Debugbar\Controllers\AssetController;
 use Snowair\Debugbar\Controllers\OpenHandlerController;
 use Phalcon\Config\Adapter\Php;
+use Phalcon\Config\Adapter\Ini;
+use Phalcon\Config\Adapter\Json;
+use Phalcon\Config\Adapter\Yaml;
+use Phalcon\Config;
 use Phalcon\DI\Injectable;
 use Snowair\Debugbar\Controllers\ToolsController;
 
@@ -37,10 +41,33 @@ class ServiceProvider extends Injectable {
             $base['collectors']['phpinfo']=true;
             $base['collectors']['time']=true;
             $base['collectors']['messages']=true;
-			if ( is_string( $configPath) && is_file($configPath) ) {
-				$config = new Php($configPath);
+			if ( is_string($configPath) && is_file($configPath) ) {
+				$extension = strtolower(pathinfo($configPath, PATHINFO_EXTENSION));
+
+				switch ($extension) {
+					case 'ini':
+						$config = new Ini($configPath);
+						break;
+					case 'json':
+						$config = new Json($configPath);
+						break;
+					case 'php':
+					case 'php5':
+					case 'inc':
+						$config = new Php($configPath);
+						break;
+					case 'yml':
+					case 'yaml':
+						$config = new Yaml($configPath);
+						break;
+					default:
+						throw new \RuntimeException(
+							sprintf('Config adapter for %s files is not support', $extension)
+						);
+				}
+
 				$base->merge($config);
-			}elseif( is_object($configPath) && $configPath instanceof Php){
+			}elseif( is_object($configPath) && $configPath instanceof Config){
 				$base->merge($configPath);
 			}else{
 			}

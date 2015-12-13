@@ -46,9 +46,6 @@ nb-configuration.xml
 .nb-gradle/
 
 
-### Linux template
-*~
-
 # KDE directory preferences
 .directory
 
