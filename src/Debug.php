@@ -17,7 +17,6 @@ class PhalconDebug{
 	/**
 	 * GET the debugbar service Instance
 	 * @return \Snowair\Debugbar\PhalconDebugbar
-	 * @throws \DebugBar\DebugBarException
 	 */
 	protected static function debugbar(){
 		if ( !self::$debugbar ) {
