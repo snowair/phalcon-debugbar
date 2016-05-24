@@ -261,8 +261,9 @@ class PhalconDebugbar extends DebugBar {
 		if ( $backend instanceof Multiple || $backend instanceof Backend ) {
 			if ($this->shouldCollect('cache',false)) {
 				$this->di->remove($cacheService);
-				$this->di->set($cacheService, function()use($backend,$collector){
-					return $this->createProxy(clone $backend,$collector);
+				$self = $this;
+				$this->di->set($cacheService, function()use($self,$backend,$collector){
+					return $self->createProxy(clone $backend,$collector);
 				}); }
 		}
 	}
