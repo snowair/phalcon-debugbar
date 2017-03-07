@@ -97,7 +97,7 @@ class Profiler extends  PhalconProfiler {
 
     public function getRealSql( $sql, $variables, $sqlBindTypes ) {
         if ( !$variables ) {
-            return $sql;
+	    $variables = $this->_db->getSqlVariables();
         }
         $pdo = $this->_db->getInternalHandler();
         $indexes = array();
