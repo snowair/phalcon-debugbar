@@ -72,6 +72,10 @@ class Profiler extends  PhalconProfiler {
 		$this->handleFailed();
 		$activeProfile = new Item();
 
+		if( !$sqlVariables )  {
+            		$sqlVariables = $this->_db->getSqlVariables();
+		}
+
 		$activeProfile->setSqlStatement($sqlStatement);
 		$activeProfile->setRealSQL($this->getRealSql($sqlStatement,$sqlVariables,$sqlBindTypes));
 
@@ -97,7 +101,7 @@ class Profiler extends  PhalconProfiler {
 
     public function getRealSql( $sql, $variables, $sqlBindTypes ) {
         if ( !$variables ) {
-	    $variables = $this->_db->getSqlVariables();
+	    return $sql;
         }
         $pdo = $this->_db->getInternalHandler();
         $indexes = array();
