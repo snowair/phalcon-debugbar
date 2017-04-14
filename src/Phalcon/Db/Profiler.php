@@ -65,7 +65,7 @@ class Profiler extends  PhalconProfiler {
 	 * @param null|array   $sqlVariables
 	 * @param null|array   $sqlBindTypes
 	 *
-	 * @return PhalconProfiler
+	 * @return Profiler
 	 */
 	public function startProfile($sqlStatement, $sqlVariables = null, $sqlBindTypes = null)
 	{
@@ -73,7 +73,7 @@ class Profiler extends  PhalconProfiler {
 		$activeProfile = new Item();
 
 		if( !$sqlVariables )  {
-            		$sqlVariables = $this->_db->getSqlVariables();
+		    $sqlVariables = $this->_db->getSqlVariables();
 		}
 
 		$activeProfile->setSqlStatement($sqlStatement);
@@ -101,7 +101,7 @@ class Profiler extends  PhalconProfiler {
 
     public function getRealSql( $sql, $variables, $sqlBindTypes ) {
         if ( !$variables ) {
-	    return $sql;
+	        return $sql;
         }
         $pdo = $this->_db->getInternalHandler();
         $indexes = array();

@@ -330,13 +330,15 @@ class;
 	 */
 	public function attachView( $view )
 	{
-        if (!$this->shouldCollect('view', true) || isset($this->collectors['views'])  ) {
+        // You can add only One View instance
+        if ( isset($this->collectors['views']) ) {
             return;
         }
-        // You can add only One View instance
         if ( is_string( $view ) ) {
             $view = $this->di[$view];
         }
+
+        // try to add PhalconDebugbar VoltFunctions
         $engins =$view->getRegisteredEngines();
         if ( isset($engins['.volt']) ) {
             $volt = $engins['.volt'];
@@ -355,6 +357,12 @@ class;
             $view->registerEngines($engins);
             $volt->getCompiler()->addExtension(new VoltFunctions($this->di));
         }
+
+        // attach the ViewCollector
+        if ( !$this->shouldCollect('view', true) ) {
+            return;
+        }
+
         $viewProfiler = new Registry();
         $viewProfiler->templates=array();
         $viewProfiler->engines = $view->getRegisteredEngines();

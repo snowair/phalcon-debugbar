@@ -32,58 +32,30 @@ class JsRender extends JavascriptRenderer{
 		$this->url = $url;
 	}
 
-	public function renderHead() {
-		if (!$this->url) {
-			return parent::renderHead();
-		}
+    public function renderHead() {
+        if (!$this->url) {
+            return parent::renderHead();
+        }
 
- 		// get current application base uri and srote it in a variable
+        $time=time();
+        $html = '';
+        $html .= sprintf(
+            '<link rel="stylesheet" type="text/css" href="%s?%s">' . "\n",
+            $this->url->get(array('for'=>'debugbar.assets.css')),$time
+        );
+        $html .= sprintf(
+            '<script type="text/javascript" src="%s?%s"></script>' . "\n",
+            $this->url->get(array('for'=>'debugbar.assets.js')),$time
+        );
 
-	        // set debugger base uri
+        if ($this->isJqueryNoConflictEnabled()) {
+            $html .= '<script type="text/javascript">jQuery.noConflict(true);</script>' . "\n";
+        }
 
-		$jsModified = $this->getModifiedTime('js');
-		$cssModified = $this->getModifiedTime('css');
+        // reset base uri to its default
 
-		$html = '';
-		$html .= sprintf(
-			'<link rel="stylesheet" type="text/css" href="%s?%s">' . "\n",
-			$this->url->get(array('for'=>'debugbar.assets.css')),
-			$cssModified
-		);
-		$html .= sprintf(
-			'<script type="text/javascript" src="%s?%s"></script>' . "\n",
-			$this->url->get(array('for'=>'debugbar.assets.js')),
-			$jsModified
-		);
-
-		if ($this->isJqueryNoConflictEnabled()) {
-			$html .= '<script type="text/javascript">jQuery.noConflict(true);</script>' . "\n";
-		}
-		
-		// reset base uri to its default
-
-		return $html;
-	}
-
-	/**
-	 * Get the last modified time of any assets.
-	 *
-	 * @param string $type 'js' or 'css'
-	 * @return int
-	 */
-	protected function getModifiedTime($type)
-	{
-		$files = $this->getAssets($type);
-
-		$latest = 0;
-		foreach ($files as $file) {
-			$mtime = filemtime($file);
-			if ($mtime > $latest) {
-				$latest = $mtime;
-			}
-		}
-		return $latest;
-	}
+        return $html;
+    }
 
 	/**
 	 * Return assets as a string

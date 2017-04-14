@@ -64,6 +64,7 @@
 1. 将应用实例保存为app服务:
 
     ```
+    // 先创建 $di实例
     $application = new Phalcon\Mvc\Application($di); // 将$di作为构造参数传入 Micro应用也一样: new Phalcon\Mvc\Micro($di);
     $di['app'] = $application; // 将应用实例保存到$di的app服务中
     ```
