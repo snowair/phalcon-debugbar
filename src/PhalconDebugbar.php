@@ -101,6 +101,67 @@ class PhalconDebugbar extends DebugBar {
 		return $this->config->collectors->get($name,$default);
 	}
 
+    public function initCollectors(  )
+    {
+        // only for normal request
+        if ($this->shouldCollect('phpinfo', true)) {
+            $this->addCollector(new PhpInfoCollector());
+        }
+        if ($this->shouldCollect('messages', true)) {
+            $this->addCollector(new MessagesCollector());
+        }
+        if ($this->shouldCollect('memory', true)) {
+            $this->addCollector(new MemoryCollector());
+        }
+        if ($this->shouldCollect('default_request', false)) {
+            $this->addCollector(new RequestDataCollector());
+        }
+        if ($this->shouldCollect('exceptions', true)) {
+            try {
+                $exceptionCollector = new ExceptionsCollector();
+                $exceptionCollector->setChainExceptions(
+                    $this->config->options->exceptions->get('chain', true)
+                );
+                $this->addCollector($exceptionCollector);
+            } catch (\Exception $e) {
+                $this->addException($e);
+            }
+        }
+        if ($this->shouldCollect('time', true)) {
+            if (defined('PHALCON_START')){
+                $startTime = PHALCON_START;
+            }else{
+                $startTime = isset($_SERVER["REQUEST_TIME_FLOAT"])?$_SERVER["REQUEST_TIME_FLOAT"]:$_SERVER["REQUEST_TIME"];
+            }
+            $this->addCollector(new TimeDataCollector($startTime));
+        }
+
+        if ($this->shouldCollect('route') && $this->di->has('router') && $this->di->has('dispatcher')) {
+            try {
+                $this->addCollector(new RouteCollector($this->di));
+            } catch (\Exception $e) {
+                $this->addException(
+                    new Exception(
+                        'Cannot add RouteCollector to Phalcon Debugbar: ' . $e->getMessage(),
+                        $e->getCode(),
+                        $e
+                    )
+                );
+            }
+        }
+        if ($this->shouldCollect('log', false) && $this->di->has('log')) {
+            $this->addCollector(
+                new LogsCollector($this->di,
+                    $this->config->options->log->get('aggregate',false),
+                    $this->config->options->log->get('formatter','line')
+                )
+            );
+        }
+
+        $this->attachServices();
+
+	}
+
 	/**
 	 * 启动debugbar: 设置collector
 	 */
@@ -122,88 +183,13 @@ class PhalconDebugbar extends DebugBar {
 			|| isset($_SERVER['REQUEST_URI']) and $_SERVER['REQUEST_URI']=='/favicon.ico'|| !$this->isEnabled()) {
 			return;
 		}
-		// only for normal request
-		if ($this->shouldCollect('phpinfo', true)) {
-			$this->addCollector(new PhpInfoCollector());
-		}
-		if ($this->shouldCollect('messages', true)) {
-			$this->addCollector(new MessagesCollector());
-		}
-		if ($this->shouldCollect('memory', true)) {
-			$this->addCollector(new MemoryCollector());
-		}
-		if ($this->shouldCollect('default_request', false)) {
-			$this->addCollector(new RequestDataCollector());
-		}
-		if ($this->shouldCollect('exceptions', true)) {
-			try {
-				$exceptionCollector = new ExceptionsCollector();
-				$exceptionCollector->setChainExceptions(
-					$this->config->options->exceptions->get('chain', true)
-				);
-				$this->addCollector($exceptionCollector);
-			} catch (\Exception $e) {
-				$this->addException($e);
-			}
-		}
-		if ($this->shouldCollect('time', true)) {
-			if (defined('PHALCON_START')){
-				$startTime = PHALCON_START;
-			}else{
-				$startTime = isset($_SERVER["REQUEST_TIME_FLOAT"])?$_SERVER["REQUEST_TIME_FLOAT"]:$_SERVER["REQUEST_TIME"];
-			}
-			$this->addCollector(new TimeDataCollector($startTime));
-		}
 
-		if ($this->shouldCollect('route') && $this->di->has('router') && $this->di->has('dispatcher')) {
-			try {
-				$this->addCollector(new RouteCollector($this->di));
-			} catch (\Exception $e) {
-				$this->addException(
-					new Exception(
-						'Cannot add RouteCollector to Phalcon Debugbar: ' . $e->getMessage(),
-						$e->getCode(),
-						$e
-					)
-				);
-			}
-		}
-		if ($this->shouldCollect('log', false) && $this->di->has('log')) {
-			$this->addCollector(
-				new LogsCollector($this->di,
-					$this->config->options->log->get('aggregate',false),
-					$this->config->options->log->get('formatter','line')
-				)
-			);
-		}
-
-		$this->attachServices();
+		$this->initCollectors();
 
 		$renderer = $this->getJavascriptRenderer();
 		$renderer->setIncludeVendors($this->config->get('include_vendors', true));
 		$renderer->setBindAjaxHandlerToXHR($this->config->get('capture_ajax', true));
 	}
-
-    public function debugbarRequestCollector()
-    {
-		// 如果 collector 需要额外的js合并, 需要在此添加一次, 以保证debugbar.widget.js不报js错误
-		if ($this->shouldCollect('doctrine', false)) {
-			$debugStack = new \Doctrine\DBAL\Logging\DebugStack();
-			$entityManager = $this->di['entityManager'];
-			$entityManager->getConnection()->getConfiguration()->setSQLLogger($debugStack);
-			$this->addCollector(new DoctrineCollector($debugStack));
-		}
-        if ($this->shouldCollect('db')) {
-            $queryCollector = new QueryCollector(new Profiler());
-            $this->addCollector($queryCollector);
-        }
-
-        if ($this->shouldCollect('view')) {
-            $viewCollector = new ViewCollector(null,null);
-            $this->addCollector($viewCollector);
-        }
-
-    }
 
 	public function attachServices() {
 

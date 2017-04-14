@@ -204,7 +204,7 @@ class ServiceProvider extends Injectable {
                         $app->useImplicitView(false);
                     }
                     $debugbar->isDebugbarRequest=true;
-                    $debugbar->debugbarRequestCollector();
+                    $debugbar->initCollectors();
                     $debugbar->disable();
                     return;
                 }
