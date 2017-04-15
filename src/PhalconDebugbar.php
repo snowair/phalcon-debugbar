@@ -469,19 +469,31 @@ class;
 		}
 	}
 
-	/**
-	 * Adds an exception to be profiled in the debug bar
-	 *
-	 * @param Exception $e
-	 */
-	public function addException(Exception $e)
-	{
-		if ($this->hasCollector('exceptions')) {
-			/** @var \DebugBar\DataCollector\ExceptionsCollector $collector */
-			$collector = $this->getCollector('exceptions');
-			$collector->addException($e);
-		}
-	}
+    /**
+     * Adds an exception to be profiled in the debug bar
+     *
+     * @param Exception $e
+     * @deprecated
+     */
+    public function addException(Exception $e)
+    {
+        $this->addThrowable($e);
+    }
+
+    /**
+     * Adds an exception to be profiled in the debug bar
+     *
+     * @param Exception $e
+     */
+    public function addThrowable($e)
+    {
+        if ($this->hasCollector('exceptions')) {
+            /** @var \DebugBar\DataCollector\ExceptionsCollector $collector */
+            $collector = $this->getCollector('exceptions');
+            $collector->addThrowable($e);
+        }
+    }
+
 	/**
 	 * Returns a JavascriptRenderer for this instance
 	 *
