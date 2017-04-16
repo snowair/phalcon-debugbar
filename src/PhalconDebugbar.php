@@ -105,16 +105,28 @@ class PhalconDebugbar extends DebugBar {
     {
         // only for normal request
         if ($this->shouldCollect('phpinfo', true)) {
-            $this->addCollector(new PhpInfoCollector());
+            $php = new PhpInfoCollector();
+            if (!isset($this->collectors[$php->getName()])) {
+                $this->addCollector($php);
+            }
         }
         if ($this->shouldCollect('messages', true)) {
-            $this->addCollector(new MessagesCollector());
+            $msg = new MessagesCollector();
+            if (!isset($this->collectors[$msg->getName()])) {
+                $this->addCollector($msg);
+            }
         }
         if ($this->shouldCollect('memory', true)) {
-            $this->addCollector(new MemoryCollector());
+            $mem=new MemoryCollector();
+            if (!isset($this->collectors[$mem->getName()])) {
+                $this->addCollector($mem);
+            }
         }
         if ($this->shouldCollect('default_request', false)) {
-            $this->addCollector(new RequestDataCollector());
+            $req = new RequestDataCollector();
+            if (!isset($this->collectors[$req->getName()])) {
+                $this->addCollector($req);
+            }
         }
         if ($this->shouldCollect('exceptions', true)) {
             try {
@@ -122,7 +134,9 @@ class PhalconDebugbar extends DebugBar {
                 $exceptionCollector->setChainExceptions(
                     $this->config->options->exceptions->get('chain', true)
                 );
-                $this->addCollector($exceptionCollector);
+                if (!isset($this->collectors[$exceptionCollector->getName()])) {
+                    $this->addCollector($exceptionCollector);
+                }
             } catch (\Exception $e) {
                 $this->addException($e);
             }
@@ -133,12 +147,18 @@ class PhalconDebugbar extends DebugBar {
             }else{
                 $startTime = isset($_SERVER["REQUEST_TIME_FLOAT"])?$_SERVER["REQUEST_TIME_FLOAT"]:$_SERVER["REQUEST_TIME"];
             }
-            $this->addCollector(new TimeDataCollector($startTime));
+            $timer = new TimeDataCollector($startTime);
+            if (!isset($this->collectors[$timer->getName()])) {
+                $this->addCollector($timer);
+            }
         }
 
         if ($this->shouldCollect('route') && $this->di->has('router') && $this->di->has('dispatcher')) {
             try {
-                $this->addCollector(new RouteCollector($this->di));
+                $routeCollector = new RouteCollector($this->di);
+                if (!isset($this->collectors[$routeCollector->getName()])) {
+                    $this->addCollector($routeCollector);
+                }
             } catch (\Exception $e) {
                 $this->addException(
                     new Exception(
@@ -150,12 +170,13 @@ class PhalconDebugbar extends DebugBar {
             }
         }
         if ($this->shouldCollect('log', false) && $this->di->has('log')) {
-            $this->addCollector(
-                new LogsCollector($this->di,
+            $logs = new LogsCollector($this->di,
                     $this->config->options->log->get('aggregate',false),
                     $this->config->options->log->get('formatter','line')
-                )
-            );
+                );
+            if (!isset($this->collectors[$logs->getName()])) {
+                $this->addCollector($logs);
+            }
         }
 
         $this->attachServices();
@@ -216,7 +237,10 @@ class PhalconDebugbar extends DebugBar {
             $debugStack = new \Doctrine\DBAL\Logging\DebugStack();
             $entityManager = $this->di['entityManager'];
             $entityManager->getConnection()->getConfiguration()->setSQLLogger($debugStack);
-            $this->addCollector(new DoctrineCollector($debugStack));
+            $doctrine = new DoctrineCollector($debugStack);
+            if (!isset($this->collectors[$doctrine->getName()])) {
+                $this->addCollector($doctrine);
+            }
         }
 	}
 
@@ -250,7 +274,8 @@ class PhalconDebugbar extends DebugBar {
 				$self = $this;
 				$this->di->set($cacheService, function()use($self,$backend,$collector){
 					return $self->createProxy(clone $backend,$collector);
-				}); }
+				});
+			}
 		}
 	}
 
@@ -469,16 +494,15 @@ class;
 		}
 	}
 
-    /**
-     * Adds an exception to be profiled in the debug bar
-     *
-     * @param Exception $e
-     * @deprecated
-     */
-    public function addException(Exception $e)
-    {
-        $this->addThrowable($e);
-    }
+	/**
+	 * Adds an exception to be profiled in the debug bar
+	 *
+	 * @param Exception|\Throwable $e
+	 */
+	public function addException($e)
+	{
+	    $this->addThrowable($e);
+	}
 
     /**
      * Adds an exception to be profiled in the debug bar
