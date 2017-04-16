@@ -18,6 +18,10 @@ class OpenHandlerController extends BaseController {
 		$debugbar = $this->debugbar;
         $debugbar->enable();
 
+        if ( !$this->session->isStarted() ) {
+            $this->session->start();
+        }
+
 		$openHandler = new OpenHandler($debugbar);
 
 		$data = $openHandler->handle(null, false, false);
