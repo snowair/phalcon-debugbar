@@ -74,12 +74,15 @@ class PhalconDebugbar extends DebugBar {
         $this->config = $di['config.debugbar'];
     }
 
+    /**
+     * Manual boot debugbar:
+     * $this->>di['debugbar']->enable()->boot();
+     * @return $this
+     */
     public function enable()
     {
         $this->config->enabled=true;
-        if (!$this->booted) {
-            $this->boot();
-        }
+        return $this;
     }
 
     public function disable()
@@ -539,7 +542,6 @@ class;
      * @throws Exception
      */
     public function modifyResponse($response){
-        $request = $this->di['request'];
         $config  = $this->config;
 
         if (!$this->isEnabled() ) {
@@ -596,7 +598,7 @@ class;
             /** @var Profiler $profiler */
             $profiler = $this->getCollector('pdo')->getProfiler();
             $profiler->handleFailed();
-        };
+        }
 
         if ( $this->isDebugbarRequest ) {
             // Notice: All Collectors must be added before check if is debugbar request.
@@ -607,17 +609,19 @@ class;
             if ($this->isRedirection($response)) {
                 $this->stackData();
             }
-            elseif ( $this->isJsonRequest($request) && $this->config->get('capture_ajax', true) )
+            elseif ( $this->isJsonRequest() && $config->get('capture_ajax', true) )
             {
                 $this->sendDataInHeaders(true);
             } elseif (
-            ( ($content_type = $response->getHeaders()->get('Content-Type')) and
-                strpos($response->getHeaders()->get('Content-Type'), 'html') === false)
+                ($content_type = $response->getHeaders()->get('Content-Type'))
+                &&
+                strpos($response->getHeaders()->get('Content-Type'), 'html') !== false
+                && $config->get('inject', true)
             ) {
-                $this->collect();
-            } elseif ($this->config->get('inject', true)) {
                 $response->setHeader('Phalcon-Debugbar','on');
                 $this->injectDebugbar($response);
+            } else {
+                $this->collect();
             }
         } catch (\Exception $e) {
             $this->addException($e);
@@ -773,12 +777,10 @@ class;
         $content = $response->getContent();
 
         $renderer = $this->getJavascriptRenderer();
-        if ($this->getStorage()) {
 
-            $openHandlerUrl = $this->di['url']->get( array('for'=>'debugbar.openhandler') );
-            $renderer->setOpenHandlerUrl($openHandlerUrl);
+        $openHandlerUrl = $this->di['url']->get( array('for'=>'debugbar.openhandler') );
+        $renderer->setOpenHandlerUrl($openHandlerUrl);
 
-        }
 
         $renderedContent = $renderer->renderHead() . $renderer->render();
 
@@ -907,3 +909,4 @@ class;
     }
 
 }
+

@@ -47,6 +47,10 @@ return array(
     ),
 
 
+    'allow_users'=>array(
+
+    ),
+
     /*
      |--------------------------------------------------------------------------
      | Safe check: Allowed Routes settings
