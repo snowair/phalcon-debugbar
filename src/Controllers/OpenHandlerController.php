@@ -20,7 +20,7 @@ class OpenHandlerController extends BaseController {
 
 	public function handleAction()
 	{
-	    if($this->request->isAjax()){
+        if($this->request->isAjax()){
             $debugbar = $this->debugbar;
             $debugbar->enable()->boot();
 
@@ -37,10 +37,16 @@ class OpenHandlerController extends BaseController {
             return $response;
         }else{
             $response = new Response( '<div style="display: none">hidden</div>', 200);
-            $response->setContentType('text/html');
-            $this->debugbar->enable();
-            $this->debugbar->isDebugbarRequest=false;
-            $this->di['config.debugbar']->merge(new Config(['inject'=>true]));
+            $config = $this->di['config.debugbar'];
+            $config->merge(new Config(['inject'=>true]));
+            if($config->open_handler->get('enable',true)){
+                $openHandlerUrl = $this->di['url']->get( array('for'=>'debugbar.openhandler') );
+                $renderer = $this->debugbar->getJavascriptRenderer();
+                $renderer->setOpenHandlerUrl($openHandlerUrl);
+                $response->setContentType('text/html');
+                $this->debugbar->enable();
+                $this->debugbar->isDebugbarRequest=false;
+            }
             return $response;
         }
 	}

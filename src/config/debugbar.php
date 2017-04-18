@@ -182,4 +182,11 @@ return array(
 
 	'inject' => true,
 
+    /*
+     * Warning: You must disable open handler for production environment.
+     */
+    'open_handler'=>array(
+        'enable'=>true,
+    ),
+
 );
