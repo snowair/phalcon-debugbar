@@ -1,12 +1,12 @@
 {
     "name": "snowair/phalcon-debugbar",
     "description": "Integrates PHP Debug Bar with Phalcon.",
+    "type": "library",
     "keywords": ["phalcon", "debugbar", "profiler", "debug", "webprofiler"],
     "require": {
-        "php": ">=5.4",
-        "ext-phalcon": ">=1.3.4|>=2.0",
+        "php": ">=5.5.0",
         "maximebf/debugbar": "^1",
-        "filp/whoops": "^1"
+        "filp/whoops": "^2"
     },
     "autoload": {
         "psr-4": {

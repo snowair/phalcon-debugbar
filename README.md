@@ -118,7 +118,8 @@ public function beforeDispatch(Event $event, Dispatcher $dispatcher)
 
 For **file** driver, the default directory for store debugbar data is `Runtime/phalcon`. If it doesn't exist, it will be created automatically. You can change it by reconfig.
 
-For **mongodb** driver, the default connection is `mongodb://localhost:27017`, the database and collection are both named **debugbar**. You must install the **mongo** extension for PHP.
+For **mongodb** driver, You must install the **mongodb** extension and install the phplib : `composer require mongodb/mongodb`
+    * the default connection is `mongodb://localhost:27017`, the database and collection are both named **debugbar**. 
 
 ### About baseUri
 

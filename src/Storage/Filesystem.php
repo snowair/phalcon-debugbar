@@ -8,6 +8,7 @@
 namespace Snowair\Debugbar\Storage;
 
 use DebugBar\Storage\StorageInterface;
+use Phalcon\Di;
 
 class Filesystem implements  StorageInterface
 {
@@ -17,10 +18,17 @@ class Filesystem implements  StorageInterface
 
 	/**
 	 * @param string $dirname 存放文件的目录
+     * @param DI $di
 	 */
-	public function __construct($dirname)
+	public function __construct($dirname,$di)
 	{
-		$this->dirname = rtrim($dirname, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        if ( !$di['session']->isStarted() ) {
+            $di['session']->start();
+        }
+        $sid = $di['session']->getId();
+
+		$this->dirname = rtrim($dirname, DIRECTORY_SEPARATOR)
+            . DIRECTORY_SEPARATOR.$sid.DIRECTORY_SEPARATOR;
 	}
 
 	/**
@@ -33,7 +41,7 @@ class Filesystem implements  StorageInterface
 	 */
 	function save( $id, $data ) {
 		if (!is_dir($this->dirname)) {
-			if (mkdir($this->dirname, 0777, true)) {
+            if (mkdir($this->dirname, 0777, true)) {
 				file_put_contents($this->dirname . '.gitignore', "*\n!.gitignore");
 			} else {
 				throw new \Exception("Cannot create directory '$this->dirname'..");
@@ -41,9 +49,10 @@ class Filesystem implements  StorageInterface
 		}
 
 		file_put_contents($this->makeFilename($id), json_encode($data));
+		touch($this->dirname);
 
 		// Randomly check if we should collect old files
-		if (rand(1, 100) <= $this->gc_probability) {
+		if (mt_rand(1, 100) <= $this->gc_probability) {
 			$this->garbageCollect();
 		}
 	}
@@ -65,17 +74,26 @@ class Filesystem implements  StorageInterface
 	protected function garbageCollect()
 	{
 		$lifetime = $this->gc_lifetime*60*60;
-		$Finder = new \FilesystemIterator($this->dirname,
+		$Finder = new \RecursiveDirectoryIterator(dirname($this->dirname),
 		      \FilesystemIterator::KEY_AS_FILENAME 
 			| \FilesystemIterator::CURRENT_AS_FILEINFO
 			| \FilesystemIterator::SKIP_DOTS);
 		$now = time();
+		/** @var \SplFileInfo $value */
 		foreach ( $Finder as $key => $value ) {
-			if ( pathinfo($key,PATHINFO_EXTENSION)=='json'
-				&& ( $value->getMtime() + $lifetime < $now)
-			) {
-				unlink($value->getRealPath());
-			}
+			if ( pathinfo($key,PATHINFO_EXTENSION)=='json' && ( $value->getMtime() + $lifetime < $now) ) {
+				@unlink($value->getRealPath());
+			} elseif($value->isDir() && ( $value->getMtime() + $lifetime < $now)  ){
+			    $path = $value->getRealPath();
+			    $dir = dir($path);
+			    while($f=$dir->read()){
+			        if(!in_array($f,['.','..']) && is_file($f)){
+                        @unlink($path.'/'.$f);
+                    }
+                }
+                $dir->close();
+                @rmdir($value->getRealPath());
+            }
 		}
 	}
 

@@ -12,10 +12,16 @@ use Phalcon\Exception;
 class MongoDB implements StorageInterface
 {
     protected $collection;
+    protected $di;
+    protected $sid;
 
-    public function __construct( $connection, $db, $collection,$options  )
+    public function __construct( $connection, $db, $collection,$options,$di  )
     {
-        $client = new \MongoClient($connection,(array)$options);
+        if ( !$di['session']->isStarted() ) {
+            $di['session']->start();
+        }
+        $this->sid = $di['session']->getId();;
+        $client = new \MongoDB\Client($connection,(array)$options);
         $this->collection = $client->{$db}->{$collection};
     }
 
@@ -23,12 +29,13 @@ class MongoDB implements StorageInterface
      * Saves collected data
      *
      * @param string $id
-     * @param string $data
+     * @param array $data
      */
     function save( $id, $data )
     {
         $data['_id'] = $id;
-        $this->collection->insert($data);
+        $data['__meta']['sid'] = $this->sid;
+        $this->collection->insertOne($data);
     }
 
     /**
@@ -54,19 +61,27 @@ class MongoDB implements StorageInterface
      */
     function find( array $filters = array(), $max = 20, $offset = 0 )
     {
-        $criteria = array();
+        $criteria =[
+            '$and'=>[
+                ['__meta.sid' => $this->sid],
+            ]
+        ];
         if (isset($filters['method'])) {
-            $criteria['__meta.method'] = $filters['method'];
+            $criteria['$and'][]['__meta.method'] = $filters['method'];
         }
         if (isset($filters['uri'])) {
-            $criteria['__meta.uri'] = $filters['uri'];
+            $criteria['$and'][]['__meta.uri'] = $filters['uri'];
         }
         if (isset($filters['ip'])) {
-            $criteria['__meta.ip'] = $filters['ip'];
+            $criteria['$and'][]['__meta.ip'] = $filters['ip'];
         }
-        $iterator =$this->collection->find($criteria)
-            ->sort(array('__meta.utime'=>-1))
-            ->skip($offset)->limit($max);
+        $iterator =$this->collection->find(
+            $criteria,
+            [
+                'skip'=>(int)$offset,
+                'limit'=>(int)$max,
+                'sort'=>['__meta.utime'=>-1],
+            ]);
         $array = iterator_to_array($iterator);
         $result = array();
         foreach ($array as $value) {
@@ -83,6 +98,6 @@ class MongoDB implements StorageInterface
      */
     function clear()
     {
-        $this->collection->drop();
+        $this->collection->deleteMany(['__meta.sid' => $this->sid]);
     }
 }

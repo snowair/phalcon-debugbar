@@ -136,6 +136,7 @@ class ServiceProvider extends Injectable {
 	}
 
 	public function boot() {
+        /** @var PhalconDebugbar $debugbar */
 		$app      = $this->di['app'];
 		$debugbar = $this->di['debugbar'];
 		$router   = $this->di['router'];
@@ -176,6 +177,7 @@ class ServiceProvider extends Injectable {
 
     protected function safeCheck()
     {
+        /** @var PhalconDebugbar $debugbar */
         $config   = $this->di['config.debugbar'];
         $router   = $this->di['router'];
         $debugbar = $this->di['debugbar'];
@@ -202,7 +204,7 @@ class ServiceProvider extends Injectable {
                         $app->useImplicitView(false);
                     }
                     $debugbar->isDebugbarRequest=true;
-                    $debugbar->debugbarRequestCollector();
+                    $debugbar->initCollectors();
                     $debugbar->disable();
                     return;
                 }

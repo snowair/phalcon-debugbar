@@ -64,6 +64,7 @@
 1. 将应用实例保存为app服务:
 
     ```
+    // 先创建 $di实例
     $application = new Phalcon\Mvc\Application($di); // 将$di作为构造参数传入 Micro应用也一样: new Phalcon\Mvc\Micro($di);
     $di['app'] = $application; // 将应用实例保存到$di的app服务中
     ```
@@ -117,10 +118,10 @@ public function beforeDispatch(Event $event, Dispatcher $dispatcher)
 
 每次请求的调试数据都可以被保存下了, 供你进行系统分析.
 
-对于 **file** 驱动, 调试数据默认保存在 `Runtime/phalcon` 目录. 如果该目录不存在会自动创建. 你也可以在配置文件中指定其他目录.
+* 对于 **file** 驱动, 调试数据默认保存在 `Runtime/phalcon` 目录. 如果该目录不存在会自动创建. 你也可以在配置文件中指定其他目录.
 
-对于 **mongodb** 驱动, 需要安装 **mongo** 扩展. 默认连接是 `mongodb://localhost:27017`, 默认数据库和集合名称都是 **debugbar**. 
-
+* 对于 **mongodb** 驱动, 需要安装 **mongodb** 扩展, 以及mongodb phplib: `composer require mongodb/mongodb`
+    * 默认连接是 `mongodb://localhost:27017`, 默认数据库和集合名称都是 **debugbar**. 
 
 ### 关于 baseUri
 
