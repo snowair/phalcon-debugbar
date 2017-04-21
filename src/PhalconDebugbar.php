@@ -620,7 +620,16 @@ class;
             ) {
                 $response->setHeader('Phalcon-Debugbar','on');
                 $this->injectDebugbar($response);
-            } else {
+            } elseif (
+                ($content_type = $response->getHeaders()->get('Content-Type'))
+                &&
+                strpos($response->getHeaders()->get('Content-Type'), 'html') === false
+            ) {
+                $this->collect();
+            } elseif($config->get('inject', true)) {
+                $response->setHeader('Phalcon-Debugbar','on');
+                $this->injectDebugbar($response);
+            }else{
                 $this->collect();
             }
         } catch (\Exception $e) {
