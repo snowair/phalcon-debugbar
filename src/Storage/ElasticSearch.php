@@ -103,17 +103,17 @@ class ElasticSearch implements StorageInterface
         $index['index'] = $this->config->index;
         $index['type'] = $this->config->type;
         $index['body']['query']['bool']['must']= [
-            ['match'=>[ '__meta.sid'=>$this->sid, ]]
+            ['match_phrase'=>[ '__meta.sid'=>$this->sid, ]]
         ];
 
         if (isset($filters['method'])) {
-            $index['body']['query']['bool']['must'][] = [ 'match' => [ '__meta.method' => $filters['method'] ]];
+            $index['body']['query']['bool']['must'][] = [ 'match_phrase' => [ '__meta.method' => $filters['method'] ]];
         }
         if (isset($filters['uri'])) {
-            $index['body']['query']['bool']['must'][] = [ 'match' => [ '__meta.uri' => $filters['uri'] ]];
+            $index['body']['query']['bool']['must'][] = [ 'match_phrase' => [ '__meta.uri' => $filters['uri'] ]];
         }
         if (isset($filters['ip'])) {
-            $index['body']['query']['bool']['must'][] = [ 'match' => [ '__meta.ip' => $filters['ip'] ]];
+            $index['body']['query']['bool']['must'][] = [ 'match_phrase' => [ '__meta.ip' => $filters['ip'] ]];
         }
 
         $index['size'] = $max;
@@ -138,7 +138,7 @@ class ElasticSearch implements StorageInterface
         $index['index'] = $this->config->index;
         $index['type'] = $this->config->type;
         $index['body']['query']['bool']['must']= [
-            ['match'=>[ '__meta.sid'=>$this->sid, ]]
+            ['match_phrase'=>[ '__meta.sid'=>$this->sid, ]]
         ];
         $this->client->deleteByQuery($index);
     }
