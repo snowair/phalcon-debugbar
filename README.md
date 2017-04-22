@@ -20,6 +20,7 @@ Integrates [PHP Debug Bar](https://github.com/maximebf/php-debugbar) with [Phalc
 6. Data storaged by sessionid, it's more firendly for team development.
 7. You can close inject debugbar, and on a new browser tab, visit `/_debugbar/open` to see data(and it alse can be disabled).
 8. Whoops Integration, and debugbar works well with it.
+9. Support palcon 1.3.x,2.x,3.x, PHP5.5~7.1
 
 ### Support Collectors
 
