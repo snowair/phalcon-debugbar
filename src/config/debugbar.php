@@ -23,7 +23,7 @@ return array(
 	 */
 	'storage' => array(
 		'enabled' => true,
-		'driver' => 'file', // file, mongodb
+		'driver' => 'file', // file, mongodb, elastic
 		'path' => '../Runtime/debugbar', // For file driver
 		'mongodb' => array(  // mongodb driver
                              'connection' => 'mongodb://localhost:27017',
@@ -31,6 +31,17 @@ return array(
                              'collection' => 'debugbar',
                              'options'=>array(),
 		),
+        'elastic' => array(  // elasticsearch driver
+                             'hosts' => ['localhost:9200'],
+                             'index'=>'debugbar',
+                             'type' => 'debugbar',
+                             'connection_params'=>array(),
+                             'ssl'=>array(
+                                 'key'=>'',
+                                 'cert'=>'',
+                                 'verify'=>'',
+                             ),
+        ),
 	),
 
     /*
