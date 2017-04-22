@@ -47,10 +47,6 @@ class ElasticSearch implements StorageInterface
             $factory->setConnectionParams((array)$config->connection_params);
         }
 
-        if($config->handler){
-            $factory->setHandler($config->handler);
-        }
-
         $this->client = $factory->build();
     }
 
