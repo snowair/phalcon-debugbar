@@ -7,15 +7,16 @@
 
 一个无侵入的[Phalcon Framework](https://github.com/phalcon/cphalcon)应用调试/分析工具条
 
-[演示](http://invo.coding.io/)
- 
 ## 功能特性
 
 1. 常规请求调试信息收集
 2. Ajax请求调试信息收集
 3. Redirect请求调试信息
-4. 调试信息本地持久化支持,MongoDB持久化支持
+4. 调试信息持久化支持:本地file,MongoDB,ElasticSearch
 5. 支持 多模块,单模块,微应用.
+6. 数据按 sessionid 存储, 多人共用测试环境协作开发时调试数据互不影响.
+7. debugbar工具条可不注入正常页面, 访问 `/_debugbar/open` 独立查看调试数据.
+8. 集成 Whoops, 即使发生异常, 仍可正常收集到异常发生之前的所有调试数据.
  
 ### 支持的数据收集器
 
@@ -76,6 +77,10 @@
     // 在启动debugbar之后,立即handle应用.
     echo $application->handle()->getContent();
     ```
+3. **可选**  启用Whoops, 修改index.php, 在启动debugbar之后,加入下面代码:
+    ```
+    (new \Snowair\Debugbar\Whoops\WhoopsServiceProvider($di));
+    ```
 
 ### 修改权限控制代码
 
@@ -121,7 +126,8 @@ public function beforeDispatch(Event $event, Dispatcher $dispatcher)
 * 对于 **file** 驱动, 调试数据默认保存在 `Runtime/phalcon` 目录. 如果该目录不存在会自动创建. 你也可以在配置文件中指定其他目录.
 
 * 对于 **mongodb** 驱动, 需要安装 **mongodb** 扩展, 以及mongodb phplib: `composer require mongodb/mongodb`
-    * 默认连接是 `mongodb://localhost:27017`, 默认数据库和集合名称都是 **debugbar**. 
+
+* 对于 **elastic** 驱动, 需要安装 phplib: `composer require elasticsearch/elasticsearch:some-version`
 
 ### 关于 baseUri
 

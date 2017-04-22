@@ -15,8 +15,11 @@ Integrates [PHP Debug Bar](https://github.com/maximebf/php-debugbar) with [Phalc
 1. Normal request capturing
 2. Ajax request capturing
 3. Redirect request chain capturing
-4. Data collected persistent : save to Local File or MongoDB
-5. Simple App, Multi module App and Micro App support
+4. Simple App, Multi module App and Micro App support
+5. Data collected persistent : save to **Local File** or **MongoDB**, or **ElasticSearch**
+6. Data storaged by sessionid, it's more firendly for team development.
+7. You can close inject debugbar, and on a new browser tab, visit `/_debugbar/open` to see data(and it alse can be disabled).
+8. Whoops Integration, and debugbar works well with it.
 
 ### Support Collectors
 
@@ -77,6 +80,12 @@ Integrates [PHP Debug Bar](https://github.com/maximebf/php-debugbar) with [Phalc
     echo $application->handle()->getContent();
     ```
     
+3. **optional**  to use Whoops, modify the index.php, add follow codes bellow the debugbar service `start()` method.
+
+    ```
+    (new \Snowair\Debugbar\Whoops\WhoopsServiceProvider($di));
+    ```
+    
 ### Modify The ACL Code
 
 Here is a example for INVO:
@@ -119,7 +128,8 @@ public function beforeDispatch(Event $event, Dispatcher $dispatcher)
 For **file** driver, the default directory for store debugbar data is `Runtime/phalcon`. If it doesn't exist, it will be created automatically. You can change it by reconfig.
 
 For **mongodb** driver, You must install the **mongodb** extension and install the phplib : `composer require mongodb/mongodb`
-    * the default connection is `mongodb://localhost:27017`, the database and collection are both named **debugbar**. 
+    
+For **elastic** driver, You must install the phplib : `composer require elasticsearch/elasticsearch:some-version`
 
 ### About baseUri
 
