@@ -58,13 +58,14 @@ class JsRender extends JavascriptRenderer{
             $m='';
         }
 
+        $baseuri = rtrim($this->url->getBaseUri(),'/').'/';
         $html .= sprintf(
             '<link rel="stylesheet" type="text/css" href="%s?m='.$m.'&%s">' . "\n",
-            $this->url->get(array('for'=>'debugbar.assets.css')),$time
+            $baseuri.ltrim($this->url->get(array('for'=>'debugbar.assets.css')),'/'),$time
         );
         $html .= sprintf(
             '<script type="text/javascript" src="%s?m='.$m.'&%s"></script>' . "\n",
-            $this->url->get(array('for'=>'debugbar.assets.js')),$time
+            $baseuri.ltrim($this->url->get(array('for'=>'debugbar.assets.js')),'/'),$time
         );
 
         if ($this->isJqueryNoConflictEnabled()) {
