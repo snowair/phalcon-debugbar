@@ -8,6 +8,7 @@
 namespace Snowair\Debugbar;
 
 use Phalcon\Events\Manager;
+use Phalcon\Http\Request;
 use Phalcon\Http\ResponseInterface;
 use Phalcon\Mvc\Application;
 use Phalcon\Mvc\Micro;
@@ -155,7 +156,7 @@ class ServiceProvider extends Injectable {
 			});
 		}
 		$eventsManager->attach('application:afterStartModule',function($event,$app,$module) use($debugbar){
-			$debugbar->attachServices();
+			$debugbar->attachServices(); // register services used by this Module.
 		});
 		$app->setEventsManager($eventsManager);
 
@@ -170,6 +171,8 @@ class ServiceProvider extends Injectable {
         $config   = $this->di['config.debugbar'];
         $router   = $this->di['router'];
         $debugbar = $this->di['debugbar'];
+        /** @var Request $request */
+        $request = $this->di['request'];
 
         if ( $config->get('enabled')) {
             $white_lists = (array)$config->get('white_lists');
@@ -192,6 +195,18 @@ class ServiceProvider extends Injectable {
                     if (method_exists( $app, 'useImplicitView' )) {
                         $app->useImplicitView(false);
                     }
+
+                    if (  $app instanceof Application ) {
+                        if($moudleName=$request->get('m')){
+                            $this->dispatcher->setModuleName($moudleName);
+                            $moudle=$this->di['app']->getModule($moudleName);
+                            require $moudle['path'];
+                            $moduleObject=$this->di->get($moudle['className']);
+                            $moduleObject->registerAutoloaders($this->di);
+                            $moduleObject->registerServices($this->di);
+                        }
+                    }
+
                     $debugbar->isDebugbarRequest=true;
                     $debugbar->initCollectors();
                     $debugbar->disable();

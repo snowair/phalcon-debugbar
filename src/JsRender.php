@@ -9,6 +9,9 @@ namespace Snowair\Debugbar;
 
 use DebugBar\DebugBar;
 use DebugBar\JavascriptRenderer;
+use Phalcon\Di;
+use Phalcon\Dispatcher;
+use Phalcon\Mvc\Application;
 
 class JsRender extends JavascriptRenderer{
 
@@ -39,12 +42,28 @@ class JsRender extends JavascriptRenderer{
 
         $time=time();
         $html = '';
+        $di=Di::getDefault();
+        /** @var Dispatcher $dispatcher */
+        $app = $di['app'];
+        if (  $app instanceof Application ) {
+            $dispatcher= $di['dispatcher'];
+            $m=$dispatcher->getModuleName();
+            if(!$m){
+                $m=$di['request']->get('m');
+            }
+            if(!$m){
+                $m=$app->getDefaultModule();
+            }
+        }else{
+            $m='';
+        }
+
         $html .= sprintf(
-            '<link rel="stylesheet" type="text/css" href="%s?%s">' . "\n",
+            '<link rel="stylesheet" type="text/css" href="%s?m='.$m.'&%s">' . "\n",
             $this->url->get(array('for'=>'debugbar.assets.css')),$time
         );
         $html .= sprintf(
-            '<script type="text/javascript" src="%s?%s"></script>' . "\n",
+            '<script type="text/javascript" src="%s?m='.$m.'&%s"></script>' . "\n",
             $this->url->get(array('for'=>'debugbar.assets.js')),$time
         );
 

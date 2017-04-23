@@ -206,6 +206,7 @@ Usually, You needn't modify any other files, if you follow rules bellow:
 
 1. All the services for cache has a name contain `cache`.
 2. All the services for db has a name start with `db` or end with `db`.
+3. Visit `/_debugbar/open?m={modulename}` to open a independent  debugbar page.
 
 If your service name is't match these rules, you need attach it to debugbar: 
 

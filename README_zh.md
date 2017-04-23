@@ -204,6 +204,7 @@ debug/info/notice/warning/error/emergency/critical
 
 1. 缓存服务的命名一定含有`cache`
 2. 数据库服务的命名一定含有`db`并且是以`db`开头或结尾
+3. 多模块应用,可以使用 `/_debugbar/open?m=modulename` 打开模块的独立调试窗口
 
 debugbar无需任何特殊设置即可支持符合以上习惯的多模块应用. 
 
