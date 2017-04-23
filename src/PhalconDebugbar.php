@@ -791,7 +791,7 @@ class;
 
         $renderer = $this->getJavascriptRenderer();
 
-        $openHandlerUrl = $this->di['url']->get( array('for'=>'debugbar.openhandler') );
+        $openHandlerUrl = $this->di['url']->getStatic( array('for'=>'debugbar.openhandler') );
         $renderer->setOpenHandlerUrl($openHandlerUrl);
 
 
