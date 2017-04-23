@@ -196,7 +196,7 @@ class ServiceProvider extends Injectable {
                         $app->useImplicitView(false);
                     }
 
-                    if (  $app instanceof Application ) {
+                    if (  $app instanceof Application  && $app->getModules()) {
                         if($moudleName=$request->get('m')){
                             $this->dispatcher->setModuleName($moudleName);
                             $moudle=$this->di['app']->getModule($moudleName);
