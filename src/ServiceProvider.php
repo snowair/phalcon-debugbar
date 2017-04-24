@@ -8,6 +8,7 @@
 namespace Snowair\Debugbar;
 
 use Phalcon\Events\Manager;
+use Phalcon\Http\Request;
 use Phalcon\Http\ResponseInterface;
 use Phalcon\Mvc\Application;
 use Phalcon\Mvc\Micro;
@@ -103,11 +104,6 @@ class ServiceProvider extends Injectable {
 				$controller->jsAction()->send();
 			})->setName('debugbar.assets.js');
 
-			$app->get( '/_debugbar/tools/phpinfo', function(){
-				$controller = new ToolsController();
-				$controller->phpinfoAction();
-			})->setName('debugbar.tools.phpinfo');
-
 		}elseif (  $app instanceof Application ) {
 			$router->add('/_debugbar/open',array(
 				'namespace'=>'Snowair\Debugbar\Controllers',
@@ -126,12 +122,6 @@ class ServiceProvider extends Injectable {
 				'controller'=>'Asset',
 				'action'=>'js',
 			))->setName('debugbar.assets.js');
-
-			$router->add('/_debugbar/tools/phpinfo',array(
-				'namespace'=>'Snowair\Debugbar\Controllers',
-				'controller'=>'Tools',
-				'action'=>'phpinfo',
-			))->setName('debugbar.tools.phpinfo');
 		}
 	}
 
@@ -166,7 +156,7 @@ class ServiceProvider extends Injectable {
 			});
 		}
 		$eventsManager->attach('application:afterStartModule',function($event,$app,$module) use($debugbar){
-			$debugbar->attachServices();
+			$debugbar->attachServices(); // register services used by this Module.
 		});
 		$app->setEventsManager($eventsManager);
 
@@ -181,6 +171,8 @@ class ServiceProvider extends Injectable {
         $config   = $this->di['config.debugbar'];
         $router   = $this->di['router'];
         $debugbar = $this->di['debugbar'];
+        /** @var Request $request */
+        $request = $this->di['request'];
 
         if ( $config->get('enabled')) {
             $white_lists = (array)$config->get('white_lists');
@@ -203,6 +195,18 @@ class ServiceProvider extends Injectable {
                     if (method_exists( $app, 'useImplicitView' )) {
                         $app->useImplicitView(false);
                     }
+
+                    if (  $app instanceof Application  && $app->getModules()) {
+                        if($moudleName=$request->get('m')){
+                            $this->dispatcher->setModuleName($moudleName);
+                            $moudle=$this->di['app']->getModule($moudleName);
+                            require $moudle['path'];
+                            $moduleObject=$this->di->get($moudle['className']);
+                            $moduleObject->registerAutoloaders($this->di);
+                            $moduleObject->registerServices($this->di);
+                        }
+                    }
+
                     $debugbar->isDebugbarRequest=true;
                     $debugbar->initCollectors();
                     $debugbar->disable();

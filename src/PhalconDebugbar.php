@@ -41,6 +41,7 @@ use Snowair\Debugbar\DataCollector\SessionCollector;
 use Snowair\Debugbar\DataCollector\ViewCollector;
 use Snowair\Debugbar\Phalcon\Db\Profiler;
 use Snowair\Debugbar\Phalcon\View\VoltFunctions;
+use Snowair\Debugbar\Storage\ElasticSearch;
 use Snowair\Debugbar\Storage\Filesystem;
 use Snowair\Debugbar\Storage\MongoDB;
 
@@ -441,7 +442,7 @@ class;
     /**
      * @param DebugBar $debugbar
      */
-    protected function selectStorage(DebugBar $debugbar)
+    public function selectStorage(DebugBar $debugbar)
     {
         $config = $this->config;
         if ($config->storage->enabled) {
@@ -449,9 +450,12 @@ class;
             if ($driver=='mongodb') {
                 $connection = $config->storage->mongodb->connection;
                 $db         = $config->storage->mongodb->db;
-                $options    = $config->storage->mongodb->options;
                 $collection = $config->storage->mongodb->collection;
-                $storage    = new MongoDB( $connection, $db, $collection, $options, $this->di );
+                $options    = $config->storage->mongodb->options;
+                $dirveropts = $config->storage->mongodb->driver_options;
+                $storage    = new MongoDB( $this->di, $connection, $db, $collection, $options,$dirveropts );
+            }elseif ($driver=='elastic') {
+                $storage    = new ElasticSearch( $this->di,$config->storage->elastic );
             } else {
                 $path    = $config->storage->path;
                 $storage = new Filesystem( $path, $this->di );
@@ -620,7 +624,16 @@ class;
             ) {
                 $response->setHeader('Phalcon-Debugbar','on');
                 $this->injectDebugbar($response);
-            } else {
+            } elseif (
+                ($content_type = $response->getHeaders()->get('Content-Type'))
+                &&
+                strpos($response->getHeaders()->get('Content-Type'), 'html') === false
+            ) {
+                $this->collect();
+            } elseif($config->get('inject', true)) {
+                $response->setHeader('Phalcon-Debugbar','on');
+                $this->injectDebugbar($response);
+            }else{
                 $this->collect();
             }
         } catch (\Exception $e) {
@@ -778,7 +791,7 @@ class;
 
         $renderer = $this->getJavascriptRenderer();
 
-        $openHandlerUrl = $this->di['url']->get( array('for'=>'debugbar.openhandler') );
+        $openHandlerUrl = $this->di['url']->getStatic( array('for'=>'debugbar.openhandler') );
         $renderer->setOpenHandlerUrl($openHandlerUrl);
 
 

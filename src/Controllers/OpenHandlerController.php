@@ -36,7 +36,7 @@ class OpenHandlerController extends BaseController {
             $response->setHeader( 'Content-Type', 'application/json' );
             return $response;
         }else{
-            $response = new Response( '<div style="display: none">hidden</div>', 200);
+            $response = new Response( ' <!DOCTYPE html> <html> <head> </head> <body> </body> </html> ', 200);
             $config = $this->di['config.debugbar'];
             $config->merge(new Config(['inject'=>true]));
             if($config->open_handler->get('enable',true)){
