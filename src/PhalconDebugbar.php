@@ -214,6 +214,7 @@ class PhalconDebugbar extends DebugBar {
         $renderer = $this->getJavascriptRenderer();
         $renderer->setIncludeVendors($this->config->get('include_vendors', true));
         $renderer->setBindAjaxHandlerToXHR($this->config->get('capture_ajax', true));
+        $renderer->setAjaxHandlerAutoShow($this->config->get('ajax_handler_auto_show', true));
     }
 
     public function attachServices() {
