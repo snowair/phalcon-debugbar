@@ -87,7 +87,7 @@ class Filesystem implements  StorageInterface
 			    $path = $value->getRealPath();
 			    $dir = dir($path);
 			    while($f=$dir->read()){
-			        if(!in_array($f,['.','..']) && is_file($f)){
+			        if(!in_array($f,['.','..']) && is_file($path.'/'.$f)){
                         @unlink($path.'/'.$f);
                     }
                 }
