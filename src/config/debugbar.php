@@ -29,7 +29,18 @@ return array(
             'connection' => 'mongodb://localhost:27017',
             'db'         => 'debugbar',
             'collection' => 'debugbar',
-            'options'    => array(),
+            /* For avaialble connection options see
+             * @link http://php.net/manual/en/mongodb-driver-manager.construct.php#mongodb-driver-manager.construct-options
+             */
+            'options'        => array(
+                'appname' => 'phalcon-app',
+            ),
+            /* For avaialble driver options see
+             * @link http://php.net/manual/en/mongodb-driver-manager.construct.php#mongodb-driver-manager.construct-driveroptions
+             */
+            'driver_options' => array(
+                'weak_cert_validation' => true,
+            ),
         ),
         'elastic' => array(  // elasticsearch driver
             'hosts'             => ['localhost:9200'],
