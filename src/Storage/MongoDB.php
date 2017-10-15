@@ -4,6 +4,7 @@
  * Date: 15-9-22
  * Time: 下午10:24
  */
+
 namespace Snowair\Debugbar\Storage;
 
 use DebugBar\Storage\StorageInterface;
@@ -15,13 +16,13 @@ class MongoDB implements StorageInterface
     protected $di;
     protected $sid;
 
-    public function __construct( $connection, $db, $collection,$options,$di  )
+    public function __construct($di, $connection, $db, $collection, $options, $dirveropts)
     {
-        if ( !$di['session']->isStarted() ) {
+        if (!$di['session']->isStarted()) {
             $di['session']->start();
         }
         $this->sid = $di['session']->getId();;
-        $client = new \MongoDB\Client($connection,(array)$options);
+        $client = new \MongoDB\Client($connection, (array)$options, (array)$dirveropts);
         $this->collection = $client->{$db}->{$collection};
     }
 
@@ -29,9 +30,9 @@ class MongoDB implements StorageInterface
      * Saves collected data
      *
      * @param string $id
-     * @param array $data
+     * @param array  $data
      */
-    function save( $id, $data )
+    function save($id, $data)
     {
         $data['_id'] = $id;
         $data['__meta']['sid'] = $this->sid;
@@ -45,9 +46,9 @@ class MongoDB implements StorageInterface
      *
      * @return array
      */
-    function get( $id )
+    function get($id)
     {
-        return (array)$this->collection->findOne(array('_id'=>$id));
+        return (array)$this->collection->findOne(array('_id' => $id));
     }
 
     /**
@@ -59,12 +60,12 @@ class MongoDB implements StorageInterface
      *
      * @return array
      */
-    function find( array $filters = array(), $max = 20, $offset = 0 )
+    function find(array $filters = array(), $max = 20, $offset = 0)
     {
-        $criteria =[
-            '$and'=>[
+        $criteria = [
+            '$and' => [
                 ['__meta.sid' => $this->sid],
-            ]
+            ],
         ];
         if (isset($filters['method'])) {
             $criteria['$and'][]['__meta.method'] = $filters['method'];
@@ -75,12 +76,12 @@ class MongoDB implements StorageInterface
         if (isset($filters['ip'])) {
             $criteria['$and'][]['__meta.ip'] = $filters['ip'];
         }
-        $iterator =$this->collection->find(
+        $iterator = $this->collection->find(
             $criteria,
             [
-                'skip'=>(int)$offset,
-                'limit'=>(int)$max,
-                'sort'=>['__meta.utime'=>-1],
+                'skip'  => (int)$offset,
+                'limit' => (int)$max,
+                'sort'  => ['__meta.utime' => -1],
             ]);
         $array = iterator_to_array($iterator);
         $result = array();
