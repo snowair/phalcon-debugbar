@@ -56,7 +56,7 @@ class RouteCollector extends DataCollector implements Renderable {
 			}
 		}else{
 			$result['Moudle']=$router->getModuleName();
-			$result['Controller'] = get_class( $controller_instance = $dispatcher->getActiveController());
+			$result['Controller'] = $dispatcher->getActiveController() != null ? get_class( $controller_instance = $dispatcher->getActiveController()) : $controller_instance ="";
 			$result['Action']     = $dispatcher->getActiveMethod();
 			$reflector = new \ReflectionMethod($controller_instance, $result['Action']);
 		}
