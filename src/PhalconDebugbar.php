@@ -291,7 +291,7 @@ class PhalconDebugbar extends DebugBar {
         $classname = $prefix.'Proxy';
         $full_class = $namespace.'\\'.$classname;
         if (!class_exists($full_class)) {
-            $class =<<<"class"
+            $class =<<<CLASS
 namespace $namespace;
 
 class $classname extends \\$base_class
@@ -303,7 +303,7 @@ class $classname extends \\$base_class
 		\$this->_backend = \$backend;
 	}
 }
-class;
+CLASS;
             eval($class);
         }
         return new $full_class($backend,$collector);
@@ -923,4 +923,3 @@ class;
     }
 
 }
-
