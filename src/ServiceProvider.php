@@ -197,11 +197,11 @@ class ServiceProvider extends Injectable {
                     }
 
                     if (  $app instanceof Application  && $app->getModules()) {
-                        if($moudleName=$request->get('m')){
-                            $this->dispatcher->setModuleName($moudleName);
-                            $moudle=$this->di['app']->getModule($moudleName);
-                            require $moudle['path'];
-                            $moduleObject=$this->di->get($moudle['className']);
+                        if($moduleName=$request->get('m')){
+                            $this->dispatcher->setModuleName($moduleName);
+                            $module=$this->di['app']->getModule($moduleName);
+                            require $module['path'];
+                            $moduleObject=$this->di->get($module['className']);
                             $moduleObject->registerAutoloaders($this->di);
                             $moduleObject->registerServices($this->di);
                         }
