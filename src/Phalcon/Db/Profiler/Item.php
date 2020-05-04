@@ -7,9 +7,9 @@
  */
 namespace Snowair\Debugbar\Phalcon\Db\Profiler;
 
-use Phalcon\Db\Profiler\Item as ProflierItem;
+use Phalcon\Db\Profiler\Item as ProfilerItem;
 
-class Item extends ProflierItem {
+class Item extends ProfilerItem {
 
 	protected $_extra = array();
 	protected $_realSQL;

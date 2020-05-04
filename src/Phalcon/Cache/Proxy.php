@@ -6,7 +6,7 @@
  */
 namespace Snowair\Debugbar\Phalcon\Cache;
 
-use Phalcon\Cache\Exception;
+use Phalcon\Cache\Exception\Exception;
 use Phalcon\Cache\Frontend\Base64;
 
 class Proxy {

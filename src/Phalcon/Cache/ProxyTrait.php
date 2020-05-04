@@ -6,9 +6,7 @@
  */
 namespace Snowair\Debugbar\Phalcon\Cache;
 
-use Phalcon\Cache\Exception;
-use Phalcon\Cache\Frontend\Base64;
-use Phalcon\Cache\Frontend\Output;
+use Phalcon\Cache\Exception\Exception;
 
 trait ProxyTrait {
 
@@ -31,7 +29,7 @@ trait ProxyTrait {
 		if ( is_callable(array($this->_backend,$name) ) ) {
 			$value = call_user_func_array(array($this->_backend,$name),$parameters);
 			$frontend = $this->_backend->getFrontend();
-			if ( is_object($frontend) && $frontend instanceof Base64 ) {
+			if ( is_object($frontend)) {
 				if ( $name=='save' ) {
 					$parameters[1] = '[BINARY DATA]';
 				}
@@ -60,9 +58,9 @@ trait ProxyTrait {
 
 	public function start( $keyName, $lifetime = null ) {
 		static $reflector;
-		if ( ! $this->_backend->getFrontend() instanceof Output ) {
-			return null;
-		}
+//		if ( ! $this->_backend->getFrontend() instanceof Output ) {
+//			return null;
+//		}
 		if ( !$reflector ) {
 			$reflector = new \ReflectionObject($this->_backend);
 		}
@@ -105,11 +103,11 @@ trait ProxyTrait {
 			$keyName=$this->getLastKey();
 		}
 		if ( $content===null ) {
-			if ( !$this->_backend->getFrontend() instanceof Output ) {
-				return null;
-			}else{
+//			if ( !$this->_backend->getFrontend() instanceof Output ) {
+//				return null;
+//			}else{
 				$content = $this->_backend->getFrontend()->getContent();
-			}
+//			}
 		}
 		return $this->call('save', array($keyName, $content, $lifetime, $stopBuffer));
 	}

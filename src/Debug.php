@@ -182,10 +182,10 @@ class PhalconDebug{
 	}
 
 	/**
-	 * Add a Exception Instance to Debugbar
-	 * @param Exception $e
+	 * Add a Throwable Instance to Debugbar
+	 * @param Throwable $e
 	 */
-	public static function addException(\Exception $e){
+	public static function addException(\Throwable $e){
 		self::debugbar()->addException($e);
 	}
 

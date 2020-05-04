@@ -8,12 +8,12 @@
 namespace Snowair\Debugbar\Phalcon\Logger\Adapter;
 
 use Phalcon\Version;
-use Phalcon\Logger\Adapter;
+use Phalcon\Logger\Adapter\AbstractAdapter;
 use Phalcon\Logger\AdapterInterface;
 use Phalcon\Logger\Formatter\Line;
 use Snowair\Debugbar\PhalconDebugbar;
 
-class Debugbar extends Adapter implements AdapterInterface{
+class Debugbar extends AbstractAdapter implements AdapterInterface{
 
 	/**
 	 * @var PhalconDebugbar $_debugbar
