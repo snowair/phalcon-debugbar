@@ -66,7 +66,6 @@ class ServiceProvider extends Injectable {
 							sprintf('Config adapter for %s files is not support', $extension)
 						);
 				}
-
 				$base->merge($config);
 			}elseif( is_object($configPath) && $configPath instanceof Config){
 				$base->merge($configPath);
@@ -133,7 +132,7 @@ class ServiceProvider extends Injectable {
 
 		$eventsManager = $app->getEventsManager();
 		if ( !is_object( $eventsManager ) ) {
-			$eventsManager = new Manager();
+            $eventsManager = new Manager();
 		}
 		if (  $app instanceof Micro ) {
 			$eventsManager->attach('micro:beforeExecuteRoute', function() use($router) {
@@ -174,6 +173,8 @@ class ServiceProvider extends Injectable {
         /** @var Request $request */
         $request = $this->di['request'];
 
+
+
         if ( $config->get('enabled')) {
             $white_lists = (array)$config->get('white_lists');
             if ( !empty($white_lists) && !in_array($this->di['request']->getClientAddress(true),$white_lists)) {
@@ -181,15 +182,13 @@ class ServiceProvider extends Injectable {
                 return;
             }
 
-            $router->handle();
-            $deny_routes  = (array)$config->get('deny_routes');
-            $allow_routes = (array)$config->get('allow_routes');
+            $router->handle($_SERVER["REQUEST_URI"]);
+            $deny_routes  = $config->get('deny_routes')->toArray();
+            $allow_routes = $config->get('allow_routes')->toArray();
 
             $current = $router->getMatchedRoute();
-
             if (is_object( $current )) {
                 $current = $current->getName();
-
                 if ( strpos($current,'debugbar')===0 ) {
                     $app = $this->di['app'];
                     if (method_exists( $app, 'useImplicitView' )) {
@@ -217,7 +216,6 @@ class ServiceProvider extends Injectable {
                     $debugbar->disable();
                     return;
                 }
-
                 if( !empty($deny_routes)  && in_array( $current,$deny_routes )){
                     $debugbar->disable();
                     return;

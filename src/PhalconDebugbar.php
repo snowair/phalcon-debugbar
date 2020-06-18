@@ -17,10 +17,9 @@ use DebugBar\DataCollector\RequestDataCollector;
 use DebugBar\DataCollector\TimeDataCollector;
 use DebugBar\DebugBar;
 use Exception;
-use Phalcon\Cache\Backend;
-use Phalcon\Cache\Multiple;
-use Phalcon\Db\Adapter;
-use Phalcon\Db\Adapter\Pdo;
+use Phalcon\Cache;
+use Phalcon\Db\Adapter\AbstractAdapter;
+use Phalcon\Db\Adapter\Pdo\AbstractPdo;
 use Phalcon\DI;
 use Phalcon\Events\Event;
 use Phalcon\Events\Manager;
@@ -238,7 +237,7 @@ class PhalconDebugbar extends DebugBar {
         if ($this->shouldCollect('mail', true) && $this->di->has('mailer') ) {
             $this->attachMailer( $this->di['mailer'] );
         }
-        if ($this->shouldCollect('doctrine', false) &&!$this->hasCollector('doctrine') && !$this->hasCollector('pdo') ) {
+        if ($this->shouldCollect('doctrine', false) &&!$this->hasCollector('doctrine') && !$this->hasCollector('AbstractPdo') ) {
             $debugStack = new \Doctrine\DBAL\Logging\DebugStack();
             $entityManager = $this->di['entityManager'];
             $entityManager->getConnection()->getConfiguration()->setSQLLogger($debugStack);
@@ -273,7 +272,7 @@ class PhalconDebugbar extends DebugBar {
             $this->addCollector($collector);
         }
         $backend = $this->di->get($cacheService);
-        if ( $backend instanceof Multiple || $backend instanceof Backend ) {
+        if ( $backend instanceof Cache ) {
             if ($this->shouldCollect('cache',false)) {
                 $this->di->remove($cacheService);
                 $self = $this;
@@ -599,9 +598,9 @@ CLASS;
             }
         }
 
-        if( $this->hasCollector('pdo') ){
+        if( $this->hasCollector('AbstractPdo') ){
             /** @var Profiler $profiler */
-            $profiler = $this->getCollector('pdo')->getProfiler();
+            $profiler = $this->getCollector('AbstractPdo')->getProfiler();
             $profiler->handleFailed();
         }
 
@@ -694,7 +693,7 @@ CLASS;
                 if ( !is_object( $eventsManager ) ) {
                     $eventsManager = new Manager();
                 }
-                $eventsManager->attach('db', function(Event $event, Adapter $db, $params)  use (
+                $eventsManager->attach('db', function(Event $event, AbstractAdapter $db, $params)  use (
                     $profiler,$queryCollector
                 ) {
                     $profiler->setDb($db);
@@ -762,6 +761,8 @@ CLASS;
         foreach ($this->collectors as $name => $collector) {
             $this->data[$name] = $collector->collect();
         }
+
+
 
         // Remove all invalid (non UTF-8) characters
         array_walk_recursive(

@@ -62,8 +62,9 @@ class PhalconRequestCollector extends DataCollector implements DataCollectorInte
 				$useEncrypt = false;
 			}
 			foreach ( $cookies as $key=>$vlaue ) {
-				$cookies[$key] = $cookies_service->get($key)->useEncryption($useEncrypt)->getValue();
+				$cookies[$key] = $cookies_service->get(base64_encode($key))->useEncryption($useEncrypt)->getValue();
 			}
+
 		}
 		$data = array(
 			'status'           => $status,

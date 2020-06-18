@@ -22,7 +22,7 @@ class Filesystem implements  StorageInterface
 	 */
 	public function __construct($dirname,$di)
 	{
-        if ( !$di['session']->isStarted() ) {
+        if ( !$di['session']->exists() ) {
             $di['session']->start();
         }
         $sid = $di['session']->getId();
@@ -75,7 +75,7 @@ class Filesystem implements  StorageInterface
 	{
 		$lifetime = $this->gc_lifetime*60*60;
 		$Finder = new \RecursiveDirectoryIterator(dirname($this->dirname),
-		      \FilesystemIterator::KEY_AS_FILENAME 
+		      \FilesystemIterator::KEY_AS_FILENAME
 			| \FilesystemIterator::CURRENT_AS_FILEINFO
 			| \FilesystemIterator::SKIP_DOTS);
 		$now = time();
@@ -126,7 +126,7 @@ class Filesystem implements  StorageInterface
 		// Loop through .json files, filter the metadata and stop when max is found.
 		$i = 0;
 		$results = array();
-		
+
 		$Finder = new \FilesystemIterator($this->dirname,
 			\FilesystemIterator::KEY_AS_FILENAME
 			| \FilesystemIterator::CURRENT_AS_FILEINFO
