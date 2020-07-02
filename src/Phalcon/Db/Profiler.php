@@ -62,12 +62,12 @@ class Profiler extends  PhalconProfiler {
 	 * Starts the profile of a SQL sentence
 	 *
 	 * @param string $sqlStatement
-	 * @param null|array   $sqlVariables
-	 * @param null|array   $sqlBindTypes
+	 * @param mixed   $sqlVariables
+	 * @param mixed   $sqlBindTypes
 	 *
-	 * @return Profiler
+	 * @return PhalconProfiler
 	 */
-	public function startProfile($sqlStatement, $sqlVariables = null, $sqlBindTypes = null): \Phalcon\Db\Profiler
+	public function startProfile(string $sqlStatement, $sqlVariables = null, $sqlBindTypes = null) : PhalconProfiler
 	{
 		$this->handleFailed();
 		$activeProfile = new Item();
@@ -94,6 +94,7 @@ class Profiler extends  PhalconProfiler {
 		}
 
 		$this->_activeProfile = $activeProfile;
+
 		$this->_stoped = false;
 		return $this;
 	}
@@ -168,17 +169,14 @@ class Profiler extends  PhalconProfiler {
      *
      * @return PhalconProfiler
      */
-    public function stopProfile(): \Phalcon\Db\Profiler
+    public function stopProfile() : PhalconProfiler
     {
         $finalTime = microtime(true);
         $activeProfile = $this->_activeProfile;
         $activeProfile->setFinalTime($finalTime);
 
         $initialTime = $activeProfile->getInitialTime();
-        if(!isset($this->_totalSeconds)){
-            $this->_totalSeconds = 0;
-        }
-        $this->_totalSeconds = $this->_totalSeconds + ($finalTime - $initialTime);
+        $this->totalSeconds = $this->totalSeconds + ($finalTime - $initialTime);
 
         if ( $this->_db ) {
             $pdo  = $this->_db->getInternalHandler();
@@ -202,7 +200,7 @@ class Profiler extends  PhalconProfiler {
             $activeProfile->setExtra($data);
         }
 
-        $this->_allProfiles[] = $activeProfile;
+        $this->allProfiles[] = $activeProfile;
 
         if (method_exists($this, "afterEndProfile")) {
             $this->afterEndProfile($activeProfile);

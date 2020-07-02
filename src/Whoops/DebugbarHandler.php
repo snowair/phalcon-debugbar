@@ -180,7 +180,6 @@ class DebugbarHandler extends Handler
         $templateFile = $this->getResource("views/layout.html.php");
         $cssFile      = $this->getResource("css/whoops.base.css");
         $zeptoFile    = $this->getResource("js/zepto.min.js");
-        $prettifyFile = $this->getResource("js/prettify.min.js");
         $clipboard    = $this->getResource("js/clipboard.min.js");
         $jsFile       = $this->getResource("js/whoops.base.js");
 
@@ -218,7 +217,6 @@ class DebugbarHandler extends Handler
             // @todo: Asset compiler
             "stylesheet" => file_get_contents($cssFile),
             "zepto"      => file_get_contents($zeptoFile),
-            "prettify"   => file_get_contents($prettifyFile),
             "clipboard"  => file_get_contents($clipboard),
             "javascript" => file_get_contents($jsFile),
 
@@ -238,7 +236,6 @@ class DebugbarHandler extends Handler
             "title"          => $this->getPageTitle(),
             "name"           => explode("\\", $inspector->getExceptionName()),
             "message"        => $inspector->getException()->getMessage(),
-            "previousMessages" => $inspector->getPreviousExceptionMessages(),
             "code"           => $code,
             "plain_exception" => Formatter::formatExceptionPlain($inspector),
             "frames"         => $frames,

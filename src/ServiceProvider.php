@@ -12,6 +12,7 @@ use Phalcon\Http\Request;
 use Phalcon\Http\ResponseInterface;
 use Phalcon\Mvc\Application;
 use Phalcon\Mvc\Micro;
+use Phalcon\Mvc\Router\Route;
 use Phalcon\Version;
 use Snowair\Debugbar\Controllers\AssetController;
 use Snowair\Debugbar\Controllers\OpenHandlerController;
@@ -66,6 +67,7 @@ class ServiceProvider extends Injectable {
 							sprintf('Config adapter for %s files is not support', $extension)
 						);
 				}
+
 				$base->merge($config);
 			}elseif( is_object($configPath) && $configPath instanceof Config){
 				$base->merge($configPath);
@@ -132,7 +134,7 @@ class ServiceProvider extends Injectable {
 
 		$eventsManager = $app->getEventsManager();
 		if ( !is_object( $eventsManager ) ) {
-            $eventsManager = new Manager();
+			$eventsManager = new Manager();
 		}
 		if (  $app instanceof Micro ) {
 			$eventsManager->attach('micro:beforeExecuteRoute', function() use($router) {
@@ -168,12 +170,11 @@ class ServiceProvider extends Injectable {
     {
         /** @var PhalconDebugbar $debugbar */
         $config   = $this->di['config.debugbar'];
+        /** @var Route $router */
         $router   = $this->di['router'];
         $debugbar = $this->di['debugbar'];
         /** @var Request $request */
         $request = $this->di['request'];
-
-
 
         if ( $config->get('enabled')) {
             $white_lists = (array)$config->get('white_lists');
@@ -182,13 +183,15 @@ class ServiceProvider extends Injectable {
                 return;
             }
 
-            $router->handle($_SERVER["REQUEST_URI"]);
-            $deny_routes  = $config->get('deny_routes')->toArray();
-            $allow_routes = $config->get('allow_routes')->toArray();
+            $router->handle( $request->getURI());
+            $deny_routes  = (array)$config->get('deny_routes');
+            $allow_routes = (array)$config->get('allow_routes');
 
             $current = $router->getMatchedRoute();
+
             if (is_object( $current )) {
                 $current = $current->getName();
+
                 if ( strpos($current,'debugbar')===0 ) {
                     $app = $this->di['app'];
                     if (method_exists( $app, 'useImplicitView' )) {
@@ -196,11 +199,11 @@ class ServiceProvider extends Injectable {
                     }
 
                     if (  $app instanceof Application  && $app->getModules()) {
-                        if($moduleName=$request->get('m')){
-                            $this->dispatcher->setModuleName($moduleName);
-                            $module=$this->di['app']->getModule($moduleName);
-                            require $module['path'];
-                            $moduleObject=$this->di->get($module['className']);
+                        if($moudleName=$request->get('m')){
+                            $this->dispatcher->setModuleName($moudleName);
+                            $moudle=$this->di['app']->getModule($moudleName);
+                            require $moudle['path'];
+                            $moduleObject=$this->di->get($moudle['className']);
                             $moduleObject->registerAutoloaders($this->di);
                             $moduleObject->registerServices($this->di);
                         }
@@ -212,11 +215,12 @@ class ServiceProvider extends Injectable {
                     return;
                 }
 
-                if(  !empty($allow_routes)  && !in_array( $current,$allow_routes ) ){
+                if( !empty($current) && !empty($allow_routes)  && !in_array( $current,$allow_routes ) ){
                     $debugbar->disable();
                     return;
                 }
-                if( !empty($deny_routes)  && in_array( $current,$deny_routes )){
+
+                if( !empty($current) && !empty($deny_routes)  && in_array( $current,$deny_routes )){
                     $debugbar->disable();
                     return;
                 }
