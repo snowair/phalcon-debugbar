@@ -30,8 +30,7 @@ class QueryCollector extends PDOCollector{
 	{
 	    $tab_profiles = (array)$this->profiler;
 		/** @var Item[] $succeed */
-		//$succeed = (array)$this->profiler->getProfiles();
-		$succeed = $tab_profiles["_allProfiles"];
+		$succeed = (array)$this->profiler->getProfiles();
 		/** @var Item[] $failed */
 		$failed = (array)$this->profiler->getFailedProfiles();
 		$data = array(

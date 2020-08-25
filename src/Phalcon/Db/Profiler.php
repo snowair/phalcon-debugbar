@@ -29,7 +29,7 @@ class Profiler extends  PhalconProfiler {
 	protected $_db;
 
 	public function handleFailed() {
-		$latest = $this->_activeProfile;
+		$latest = $this->activeProfile;
 		if ( !$this->_stoped && $latest) {
 			if ( $this->_db ) {
 				$pdo = $this->_db->getInternalHandler();
@@ -93,7 +93,7 @@ class Profiler extends  PhalconProfiler {
 			$this->beforeStartProfile($activeProfile);
 		}
 
-		$this->_activeProfile = $activeProfile;
+		$this->activeProfile = $activeProfile;
 		$this->_stoped = false;
 		return $this;
 	}
@@ -171,14 +171,14 @@ class Profiler extends  PhalconProfiler {
     public function stopProfile(): \Phalcon\Db\Profiler
     {
         $finalTime = microtime(true);
-        $activeProfile = $this->_activeProfile;
+        $activeProfile = $this->activeProfile;
         $activeProfile->setFinalTime($finalTime);
 
         $initialTime = $activeProfile->getInitialTime();
-        if(!isset($this->_totalSeconds)){
-            $this->_totalSeconds = 0;
+        if(!isset($this->totalSeconds)){
+            $this->totalSeconds = 0;
         }
-        $this->_totalSeconds = $this->_totalSeconds + ($finalTime - $initialTime);
+        $this->totalSeconds = $this->totalSeconds + ($finalTime - $initialTime);
 
         if ( $this->_db ) {
             $pdo  = $this->_db->getInternalHandler();
@@ -202,7 +202,7 @@ class Profiler extends  PhalconProfiler {
             $activeProfile->setExtra($data);
         }
 
-        $this->_allProfiles[] = $activeProfile;
+        $this->allProfiles[] = $activeProfile;
 
         if (method_exists($this, "afterEndProfile")) {
             $this->afterEndProfile($activeProfile);
@@ -234,7 +234,7 @@ class Profiler extends  PhalconProfiler {
 	}
 
 	public function setSource( $source ) {
-			$this->_activeProfile->setExtra(array('source'=>$source));
+			$this->activeProfile->setExtra(array('source'=>$source));
 	}
 
 	/**
