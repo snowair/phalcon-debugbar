@@ -95,6 +95,7 @@ class Profiler extends  PhalconProfiler {
 
 		$this->_activeProfile = $activeProfile;
 
+
 		$this->_stoped = false;
 		return $this;
 	}
@@ -176,6 +177,11 @@ class Profiler extends  PhalconProfiler {
         $activeProfile->setFinalTime($finalTime);
 
         $initialTime = $activeProfile->getInitialTime();
+
+        if(!isset($this->totalSeconds)){
+            $this->totalSeconds = 0;
+        }
+
         $this->totalSeconds = $this->totalSeconds + ($finalTime - $initialTime);
 
         if ( $this->_db ) {
