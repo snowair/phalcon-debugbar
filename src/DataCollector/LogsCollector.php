@@ -10,9 +10,11 @@ namespace Snowair\Debugbar\DataCollector;
 
 use Monolog\Logger;
 use Phalcon\DI;
-use Phalcon\Logger\Adapter\AbstractAdapter;
+use Phalcon\Logger\Adapter;
 use Phalcon\Logger\Formatter\Line;
+use Phalcon\Logger\Formatter\Syslog;
 use Phalcon\Logger\FormatterInterface;
+use Phalcon\Logger\Multiple;
 use Psr\Log\LoggerInterface;
 use Snowair\Debugbar\Phalcon\Logger\Adapter\Debugbar;
 use Snowair\Debugbar\PhalconDebugbar;
@@ -44,7 +46,7 @@ class LogsCollector extends MessagesCollector{
 		$this->_formatter = strtolower($formatter);
 		if ( $di->has('log') && $log = $di->get('log') ) {
 			$debugbar_loger = new Debugbar($di['debugbar']);
-			if ( $log instanceof AbstractAdapter ) {
+			if ( $log instanceof Adapter ) {
                 $di->remove('log');
 				$multiple = new Multiple();
 				$multiple->push( clone $log );
@@ -64,7 +66,7 @@ class LogsCollector extends MessagesCollector{
 
 	public function add( $message, $type, $time, $context ) {
 		$debugbar = $this->_di['debugbar'];
-		if ( is_scalar($message) && $this->_formatter=='syslog' && $formatter = new Line ) {
+		if ( is_scalar($message) && $this->_formatter=='syslog' && $formatter = new Syslog ) {
 			$message = $formatter->format($message,$type,$time,$context);
 			$message = $message[1];
 		}elseif( is_scalar($message) && $this->_formatter=='line' && $formatter = new Line){

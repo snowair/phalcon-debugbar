@@ -29,7 +29,7 @@ class Profiler extends  PhalconProfiler {
 	protected $_db;
 
 	public function handleFailed() {
-		$latest = $this->activeProfile;
+		$latest = $this->_activeProfile;
 		if ( !$this->_stoped && $latest) {
 			if ( $this->_db ) {
 				$pdo = $this->_db->getInternalHandler();
@@ -62,12 +62,12 @@ class Profiler extends  PhalconProfiler {
 	 * Starts the profile of a SQL sentence
 	 *
 	 * @param string $sqlStatement
-	 * @param null|array   $sqlVariables
-	 * @param null|array   $sqlBindTypes
+	 * @param mixed   $sqlVariables
+	 * @param mixed   $sqlBindTypes
 	 *
-	 * @return Profiler
+	 * @return PhalconProfiler
 	 */
-	public function startProfile($sqlStatement, $sqlVariables = null, $sqlBindTypes = null): \Phalcon\Db\Profiler
+	public function startProfile(string $sqlStatement, $sqlVariables = null, $sqlBindTypes = null) : PhalconProfiler
 	{
 		$this->handleFailed();
 		$activeProfile = new Item();
@@ -93,7 +93,9 @@ class Profiler extends  PhalconProfiler {
 			$this->beforeStartProfile($activeProfile);
 		}
 
-		$this->activeProfile = $activeProfile;
+		$this->_activeProfile = $activeProfile;
+
+
 		$this->_stoped = false;
 		return $this;
 	}
@@ -168,16 +170,18 @@ class Profiler extends  PhalconProfiler {
      *
      * @return PhalconProfiler
      */
-    public function stopProfile(): \Phalcon\Db\Profiler
+    public function stopProfile() : PhalconProfiler
     {
         $finalTime = microtime(true);
-        $activeProfile = $this->activeProfile;
+        $activeProfile = $this->_activeProfile;
         $activeProfile->setFinalTime($finalTime);
 
         $initialTime = $activeProfile->getInitialTime();
+
         if(!isset($this->totalSeconds)){
             $this->totalSeconds = 0;
         }
+
         $this->totalSeconds = $this->totalSeconds + ($finalTime - $initialTime);
 
         if ( $this->_db ) {
@@ -234,7 +238,7 @@ class Profiler extends  PhalconProfiler {
 	}
 
 	public function setSource( $source ) {
-			$this->activeProfile->setExtra(array('source'=>$source));
+			$this->_activeProfile->setExtra(array('source'=>$source));
 	}
 
 	/**
