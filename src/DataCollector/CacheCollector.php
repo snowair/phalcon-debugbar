@@ -9,7 +9,7 @@ namespace Snowair\Debugbar\DataCollector;
 
 use DebugBar\DataCollector\DataCollector;
 use DebugBar\DataCollector\Renderable;
-use Phalcon\Cache;
+use Phalcon\Cache\Backend;
 
 class CacheCollector extends DataCollector implements Renderable{
 
