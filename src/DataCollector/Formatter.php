@@ -135,7 +135,7 @@ trait Formatter  {
 		$vars = $this->_preformat($vars);
 		if ( is_object( $vars ) ) {
 			$class = get_class($vars);
-			$prefix = '['. $class .'] Convertd To : ';
+			$prefix = '['. $class .'] Converted To: ';
 			if ( method_exists( $vars, 'toArray' ) ) {
 				@$vars = $prefix. $formatter->formatVar($vars->toArray());
 			}else if ( $vars instanceof \StdClass ) {

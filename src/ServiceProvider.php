@@ -22,7 +22,6 @@ use Phalcon\Config\Adapter\Json;
 use Phalcon\Config\Adapter\Yaml;
 use Phalcon\Config;
 use Phalcon\DI\Injectable;
-use Snowair\Debugbar\Controllers\ToolsController;
 
 class ServiceProvider extends Injectable {
 

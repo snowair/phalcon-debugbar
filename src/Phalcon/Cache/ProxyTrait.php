@@ -4,190 +4,141 @@
  * Date: 15/3/14
  * Time: 20:24
  */
+
 namespace Snowair\Debugbar\Phalcon\Cache;
 
-use Phalcon\Cache\Exception;
-use Phalcon\Cache\Frontend\Base64;
-use Phalcon\Cache\Frontend\Output;
+use Phalcon\Cache\Adapter\AdapterInterface as CacheAdapterInterface;
+use Phalcon\Exception;
+use Phalcon\Storage\Serializer\Base64;
+use Phalcon\Storage\Serializer\Msgpack;
+use ReflectionClass;
+use Snowair\Debugbar\DataCollector\CacheCollector;
 
-trait ProxyTrait {
+trait ProxyTrait
+{
+    /** @var CacheCollector */
+    protected $_collector;
+    /** @var CacheAdapterInterface */
+    protected $_backend;
 
-	protected $_collector;
-	protected $_backend;
+    public function __construct(CacheAdapterInterface $backend, CacheCollector $collector)
+    {
+        $this->_collector = $collector;
+        $this->_backend = $backend;
+    }
 
-	public function __construct($backend,$collector ) {
-		$this->_collector = $collector;
-		$this->_backend = $backend;
-	}
+    public function __call($name, $parameters)
+    {
+        return $this->call($name, $parameters);
+    }
 
-	public function __call( $name, $parameters ){
-		return $this->call($name,$parameters);
-	}
+    protected function call()
+    {
+        $parameters = func_get_args();
+        $name = (string)$parameters[0];
+        $parameters = isset($parameters[1]) ? $parameters[1] : array();
+        if (is_callable(array($this->_backend, $name))) {
+            $value = call_user_func_array(array($this->_backend, $name), $parameters);
 
-	protected function call() {
-		$parameters = func_get_args();
-		$name       = $parameters[0];
-		$parameters = isset($parameters[1])?$parameters[1]:array();
-		if ( is_callable(array($this->_backend,$name) ) ) {
-			$value = call_user_func_array(array($this->_backend,$name),$parameters);
-			$frontend = $this->_backend->getFrontend();
-			if ( is_object($frontend) && $frontend instanceof Base64 ) {
-				if ( $name=='save' ) {
-					$parameters[1] = '[BINARY DATA]';
-				}
-				if ( $name=='get' ) {
-					$returned =  '[BINARY DATA]';
-				}
-			}
-			if ( $name=='save' && is_object($parameters[1]) ) {
-				$parameters[1] = 'Object Of : '. get_class($parameters[1]);
-			}
-			if ( $name=='get' && is_object($value) ) {
-				$returned = 'Object Of : '. get_class($value);
-			}
-			$parameters[] = isset($returned)?$returned:$value;
-			if ( in_array( strtolower( $name ), array('save','increment','decrement','get','delete','flush') ) ) {
-				call_user_func_array(array($this->_collector,$name),$parameters);
-			}
-			return $value;
-		}
-		throw new Exception("Method '{$name}' not found on ".get_class($this->_backend) );
-	}
+            $reflection = new ReflectionClass($this->_backend);
+            // when some cache decorators are used there's no 'serializer' property
+            if ($reflection->hasProperty('serializer')) {
+                $prop = $reflection->getProperty('serializer');
+                $prop->setAccessible(true);
+                $serializer = $prop->getValue($this->_backend);
+                if ($serializer instanceof Base64 || $serializer instanceof Msgpack) {
+                    if (in_array($name, ['save', 'set'])) {
+                        $parameters[1] = '[BINARY DATA]';
+                    }
+                    if ($name == 'get') {
+                        $returned = '[BINARY DATA]';
+                    }
+                }
+            }
+            if (in_array($name, ['save', 'set']) && is_object($parameters[1])) {
+                $parameters[1] = 'Object Of : ' . get_class($parameters[1]);
+            }
+            if ($name == 'get' && is_object($value)) {
+                $returned = 'Object Of : ' . get_class($value);
+            }
+            $parameters[] = isset($returned) ? $returned : $value;
+            if (in_array(strtolower($name), array('save', 'set', 'increment', 'decrement', 'get', 'delete'))) {
+                call_user_func_array(array($this->_collector, $name), $parameters);
+            }
+            return $value;
+        }
+        throw new Exception("Method '{$name}' not found on " . get_class($this->_backend));
+    }
 
-	public function get($keyName, $lifetime=null){
-		return $this->call('get', array($keyName, $lifetime));
-	}
+    public function get(string $key, $defaultValue = null)
+    {
+        return $this->call('get', array($key, $defaultValue));
+    }
 
-	public function start( $keyName, $lifetime = null ) {
-		static $reflector;
-		if ( ! $this->_backend->getFrontend() instanceof Output ) {
-			return null;
-		}
-		if ( !$reflector ) {
-			$reflector = new \ReflectionObject($this->_backend);
-		}
-		$existingCache = $this->get($keyName, $lifetime);
-		if( $existingCache === null) {
-			$fresh = true;
-			$this->_backend->getFrontend()->start();
-		} else {
-			$fresh = false;
-		}
+    /**
+     * @param string $keyName
+     * @param mixed $content
+     * @param int|null $ttl
+     * @return bool
+     * @deprecated BC for app cache proxy/decorator classes
+     */
+    public function save(string $keyName, $content, $ttl = null): bool
+    {
+        return $this->call('save', array($keyName, $content, $ttl));
+    }
 
-		$_fresh = $reflector->getProperty('_fresh');
-		$_fresh->setAccessible(true);
-		$_fresh->setValue($this->_backend,$fresh);
+    public function set(string $keyName, $content, $ttl = null): bool
+    {
+        return $this->call('set', array($keyName, $content, $ttl));
+    }
 
-		$_started = $reflector->getProperty('_started');
-		$_started->setAccessible(true);
-		$_started->setValue($this->_backend,true);
+    public function delete(string $keyName): bool
+    {
+        return $this->call('delete', array($keyName));
+    }
 
-		/**
-		 * Update the last lifetime to be used in save()
-		 */
-		if ( $lifetime !== null ) {
-			$_lastLifetime = $reflector->getProperty('_lastLifetime');
-			$_lastLifetime->setAccessible(true);
-			$_lastLifetime->setValue($this->_backend,$lifetime);
-		}
+    public function increment(string $key, int $value = 1)
+    {
+        return $this->call('increment', array($key, $value));
+    }
 
-		return $existingCache;
-	}
+    public function decrement(string $key, int $value = 1)
+    {
+        return $this->call('decrement', array($key, $value));
+    }
 
-	public function stop( $stopBuffer = true ) {
-		return $this->_backend->stop($stopBuffer);
-	}
+    public function getKeys(string $prefix = ''): array
+    {
+        return $this->_backend->getKeys($prefix);
+    }
 
+    /**
+     * @param string|null $keyName
+     * @return bool
+     * @deprecated BC for app cache proxy/decorator classes
+     */
+    public function exists(string $keyName = null): bool
+    {
+        return $this->_backend->has($keyName);
+    }
 
-	public function save($keyName=null, $content=null, $lifetime=null, $stopBuffer=true)
-	{
-		if ( $keyName===null ) {
-			$keyName=$this->getLastKey();
-		}
-		if ( $content===null ) {
-			if ( !$this->_backend->getFrontend() instanceof Output ) {
-				return null;
-			}else{
-				$content = $this->_backend->getFrontend()->getContent();
-			}
-		}
-		return $this->call('save', array($keyName, $content, $lifetime, $stopBuffer));
-	}
+    public function clear(): bool
+    {
+        return $this->_backend->clear();
+    }
 
-	public function delete($keyName)
-	{
-		return $this->call('delete',array($keyName));
-	}
+    public function getAdapter()
+    {
+        return $this->_backend->getAdapter();
+    }
 
-	public function increment($key_name=null, $value=null)
-	{
-		return $this->call('increment',array($key_name, $value));
-	}
+    public function getPrefix(): string
+    {
+        return $this->_backend->getPrefix();
+    }
 
-	public function decrement($key_name=null, $value=null)
-	{
-		return $this->call('decrement',array($key_name, $value));
-	}
-
-	public function flush()
-	{
-		return $this->call('flush');
-	}
-
-	public function queryKeys($prefix=null) {
-		return $this->_backend->queryKeys($prefix);
-	}
-
-	public function exists($keyName=null,$lifetime=null) {
-		return $this->_backend->exists($keyName,$lifetime);
-	}
-
-	public function getKey( $key ) {
-		return $this->_backend->getKey($key);
-	}
-
-	public function useSafeKey( $useSafeKey ) {
-		return $this->_backend->useSafeKey($useSafeKey);
-	}
-
-	public function _connect() {
-		$this->_backend->_connect();
-	}
-
-	public function _getCollection() {
-		return $this->_backend->_getCollection();
-	}
-
-	public function gc() {
-		return $this->_backend->gc();
-	}
-
-	public function getLastKey() {
-		return $this->_backend->getLastKey();
-	}
-
-	public function setLastKey($lastKey) {
-		return $this->_backend->setLastKey($lastKey);
-	}
-
-	public function isStarted() {
-		return $this->_backend->isStarted();
-	}
-
-	public function isFresh() {
-		return $this->_backend->isFresh();
-	}
-
-	public function getOptions() {
-		return $this->_backend->getOptions();
-	}
-
-	public function getFrontend() {
-		return $this->_backend->getFrontend();
-	}
-
-	public function getLifetime() {
-		return $this->_backend->getLifetime();
-	}
-
+    public function has(string $key): bool
+    {
+        return $this->_backend->has($key);
+    }
 }
