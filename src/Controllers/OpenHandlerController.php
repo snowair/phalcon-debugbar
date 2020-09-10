@@ -24,7 +24,7 @@ class OpenHandlerController extends BaseController {
             $debugbar = $this->debugbar;
             $debugbar->enable()->boot();
 
-            if ( !$this->session->isStarted() ) {
+            if ( !$this->session->exists() ) {
                 $this->session->start();
             }
 

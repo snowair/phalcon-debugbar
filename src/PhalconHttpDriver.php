@@ -27,10 +27,10 @@ class PhalconHttpDriver extends Injectable implements HttpDriverInterface {
      * {@inheritDoc}
 	 */
 	function isSessionStarted() {
-		if ( !$this->session->isStarted() ) {
+		if ( !$this->session->exists() ) {
 			$this->session->start();
 		}
-		return $this->session->isStarted();
+		return $this->session->exists();
 	}
 
 	/**
