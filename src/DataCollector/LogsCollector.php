@@ -71,9 +71,11 @@ class LogsCollector extends MessagesCollector{
 			$message = $message[1];
 		}elseif( is_scalar($message) && $this->_formatter=='line' && $formatter = new Line){
 			$message = $formatter->format($message,$type,$time,$context);
-		}elseif( class_exists($this->_formatter) && $this->_formatter instanceof FormatterInterface ){
+		}elseif( class_exists($this->_formatter) ){
 			$formatter = new $this->_formatter;
-			$message = $formatter->format($message,$type,$time,$context);
+			if ($this->_formatter instanceof FormatterInterface) {
+  			    $message = $formatter->format($message,$type,$time,$context);
+			}
 		}
 		if ( $this->_aggregate ) {
 			/** @var MessagesCollector $message_collector */
