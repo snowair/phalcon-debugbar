@@ -631,8 +631,10 @@ PROXY_CLASS;
             ) {
                 $data = $this->collect();
                 $content = json_decode($response->getContent(), true);
-                $data = array_merge($data, $content);
-                $response->setContent(json_encode($data));
+                if (!is_null($content)) {
+                    $data = array_merge($data, $content);
+                    $response->setContent(json_encode($data));
+                }
             } elseif ($config->get('inject', true)) {
                 $response->setHeader('Phalcon-Debugbar', 'on');
                 $this->injectDebugbar($response);
