@@ -1,5 +1,5 @@
 {
-    "name": "snowair/phalcon-debugbar",
+    "name": "jmar1998/phalcon-debugbar",
     "description": "Integrates PHP Debug Bar with Phalcon.",
     "type": "library",
     "keywords": ["phalcon", "debugbar", "profiler", "debug", "webprofiler"],
@@ -22,6 +22,10 @@
         {
             "name": "snowair",
             "email": "xcoolcc@gmail.com"
+        },
+        {
+            "name": "jmar1998",
+            "email": "joseairesfwork@gmail.com"
         }
     ],
     "minimum-stability": "dev"
